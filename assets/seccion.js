@@ -62,6 +62,38 @@
     return ol;
   }
 
+  // Experimento planeado: estado, tabla de candidatos y decisiones abiertas
+  var CLASE_PRIO = { "Obligatorio": "oblig", "Alta": "alta", "Media": "media", "Experimental": "exp" };
+  function experimento(x) {
+    var w = el("div", "experimento");
+    var cab = el("div", "exp-cab");
+    cab.appendChild(el("span", "chip plan", x.estado));
+    cab.appendChild(el("p", null, x.nota));
+    w.appendChild(cab);
+
+    var caja = el("div", "tablebox");
+    var t = el("table", "tabla-exp");
+    var th = el("thead"), trh = el("tr");
+    ["#", "Modelo", "Familia", "Prioridad"].forEach(function (h) { trh.appendChild(el("th", null, h)); });
+    th.appendChild(trh); t.appendChild(th);
+    var tb = el("tbody");
+    x.modelos.forEach(function (m) {
+      var tr = el("tr", m[3] === "Obligatorio" ? "base" : "");
+      tr.appendChild(el("td", "num", m[0]));
+      tr.appendChild(el("td", null, m[1]));
+      tr.appendChild(el("td", null, m[2]));
+      var td = el("td"); td.appendChild(el("span", "prio " + (CLASE_PRIO[m[3]] || ""), m[3])); tr.appendChild(td);
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb); caja.appendChild(t); w.appendChild(caja);
+
+    w.appendChild(el("h3", "sub-h", "Por decidir antes de ejecutar"));
+    var ul = el("ul", "plain");
+    x.porDecidir.forEach(function (d) { ul.appendChild(el("li", null, d)); });
+    w.appendChild(ul);
+    return w;
+  }
+
   sec.subs.forEach(function (b) {
     var nbs = NB.filter(function (n) { return n.seccion === sec.id && n.sub === b.id; });
     var pgs = PAG.filter(function (p) { return p.seccion === sec.id && p.sub === b.id; });
@@ -70,6 +102,8 @@
     s.appendChild(el("h2", "sub-t", b.titulo));
     s.appendChild(el("p", "grupo-desc", b.desc));
     if (b.flujo) s.appendChild(flujo());
+
+    if (b.experimento) s.appendChild(experimento(b.experimento));
 
     if (nbs.length) {
       s.appendChild(el("h3", "sub-h", "Cómo se hizo"));
