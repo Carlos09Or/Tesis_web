@@ -102,6 +102,15 @@
   code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12.5px; background: var(--line); padding: 1px 5px; border-radius: 4px; word-break: break-all; }
   svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
   svg .axis { stroke: var(--line); } svg .target { stroke: var(--bad); stroke-dasharray: 4 3; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+  .step { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; }
+  .step .n { display: inline-block; width: 22px; height: 22px; line-height: 22px; text-align: center; border-radius: 50%; background: var(--accent); color: #fff; font-size: 12px; margin-right: 8px; font-variant-numeric: tabular-nums; }
+  .step p { margin: 6px 0 0; color: var(--muted); font-size: 13.5px; }
+  table.grid8 th { text-align: center; font-size: 11.5px; line-height: 1.3; white-space: nowrap; }
+  table.grid8 th:first-child { text-align: left; }
+  table.grid8 td { text-align: center; }
+  table.grid8 td:first-child { text-align: left; }
+  .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
   footer { margin-top: 48px; color: var(--muted); font-size: 13px; }
 </style>
 </head>
@@ -256,7 +265,11 @@
     { tipo: "info", titulo: "Más datos de entrenamiento siguen ayudando",
       texto: "En la curva de aprendizaje (val, modelo B) el dentro de ×2 sube de 0,83 a 0,89 de 25 % a 100 % de train y no se aplana. El R² en log de la lógica sube de 0,36 a 0,57." },
     { tipo: "info", titulo: "Colas largas en C-synth de conv1d",
-      texto: "En la muestra a ojo, el p90 de A llega a 1.844 y 2.092 s con un p50 de 322 y 299 s. Son solo dos casos: hay que mirar los residuos por familia antes de sacar conclusiones.", verificado: false }
+      texto: "En la muestra a ojo, el p90 de A llega a 1.844 y 2.092 s con un p50 de 322 y 299 s. Son solo dos casos: hay que mirar los residuos por familia antes de sacar conclusiones.", verificado: false },
+    { tipo: "warn", titulo: "La rejilla de hiperparámetros quedó corta",
+      texto: "Los 9 modelos eligieron el máximo de hojas (63) y el máximo de iteraciones (800, o 500 en el clasificador), y 8 de 9 el mayor learning rate (0,1). Si el mejor valor está más allá del borde, hay margen de mejora sin tocar los datos." },
+    { tipo: "info", titulo: "Las esperas del clúster se concentran en conv1d",
+      texto: "Cerca del 17 % de las síntesis de conv1d tuvieron espera, contra menos del 4 % en las demás familias. conv1d es también la familia donde el margen de B es más grande (1,0 y 1,2 en log) y donde A cubre menos. Puede ser coincidencia: hay que comprobarlo.", verificado: false }
   ],
 
   // Banco de mejoras. impacto/esfuerzo: alto | medio | bajo
@@ -289,6 +302,10 @@
       evidencia: "Una sola partición de val y una sola semilla.",
       accion: "Validación cruzada agrupada por proyecto y varias semillas para dar la variación entre corridas. No se toca test.",
       impacto: "bajo", esfuerzo: "medio", sugerida: null },
+    { id: "M9", cat: "Modelo", titulo: "Ampliar la rejilla de hiperparámetros",
+      evidencia: "Los 9 modelos eligieron 63 hojas y el máximo de iteraciones. min_samples_leaf y l2 nunca se probaron.",
+      accion: "Probar más hojas (127, 255), más iteraciones (1.500, 3.000) y varios min_samples_leaf y l2, con el mismo criterio en val. Es un cambio aparte de M1: se hace en otra iteración.",
+      impacto: "medio", esfuerzo: "bajo", sugerida: null },
     { id: "M8", cat: "Etiquetas", titulo: "Revisar las anomalías de la ronda 2.000",
       evidencia: "3 anomalías en train y 1 en test marcadas.",
       accion: "Medir cuánto cambian las métricas con y sin ellas y dejar documentado el criterio.",
@@ -304,6 +321,157 @@
       "Si el R² de la lógica sube como se espera, decidir en la tesis qué tiempo se predice y pasar a M2 en la iteración 3."
     ],
     criterio: "Se considera mejora si el R² en log de la lógica sube y el dentro de ×2 no baja en val, con la cobertura de familias entre 75 % y 85 %."
+  },
+
+  // ------------------------------------------------------------------
+  // Cómo se hizo: todo sale del código y de las salidas del notebook
+  // ------------------------------------------------------------------
+  metodologia: {
+    pasos: [
+      { t: "Datos", d: "3 CSV con los tiempos medidos en los logs (train, val y test) y los JSON de arquitecturas del dataset wa-hls4ml en Hugging Face." },
+      { t: "Limpieza", d: "Se excluyen las filas sin log (missing_project/log), con tiempo ambiguo y con tiempo anómalo. Es anómalo todo lo que necesitó 2 o más vueltas de 24 h de Vivado." },
+      { t: "Esperas", d: "Se marca como espera la síntesis cuya CPU trabajó menos del 20 % del reloj. En la iteración 1 se marcan pero no se quitan." },
+      { t: "Entradas (X)", d: "36 variables calculadas solo con la arquitectura y la configuración de hls4ml. Se verifica que ninguna sea un resultado de la síntesis." },
+      { t: "Objetivos (y)", d: "Tiempos: logaritmo de los segundos, solo de síntesis terminadas. Fallo: 1 si la síntesis falló, 0 si terminó." },
+      { t: "Partición", d: "Se usa la del dataset. Se comprueba que train, val y test no comparten ningún proyecto." },
+      { t: "Modelos", d: "HistGradientBoosting de scikit-learn. Cada modelo prueba 8 combinaciones de hiperparámetros y se queda con la mejor en val." },
+      { t: "Calibración", d: "Rango 10–90: conformal con la mitad de val. Fallo: regresión isotónica con val." },
+      { t: "Evaluación", d: "Comparación en la otra mitad de val. Test se evalúa una sola vez, con intervalo de confianza por bootstrap." }
+    ],
+
+    datos: {
+      familias: ["2_20", "2_layer", "3_layer", "conv1d", "conv2d", "latency", "resource"],
+      // filas por familia: terminadas (successful_parse) y fallidas (synthesis_failure)
+      filas: {
+        train: { ok: [4656, 4866, 4947, 4395, 4409, 4591, 4526], fallo: [1, 0, 0, 6140, 11133, 1577, 2424] },
+        val:   { ok: [1005, 1001, 1016, 1007, 1000, 979, 978],   fallo: [1, 0, 0, 1285, 2363, 317, 536] },
+        test:  { ok: [1432, 2003, 2000, 1985, 1864, 1995, 1996], fallo: [0, 0, 0, 2690, 4620, 705, 1047] }
+      },
+      excluidas: [
+        { motivo: "Sin log del proyecto (missing_project/log)", train: 372, val: 77, test: 44 },
+        { motivo: "Tiempo ambiguo", train: 3, val: 0, test: 1 },
+        { motivo: "Tiempo anómalo (≥ 2 vueltas de 24 h)", train: 3, val: 0, test: 1 }
+      ],
+      totales: { train: 54043, val: 11565, test: 22383 },
+      // mediana de segundos por familia, para ver que los tres conjuntos se parecen
+      medianas: {
+        c:     { train: [2079, 85, 98, 202, 323, 241, 445], val: [2054, 83, 95, 192, 318, 228, 425], test: [2000, 85, 102, 201, 305, 241, 484] },
+        logic: { train: [389, 278, 295, 184, 231, 544, 368], val: [403, 272, 283, 180, 230, 529, 367], test: [388, 272, 303, 181, 231, 552, 371] }
+      }
+    },
+
+    esperas: {
+      umbral: 0.2,
+      pct: { train: [2.3, 0.1, 0.0, 17.6, 3.5, 1.6, 0.3], val: [3.0, 0.0, 0.1, 16.8, 3.5, 1.1, 0.4], test: [2.9, 0.1, 0.0, 16.6, 2.8, 1.7, 0.2] },
+      cpuNormal: [0.470, 1.013, 1.014, 0.943, 0.719, 0.867, 0.805],
+      cpuEspera: [0.168, 0.054, 0.063, 0.012, 0.007, 0.056, 0.038]
+    },
+
+    // 36 entradas: 6 categóricas + 30 numéricas
+    entradas: [
+      { grupo: "Categóricas (6)", vars: "family, io_type, target_part, vivado_version, hls4ml_version, strategy", como: "Columnas del CSV y de hls_config. El modelo las lee como categorías nativas. Las categorías son las de train; una categoría nueva queda como faltante." },
+      { grupo: "Conteo de capas (12)", vars: "n_dense, n_conv1d, n_conv2d, n_activation, n_batchnormalization, n_pooling, n_flatten, n_dropout, n_inputlayer, n_otra, n_capas, n_capas_peso", como: "Se agrupa cada capa por su nombre de clase (sin la Q de QKeras). n_capas_peso cuenta las capas dense y conv." },
+      { grupo: "Tamaño del cómputo (5)", vars: "log_parametros, log_macs, log_macs_max_capa, log_multiplicadores, log_multiplicadores_max_capa", como: "Multiplicaciones de dense = entradas × neuronas. De conv = posiciones de salida × kernel × canales de entrada × filtros. Los multiplicadores en paralelo son las multiplicaciones ÷ reuse factor de la capa. Todo con log(1 + x)." },
+      { grupo: "Reuse factor (4)", vars: "reuse_factor, log_reuse_factor, log_rf_capa_min, log_rf_capa_max", como: "Reuse factor global de hls_config y mínimo y máximo entre las capas con pesos." },
+      { grupo: "Precisión (5)", vars: "bits_modelo, bits_modelo_enteros, bits_peso_medio, bits_peso_max, n_activaciones_cuantizadas", como: "Se lee fixed<total, enteros> con una expresión regular. En capas Q* la precisión del peso sale de hls_config por capa. En las demás, de la precisión del modelo." },
+      { grupo: "Forma de la red (4)", vars: "ancho_max, kernel_max, log_tam_entrada, log_tam_salida", como: "Neuronas o filtros máximos, kernel máximo y tamaño de la entrada y de la salida." }
+    ],
+    ejemploRed: {
+      texto: "Red de ejemplo de la familia resource: 12 capas (7 QDense, 4 QActivation y 1 entrada), strategy resource, reuse factor 1536 y precisión fixed<16,6>.",
+      filas: [
+        ["Multiplicaciones totales", "30.720"],
+        ["log_macs", "log(1 + 30.720) = 10,3327"],
+        ["log_multiplicadores", "3,434"],
+        ["log_parametros", "10,339"],
+        ["bits_peso_medio / máx.", "16 / 16"],
+        ["ancho_max", "128"]
+      ]
+    },
+
+    // 8 modelos de tiempo + 1 clasificador
+    modelos: [
+      { enf: "A", obj: "C-synth", quien: "Percentil 10", perdida: "quantile (0,1)", lr: 0.1, hojas: 63, iter: 800 },
+      { enf: "A", obj: "C-synth", quien: "Percentil 50", perdida: "quantile (0,5)", lr: 0.1, hojas: 63, iter: 800 },
+      { enf: "A", obj: "C-synth", quien: "Percentil 90", perdida: "quantile (0,9)", lr: 0.1, hojas: 63, iter: 800 },
+      { enf: "A", obj: "Lógica", quien: "Percentil 10", perdida: "quantile (0,1)", lr: 0.1, hojas: 63, iter: 800 },
+      { enf: "A", obj: "Lógica", quien: "Percentil 50", perdida: "quantile (0,5)", lr: 0.1, hojas: 63, iter: 800 },
+      { enf: "A", obj: "Lógica", quien: "Percentil 90", perdida: "quantile (0,9)", lr: 0.05, hojas: 63, iter: 800 },
+      { enf: "B", obj: "C-synth", quien: "Valor esperado", perdida: "error cuadrático en log", lr: 0.1, hojas: 63, iter: 800 },
+      { enf: "B", obj: "Lógica", quien: "Valor esperado", perdida: "error cuadrático en log", lr: 0.1, hojas: 63, iter: 800 },
+      { enf: "A y B", obj: "Fallo", quien: "Clasificador", perdida: "log-loss", lr: 0.1, hojas: 63, iter: 500 }
+    ],
+    rejilla: {
+      tiempo: { lr: [0.05, 0.1], hojas: [31, 63], iter: [300, 800] },
+      fallo: { lr: [0.05, 0.1], hojas: [31, 63], iter: [200, 500] },
+      fijos: [
+        ["min_samples_leaf", "40"],
+        ["l2_regularization", "1,0"],
+        ["early_stopping", "desactivado"],
+        ["categorical_features", "from_dtype"],
+        ["random_state", "20261105"],
+        ["max_depth, max_bins", "por defecto de scikit-learn"]
+      ],
+      criterio: [
+        ["A (percentiles)", "Pérdida pinball de cada percentil, en val"],
+        ["B (valor esperado)", "Error cuadrático en log, en val"],
+        ["Clasificador", "Log-loss, en val"]
+      ],
+      tiempos: [
+        ["A · C-synth (3 modelos × 8)", "318 s"],
+        ["A · Lógica (3 modelos × 8)", "281 s"],
+        ["B · C-synth (1 modelo × 8)", "64 s"],
+        ["B · Lógica (1 modelo × 8)", "60 s"]
+      ]
+    },
+
+    calibracion: {
+      texto: "Val se parte en dos mitades por familia, con semilla fija. Una mitad calibra el rango y la otra se usa para compararlo. El ajuste es el cuantil 80 % (con la corrección de muestra finita) de un puntaje de error, medido en log.",
+      puntajes: [
+        ["A", "Cuánto queda el valor real fuera del rango p10–p90 (0 si queda dentro). El rango final es p10 − ajuste hasta p90 + ajuste."],
+        ["B", "Valor absoluto del error entre el log real y el log predicho. El rango final es el predicho × e^(±ajuste)."]
+      ],
+      familias: ["2_20", "2_layer", "3_layer", "conv1d", "conv2d", "latency", "resource"],
+      ajustes: {
+        c:     { "A": { global: 0.039, fam: [0.098, 0.023, 0.034, 0.056, 0.063, 0.016, 0.033] }, "B": { global: 0.418, fam: [0.466, 0.181, 0.283, 1.003, 0.488, 0.179, 0.636] } },
+        logic: { "A": { global: 0.023, fam: [0.051, 0.033, 0.043, 0.020, 0.023, 0.014, 0.007] }, "B": { global: 0.430, fam: [0.555, 0.367, 0.331, 1.193, 0.501, 0.239, 0.205] } }
+      },
+      fallo: "El clasificador se calibra con regresión isotónica ajustada sobre todo val. Por eso las métricas de fallo en val son optimistas y solo test es una medida limpia."
+    },
+
+    evaluacion: [
+      ["Dentro de ×2", "% de casos con máx(predicho/real, real/predicho) ≤ 2"],
+      ["Error relativo mediano", "mediana de |predicho − real| / real"],
+      ["sMAPE", "media de 2|p − y| / (|p| + |y|), la misma del surrogate 07D"],
+      ["R² en log", "1 − Σ(ln y − ln p)² / Σ(ln y − media)²"],
+      ["Spearman", "correlación de rangos: ¿ordena bien de rápida a lenta?"],
+      ["Cobertura 10–90", "% de casos con p10 ≤ real ≤ p90. Debe rondar 80 %"],
+      ["Ancho p90/p10", "mediana de p90 / p10: cuántas veces más ancho es el rango"],
+      ["Puntaje de intervalo", "ancho del rango en log más una penalización por cada caso fuera. Menor es mejor"],
+      ["AUC, AUC-PR, Brier, log-loss", "calidad de la probabilidad de fallo"],
+      ["Horas evitadas y descartadas", "horas de síntesis fallida marcadas, contra horas de síntesis buenas marcadas, con un umbral de riesgo"],
+      ["IC 95 %", "bootstrap con 1.000 remuestreos (semilla 0), sobre el dentro de ×2 de B"]
+    ],
+    lineasBase: [
+      ["Mediana por familia", "Predice la mediana del tiempo de train de la familia."],
+      ["Mediana por familia, estrategia y RF", "Igual, pero por grupo de familia, estrategia y tercio del reuse factor."],
+      ["Regresión lineal", "Ridge (alfa 1,0) sobre las 30 entradas numéricas y la familia y la estrategia en variables indicadoras. Faltantes en 0."]
+    ],
+    verificaciones: [
+      ["Sin proyectos compartidos (train–val, train–test, val–test)", 3],
+      ["Anomalías marcadas (3 en train, 1 en test)", 1],
+      ["Todas las filas tienen entradas (train, val, test)", 3],
+      ["Ninguna entrada es un resultado de la síntesis ni del 07D", 1],
+      ["Tiempos positivos y sin faltantes (2 etapas × 3 conjuntos)", 6],
+      ["Fórmulas de las métricas con un caso conocido", 1]
+    ],
+    limites: [
+      "La rejilla de hiperparámetros es corta: 8 combinaciones. Los 9 modelos eligieron 63 hojas y el máximo de iteraciones, y 8 de 9 el mayor learning rate. El óptimo probablemente está fuera de la rejilla.",
+      "min_samples_leaf y l2_regularization quedaron fijos y no se probaron.",
+      "Hay una sola partición de val y una sola semilla: no hay variación entre corridas.",
+      "No hay selección de entradas ni validación cruzada por proyecto.",
+      "Las esperas del clúster se dejan en los datos de entrenamiento en esta iteración.",
+      "El clasificador se calibra con el mismo val con que se eligieron sus hiperparámetros."
+    ]
   },
 
   archivos: [
@@ -469,6 +637,125 @@
     return h;
   }
 
+  // ---------- cómo se hizo ----------
+  var sub = "res";
+  var nf = function (x) { return x.toLocaleString("es"); };
+  var th = function (arr, lcols) { return "<tr>" + arr.map(function (x, i) { return "<th" + ((lcols || [0]).indexOf(i) > -1 ? ' class="l"' : "") + ">" + x + "</th>"; }).join("") + "</tr>"; };
+
+  // gráfico de puntos genérico: una fila por familia y un punto por serie
+  function puntos(fams, series, o) {
+    var names = Object.keys(series), W = 760, rowH = 30, Tp = 12, Bt = 38, L = 70, R = 18, H = Tp + rowH * fams.length + Bt;
+    var x = function (v) { return L + (v - o.lo) / (o.hi - o.lo) * (W - L - R); };
+    var s = '<svg viewBox="0 0 ' + W + " " + H + '" width="100%" role="img" aria-label="' + esc(o.aria) + '">';
+    for (var v = o.lo; v <= o.hi + 1e-9; v += o.paso) {
+      s += '<line class="axis" x1="' + x(v) + '" x2="' + x(v) + '" y1="' + Tp + '" y2="' + (H - Bt) + '"/><text x="' + x(v) + '" y="' + (H - Bt + 16) + '" text-anchor="middle">' + o.fmt(v) + "</text>";
+    }
+    if (o.meta != null) s += '<line class="target" x1="' + x(o.meta) + '" x2="' + x(o.meta) + '" y1="' + Tp + '" y2="' + (H - Bt) + '"/>';
+    s += '<text x="' + ((L + W - R) / 2) + '" y="' + (H - 6) + '" text-anchor="middle">' + esc(o.eje) + "</text>";
+    fams.forEach(function (f, i) {
+      var y = Tp + rowH * i + rowH / 2;
+      s += '<text x="' + (L - 8) + '" y="' + (y + 4) + '" text-anchor="end">' + esc(f) + "</text>";
+      names.forEach(function (n, k) {
+        var c = o.col[n], dy = (k - (names.length - 1) / 2) * 6, v = series[n][i], vac = o.vacio && o.vacio.indexOf(n) > -1;
+        s += '<circle cx="' + x(v) + '" cy="' + (y + dy) + '" r="4.2" fill="' + (vac ? "none" : c) + '" stroke="' + c + '" stroke-width="1.8"><title>' + esc(n) + " · " + esc(f) + ": " + o.fmt(v) + "</title></circle>";
+      });
+    });
+    return s + "</svg>";
+  }
+
+  function verMetodologia(it) {
+    var M = it.metodologia, D = M.datos, F = D.familias, h = "";
+
+    h += "<h2>Resumen del proceso</h2><p class=\"lede\">De los datos crudos a la evaluación en test, en el orden en que se hizo.</p><div class=\"steps\">" +
+      M.pasos.map(function (p, i) { return '<div class="step"><span class="n">' + (i + 1) + "</span><b>" + esc(p.t) + "</b><p>" + esc(p.d) + "</p></div>"; }).join("") + "</div>";
+
+    // --- datos ---
+    var ok = {}, fl = {}; ["train", "val", "test"].forEach(function (s) { ok[s] = D.filas[s].ok; fl[s] = D.filas[s].fallo; });
+    h += "<h2>Datos: cuántas filas y de qué tipo</h2><p class=\"lede\">Filas por familia y conjunto. «Terminadas» alimentan los modelos de tiempo. Terminadas más fallidas alimentan el clasificador de fallo.</p>";
+    h += '<div class="panel tablewrap"><table><thead>' + th(["Familia", "Train terminadas", "Train fallidas", "Val terminadas", "Val fallidas", "Test terminadas", "Test fallidas"]) + "</thead><tbody>";
+    F.forEach(function (f, i) {
+      h += '<tr><td class="l">' + f + "</td><td>" + nf(ok.train[i]) + "</td><td>" + nf(fl.train[i]) + "</td><td>" + nf(ok.val[i]) + "</td><td>" + nf(fl.val[i]) + "</td><td>" + nf(ok.test[i]) + "</td><td>" + nf(fl.test[i]) + "</td></tr>";
+    });
+    var sum = function (a) { return a.reduce(function (p, q) { return p + q; }, 0); };
+    h += '<tr class="best"><td class="l">Total</td><td>' + nf(sum(ok.train)) + "</td><td>" + nf(sum(fl.train)) + "</td><td>" + nf(sum(ok.val)) + "</td><td>" + nf(sum(fl.val)) + "</td><td>" + nf(sum(ok.test)) + "</td><td>" + nf(sum(fl.test)) + "</td></tr></tbody></table></div>";
+
+    // barras apiladas: terminadas vs fallidas por familia (todos los conjuntos)
+    var tot = F.map(function (f, i) { return ok.train[i] + ok.val[i] + ok.test[i] + fl.train[i] + fl.val[i] + fl.test[i]; }), mx = Math.max.apply(null, tot);
+    h += '<h3>Terminadas y fallidas por familia (los tres conjuntos juntos)</h3><div class="panel"><div class="legend"><span><i style="background:var(--a)"></i>Terminadas</span><span><i style="background:var(--b)"></i>Fallidas</span></div>';
+    F.forEach(function (f, i) {
+      var o = ok.train[i] + ok.val[i] + ok.test[i], x = fl.train[i] + fl.val[i] + fl.test[i];
+      h += '<div class="barrow" style="grid-template-columns:90px 1fr 150px"><span>' + f + '</span><div class="track" style="display:flex"><div class="fill" style="width:' + (o / mx * 100) + '%;background:var(--a);border-radius:4px 0 0 4px"></div><div class="fill" style="width:' + (x / mx * 100) + '%;background:var(--b);border-radius:0 4px 4px 0"></div></div><span class="val">' + nf(o) + " / " + nf(x) + "</span></div>";
+    });
+    h += '<p class="meta" style="margin-bottom:0">Solo conv1d, conv2d, latency y resource tienen fallos. En 2_20, 2_layer y 3_layer casi todo termina.</p></div>';
+
+    h += "<h3>Filas excluidas</h3><div class=\"panel tablewrap\"><table><thead>" + th(["Motivo", "Train", "Val", "Test"]) + "</thead><tbody>" +
+      D.excluidas.map(function (r) { return '<tr><td class="l">' + esc(r.motivo) + "</td><td>" + r.train + "</td><td>" + r.val + "</td><td>" + r.test + "</td></tr>"; }).join("") +
+      '</tbody></table><p class="meta" style="margin-bottom:0">Total de filas: train ' + nf(D.totales.train) + ", val " + nf(D.totales.val) + ", test " + nf(D.totales.test) + ". Las anomalías son las síntesis que necesitaron 2 o más vueltas de 24 h de Vivado.</p></div>";
+
+    h += "<h3>¿Train, val y test se parecen?</h3><p class=\"lede\">Mediana del tiempo en segundos por familia. Si los tres conjuntos son parecidos, lo aprendido en train sirve para val y test.</p><div class=\"panel tablewrap\"><table><thead>" +
+      th(["Familia", "C-synth train", "C-synth val", "C-synth test", "Lógica train", "Lógica val", "Lógica test"]) + "</thead><tbody>" +
+      F.map(function (f, i) { return '<tr><td class="l">' + f + "</td>" + ["c", "logic"].map(function (k) { return ["train", "val", "test"].map(function (s) { return "<td>" + nf(D.medianas[k][s][i]) + "</td>"; }).join(""); }).join("") + "</tr>"; }).join("") + "</tbody></table></div>";
+
+    // --- esperas ---
+    var E = M.esperas;
+    h += "<h2>Esperas del clúster</h2><p class=\"lede\">En la síntesis lógica, si la CPU trabajó menos del " + Math.round(E.umbral * 100) + " % del tiempo de reloj, la máquina estuvo esperando. Ese tiempo no lo explica la red. Aquí solo se marcan: en la iteración 1 no se quitan al entrenar.</p>" +
+      '<div class="panel"><div class="legend"><span><i style="background:var(--base)"></i>Train</span><span><i style="background:var(--a)"></i>Val</span><span><i style="background:var(--b)"></i>Test</span></div>' +
+      puntos(F, { Train: E.pct.train, Val: E.pct.val, Test: E.pct.test }, { lo: 0, hi: 20, paso: 5, fmt: function (v) { return v + " %"; }, eje: "% de síntesis con espera", aria: "Porcentaje de síntesis con espera por familia", col: { Train: "var(--base)", Val: "var(--a)", Test: "var(--b)" } }) + "</div>" +
+      '<div class="panel tablewrap" style="margin-top:12px"><table><thead>' + th(["Familia", "CPU / reloj mediana (normal)", "CPU / reloj mediana (con espera)"]) + "</thead><tbody>" +
+      F.map(function (f, i) { return '<tr><td class="l">' + f + "</td><td>" + fmt(E.cpuNormal[i]) + "</td><td>" + fmt(E.cpuEspera[i]) + "</td></tr>"; }).join("") + "</tbody></table></div>";
+
+    // --- entradas ---
+    h += "<h2>Entradas (X) y variables creadas</h2><p class=\"lede\">36 variables, calculadas con los campos originales de las capas (<code>model_config</code>) y la configuración de hls4ml (<code>hls_config</code>). No se usa ningún resultado de síntesis ni el 07D. Esta es toda la ingeniería de variables que se hizo.</p>" +
+      '<div class="panel tablewrap"><table><thead>' + th(["Grupo", "Variables", "Cómo se calcula"], [0, 1, 2]) + "</thead><tbody>" +
+      M.entradas.map(function (g) { return '<tr><td class="l" style="white-space:normal;vertical-align:top"><b>' + esc(g.grupo) + '</b></td><td class="l" style="white-space:normal;vertical-align:top"><code>' + esc(g.vars) + '</code></td><td class="l" style="white-space:normal;vertical-align:top">' + esc(g.como) + "</td></tr>"; }).join("") + "</tbody></table></div>";
+    h += "<h3>Un ejemplo calculado a mano</h3><div class=\"panel\"><p style=\"margin-top:0\">" + esc(M.ejemploRed.texto) + "</p>" + kv(M.ejemploRed.filas) + "</div>";
+    h += "<h3>Otras transformaciones</h3><div class=\"panel\"><ul style=\"margin:0;padding-left:18px\"><li>Los tiempos se modelan en logaritmo natural, porque van de segundos a horas.</li><li>Los conteos y tamaños grandes entran como log(1 + x).</li><li>No se escalan ni se normalizan las entradas: los árboles no lo necesitan.</li><li>Los faltantes (por ejemplo, bits de pesos en una red sin capas con pesos) los maneja el propio modelo. Solo la regresión lineal de la línea base los rellena con 0.</li><li>No hay selección de variables: entran las 36.</li></ul></div>";
+
+    // --- modelos ---
+    h += "<h2>Modelos que se usaron</h2><p class=\"lede\">Todos son <code>HistGradientBoosting</code> de scikit-learn (árboles de gradiente boosting). Cambia la función de pérdida y lo que cada modelo aprende. Son 9 modelos finales: 6 de A, 2 de B y 1 clasificador compartido.</p>" +
+      '<div class="panel tablewrap"><table><thead>' + th(["Enfoque", "Predice", "Modelo", "Pérdida", "learning rate", "Hojas máx.", "Iteraciones"], [0, 1, 2, 3]) + "</thead><tbody>" +
+      M.modelos.map(function (m) { return '<tr><td class="l">' + esc(m.enf) + '</td><td class="l">' + esc(m.obj) + '</td><td class="l">' + esc(m.quien) + '</td><td class="l">' + esc(m.perdida) + "</td><td>" + fmt(m.lr, 2) + "</td><td>" + m.hojas + "</td><td>" + m.iter + "</td></tr>"; }).join("") + "</tbody></table></div>";
+
+    // matriz de rejilla: dónde cayó cada modelo
+    var Rj = M.rejilla;
+    function combos(g) { var c = []; g.lr.forEach(function (a) { g.hojas.forEach(function (b) { g.iter.forEach(function (d) { c.push({ lr: a, hojas: b, iter: d }); }); }); }); return c; }
+    var cT = combos(Rj.tiempo), cF = combos(Rj.fallo);
+    h += "<h3>Qué combinación ganó</h3><p class=\"lede\">Cada modelo probó 8 combinaciones y se quedó con la mejor en val. Los puntos marcan la elegida. La esquina de abajo a la derecha es la combinación más grande de la rejilla.</p>" +
+      '<div class="panel tablewrap"><table class="grid8"><thead><tr><th class="l">Modelo</th>' + cT.map(function (c) { return "<th>lr " + fmt(c.lr, 2) + "<br>" + c.hojas + " hojas<br>" + c.iter + " it.</th>"; }).join("") + "</tr></thead><tbody>" +
+      M.modelos.map(function (m) {
+        var cs = m.obj === "Fallo" ? cF : cT, idx = -1;
+        cs.forEach(function (c, i) { if (c.lr === m.lr && c.hojas === m.hojas && c.iter === m.iter) idx = i; });
+        return '<tr><td class="l">' + esc(m.enf + " · " + m.obj + " · " + m.quien) + "</td>" + cs.map(function (c, i) { return "<td>" + (i === idx ? '<span class="dot"></span>' : "") + "</td>"; }).join("") + "</tr>";
+      }).join("") + '</tbody></table><p class="meta" style="margin-bottom:0">El clasificador de fallo probó 200 y 500 iteraciones en lugar de 300 y 800. Su combinación ganadora es también la más grande.</p></div>';
+    h += '<div class="two" style="margin-top:12px"><div class="panel"><h3 style="margin-top:0">Fijos para todos</h3>' + kv(Rj.fijos) + '</div><div class="panel"><h3 style="margin-top:0">Cómo se elige la ganadora</h3>' + kv(Rj.criterio) +
+      '<h3>Tiempo de entrenamiento</h3>' + kv(Rj.tiempos) + "</div></div>";
+
+    // --- calibración ---
+    var Cb = M.calibracion;
+    h += "<h2>Ajustes y calibración</h2><p class=\"lede\">" + esc(Cb.texto) + "</p>" +
+      '<div class="panel tablewrap"><table><thead>' + th(["Enfoque", "Puntaje de error"], [0, 1]) + "</thead><tbody>" + Cb.puntajes.map(function (p) { return '<tr><td class="l"><b>' + p[0] + '</b></td><td class="l" style="white-space:normal">' + esc(p[1]) + "</td></tr>"; }).join("") + "</tbody></table></div>" +
+      "<h3>Tamaño del ajuste, en unidades de log</h3><p class=\"lede\">Un ajuste de 0,4 equivale a multiplicar y dividir el rango por e<sup>0,4</sup> ≈ 1,5. En A el ajuste es casi cero porque los percentiles ya dan un rango casi correcto. En B todo el rango sale del ajuste.</p>" +
+      '<div class="panel"><div class="legend"><span><i style="background:var(--a)"></i>A</span><span><i style="background:var(--b)"></i>B</span></div>';
+    [["c", "C-synth"], ["logic", "Lógica"]].forEach(function (k) {
+      h += '<h3 style="margin-top:8px">' + k[1] + "</h3>" + puntos(F, { A: Cb.ajustes[k[0]].A.fam, B: Cb.ajustes[k[0]].B.fam }, { lo: 0, hi: 1.2, paso: 0.2, fmt: function (v) { return fmt(v, 1); }, eje: "ajuste por familia (log)", aria: "Ajuste por familia, " + k[1], col: { A: "var(--a)", B: "var(--b)" } }) +
+        '<p class="meta" style="margin-top:0">Ajuste global: A ' + fmt(Cb.ajustes[k[0]].A.global) + " · B " + fmt(Cb.ajustes[k[0]].B.global) + "</p>";
+    });
+    h += "</div><div class=\"find info\" style=\"margin-top:12px\"><h4>Fallo</h4><p>" + esc(Cb.fallo) + "</p></div>";
+
+    // --- evaluación ---
+    h += "<h2>Cómo se evaluó</h2><div class=\"two\"><div class=\"panel tablewrap\"><h3 style=\"margin-top:0\">Métricas</h3><table><tbody>" +
+      M.evaluacion.map(function (e) { return '<tr><td class="l" style="vertical-align:top"><b>' + esc(e[0]) + '</b></td><td class="l" style="white-space:normal">' + esc(e[1]) + "</td></tr>"; }).join("") +
+      '</tbody></table></div><div class="panel tablewrap"><h3 style="margin-top:0">Líneas base</h3><table><tbody>' +
+      M.lineasBase.map(function (e) { return '<tr><td class="l" style="vertical-align:top"><b>' + esc(e[0]) + '</b></td><td class="l" style="white-space:normal">' + esc(e[1]) + "</td></tr>"; }).join("") +
+      "</tbody></table><h3>Verificaciones automáticas (15 de 15 pasan)</h3><table><tbody>" +
+      M.verificaciones.map(function (e) { return '<tr><td class="l" style="white-space:normal">' + esc(e[0]) + "</td><td>" + e[1] + "</td></tr>"; }).join("") + "</tbody></table></div></div>";
+
+    // --- límites ---
+    h += "<h2>Lo que no se hizo todavía</h2><p class=\"lede\">Límites de esta iteración. Varios son candidatos a mejoras en el banco de la pestaña «Resultados».</p><div class=\"panel\"><ul style=\"margin:0;padding-left:18px\">" +
+      M.limites.map(function (l) { return "<li>" + esc(l) + "</li>"; }).join("") + "</ul></div>";
+    return h;
+  }
+
   // ---------- vista de una iteración ----------
   function verIteracion(it) {
     var s = '<section><p class="meta"><span class="badge">' + esc(it.estado) + "</span> · " + esc(it.fecha) + " · " + esc(it.notebook) + "</p>" +
@@ -476,6 +763,10 @@
       '<div class="panel"><p style="margin:0">' + esc(it.resumen) + "</p></div>" +
       '<div class="grid4">' + it.veredicto.map(function (v) { return '<div class="stat"><div class="v">' + esc(v.valor) + '</div><div class="l">' + esc(v.etiqueta) + '</div><div class="d">' + esc(v.detalle) + "</div></div>"; }).join("") + "</div>";
 
+    if (it.metodologia) {
+      s += '<div class="seg" id="segsub" style="margin-top:22px"><button data-s="res" aria-pressed="' + (sub === "res") + '">Resultados</button><button data-s="met" aria-pressed="' + (sub === "met") + '">Cómo se hizo</button></div>';
+      if (sub === "met") return s + verMetodologia(it) + "</section>";
+    }
     s += '<h2>Qué se corrió</h2><div class="two"><div class="panel"><h3 style="margin-top:0">Configuración</h3>' + kv(it.configuracion) + '</div><div class="panel"><h3 style="margin-top:0">Datos</h3>' + kv(it.datos) + "</div></div>";
 
     s += "<h2>Tiempos: qué tan seguido acierta dentro de ×2</h2><p class=\"lede\">Porcentaje de síntesis cuyo tiempo predicho queda entre la mitad y el doble del real. Test, todas las síntesis.</p>" +
@@ -545,10 +836,11 @@
     var it = ITS.filter(function (i) { return String(i.id) === vista; })[0];
     main.innerHTML = (vista === "cmp" || !it) ? comparar() : verIteracion(it);
   }
-  tabs.addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; vista = b.dataset.v; try { location.hash = vista; } catch (x) {} pintar(); window.scrollTo(0, 0); });
+  tabs.addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; vista = b.dataset.v; sub = "res"; try { location.hash = vista; } catch (x) {} pintar(); window.scrollTo(0, 0); });
   main.addEventListener("click", function (e) {
     var b = e.target.closest("button"); if (!b) return;
     var it = ITS.filter(function (i) { return String(i.id) === vista; })[0];
+    if (b.closest("#segsub")) { sub = b.dataset.s; pintar(); document.getElementById("segsub").scrollIntoView(); return; }
     if (b.closest("#filt")) { catSel = b.dataset.c; document.getElementById("bl").innerHTML = backlog(it); }
     if (b.closest("#segcob")) {
       Array.prototype.forEach.call(b.parentNode.children, function (x) { x.setAttribute("aria-pressed", x === b); });
