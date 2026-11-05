@@ -38,19 +38,14 @@
   document.title = n.titulo + " · Resultados de la tesis";
   raiz.textContent = "";
 
-  // Barra superior
-  var barra = el("nav", "barra");
-  var volver = el("a", null, "← Todos los notebooks"); volver.href = "index.html#ruta"; barra.appendChild(volver);
-  barra.appendChild(el("span", "sp"));
-  if (i > 0) { var p = el("a", null, "← Anterior"); p.href = "notebook.html?id=" + lis[i - 1].id; p.title = lis[i - 1].titulo; barra.appendChild(p); }
-  barra.appendChild(el("span", "pos", (i + 1) + " / " + lis.length));
-  if (i < lis.length - 1) { var s = el("a", null, "Siguiente →"); s.href = "notebook.html?id=" + lis[i + 1].id; s.title = lis[i + 1].titulo; barra.appendChild(s); }
-  raiz.appendChild(barra);
+  window.Shell.montar();
+  raiz.setAttribute("data-sec", n.seccion);
 
   // Cabecera
-  var etapa = datos.etapas.filter(function (e) { return e.id === n.etapa; })[0];
+  var sec = window.Shell.seccion(n.seccion);
+  var sub = sec ? sec.subs.filter(function (b) { return b.id === n.sub; })[0] : null;
   var cab = el("header", "hero");
-  cab.appendChild(el("span", "eyebrow", etapa ? etapa.titulo : ""));
+  cab.appendChild(el("span", "eyebrow sec-color", sec ? sec.titulo + (sub ? " \u00b7 " + sub.titulo : "") : ""));
   cab.appendChild(el("h1", null, n.titulo));
   var estado = el("p", "estado " + n.nivel);
   estado.appendChild(el("b", null, ETIQUETA[n.nivel] + ". "));

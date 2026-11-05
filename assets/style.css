@@ -146,3 +146,54 @@ section[id], #ruta, #resultados { scroll-margin-top: 16px; }
   .chip.ok { color: #3CC9A0; } .chip.aviso { color: #FBBF24; }
   .flujo li:last-child .paso { border-color: #3CC9A0; } .flujo li:last-child .paso b { color: #3CC9A0; }
 }
+
+/* ── Secciones: un color por sección ── */
+:root { --s-surrogate: #0F8A6A; --s-tiempos: #B45309; --s-agente: #7C3AED; }
+@media (prefers-color-scheme: dark) { :root { --s-surrogate: #3CC9A0; --s-tiempos: #F0A73A; --s-agente: #A78BFA; } }
+[data-sec="surrogate"] { --sec: var(--s-surrogate); }
+[data-sec="tiempos"] { --sec: var(--s-tiempos); }
+[data-sec="agente"] { --sec: var(--s-agente); }
+.sec-color { color: var(--sec, var(--accent)); }
+[data-sec] .tag { color: var(--sec); border-color: var(--sec); }
+[data-sec] .ir { color: var(--sec); }
+[data-sec] .card:hover, [data-sec] .card:focus-visible, [data-sec] .fila:focus-visible, [data-sec] .paso:hover { border-color: var(--sec); }
+[data-sec] .pendientes { border-left: 4px solid var(--sec); border-radius: 0 12px 12px 0; }
+
+/* Inicio: tarjetas de sección */
+.secciones { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.sec-card {
+  display: flex; flex-direction: column; gap: 12px; min-width: 0;
+  background: var(--surface); border: 1px solid var(--line); border-top: 6px solid var(--sec);
+  border-radius: 14px; padding: 22px 22px 20px; color: inherit; text-decoration: none;
+  transition: transform .15s ease, border-color .15s ease;
+}
+.sec-card:hover, .sec-card:focus-visible { transform: translateY(-3px); border-color: var(--sec); }
+.sec-card:focus-visible { outline: 2px solid var(--sec); outline-offset: 2px; }
+.sec-eyebrow { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.sec-card h2 { font-size: 28px; }
+.sec-resumen { font-size: 16px; color: var(--muted); }
+.sec-cifras { display: flex; flex-direction: column; gap: 8px; margin: 6px 0 0; padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.sec-cifras div { display: flex; align-items: baseline; gap: 10px; }
+.sec-cifras dt { font-family: var(--f-display); font-size: 22px; font-weight: 800; color: var(--sec); font-variant-numeric: tabular-nums; min-width: 6.2ch; }
+.sec-cifras dd { margin: 0; font-size: 14px; color: var(--muted); }
+.sec-subs { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.sec-subs li { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; }
+.sec-card .ir { margin-top: auto; padding-top: 4px; font-family: var(--f-mono); font-size: 13px; color: var(--sec); }
+.conexion { color: var(--muted); font-size: 15.5px; max-width: 68ch; border-left: 3px solid var(--line); padding-left: 14px; }
+
+/* Portada de sección */
+#raiz:not(.nb) { max-width: 980px; }
+.sub { display: flex; flex-direction: column; gap: 14px; padding-top: 8px; scroll-margin-top: 12px; }
+.sub-t { font-size: 26px; padding-left: 14px; border-left: 6px solid var(--sec); }
+.sub-h { font-size: 13px; font-family: var(--f-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-top: 6px; }
+[data-sec] .fact b { color: var(--sec); }
+.saltos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.saltos a { font-family: var(--f-mono); font-size: 12.5px; color: var(--sec, var(--accent)); text-decoration: none; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 12px; }
+.saltos a:hover { border-color: var(--sec, var(--accent)); }
+.nb .hero .eyebrow.sec-color, .hero .eyebrow.sec-color { color: var(--sec); }
+
+/* Cifras clave (portadas de sección y notebooks) */
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 6px; }
+.fact { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fact b { font-family: var(--f-display); font-size: 28px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.fact span { font-size: 14px; color: var(--muted); line-height: 1.35; }

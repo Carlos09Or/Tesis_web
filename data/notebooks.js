@@ -31,6 +31,8 @@ window.NOTEBOOKS = {
     // ───────────────────────── DATOS ─────────────────────────
     {
       id: "01",
+      seccion: "surrogate",
+      sub: "datos",
       etapa: "datos",
       titulo: "01 · Carga, auditoría y compactación",
       archivo: "01_A_Datos_HLS4ML-3.ipynb",
@@ -65,6 +67,8 @@ window.NOTEBOOKS = {
     },
     {
       id: "02",
+      seccion: "surrogate",
+      sub: "datos",
       etapa: "datos",
       titulo: "02 · Cleaning",
       archivo: "02_AB_Cleaning_HLS4ML-3.ipynb",
@@ -98,6 +102,8 @@ window.NOTEBOOKS = {
     },
     {
       id: "03",
+      seccion: "surrogate",
+      sub: "datos",
       etapa: "datos",
       titulo: "03 · Canonicalización",
       archivo: "02_B_Cano.ipynb",
@@ -128,6 +134,8 @@ window.NOTEBOOKS = {
     },
     {
       id: "04",
+      seccion: "surrogate",
+      sub: "datos",
       etapa: "datos",
       titulo: "04 · Feature engineering",
       archivo: "04_Feature_Engineering_po.ipynb",
@@ -160,6 +168,8 @@ window.NOTEBOOKS = {
     },
     {
       id: "05",
+      seccion: "surrogate",
+      sub: "datos",
       etapa: "datos",
       titulo: "05 · Encoding",
       archivo: "05_Encoding_HLS4ML-2.ipynb",
@@ -188,6 +198,8 @@ window.NOTEBOOKS = {
     },
     {
       id: "06",
+      seccion: "surrogate",
+      sub: "datos",
       etapa: "datos",
       titulo: "06 · Scaling y dataset final",
       archivo: "06_Scaling_Dataset_HLS4ML-2.ipynb",
@@ -221,6 +233,8 @@ window.NOTEBOOKS = {
     // ───────────────────────── MODELOS ─────────────────────────
     {
       id: "07",
+      seccion: "surrogate",
+      sub: "modelos",
       etapa: "modelos",
       titulo: "07 · Comparación de arquitecturas",
       archivo: "07_Training_Transformer_HLS4ML_A100_CORREGIDO_v2.ipynb",
@@ -246,6 +260,8 @@ window.NOTEBOOKS = {
     },
     {
       id: "07B",
+      seccion: "surrogate",
+      sub: "modelos",
       etapa: "modelos",
       titulo: "07B · Variables mejoradas y cabezas para DSP",
       archivo: "02_07B_Features_Enhanced_DSPHeads_EXECUTADO.ipynb (registro de la tesis)",
@@ -268,6 +284,8 @@ window.NOTEBOOKS = {
     },
     {
       id: "07C",
+      seccion: "surrogate",
+      sub: "modelos",
       etapa: "modelos",
       titulo: "07C · Huber en los cinco objetivos",
       archivo: "Ultima_Prueba_FF.ipynb",
@@ -290,6 +308,8 @@ window.NOTEBOOKS = {
     },
     {
       id: "07D",
+      seccion: "surrogate",
+      sub: "modelos",
       etapa: "modelos",
       titulo: "07D · El modelo elegido",
       archivo: "07D_LateFusion_Hybrid_MSE_DSPHuber_HLS4ML.ipynb",
@@ -321,6 +341,8 @@ window.NOTEBOOKS = {
     },
     {
       id: "07E",
+      seccion: "surrogate",
+      sub: "modelos",
       etapa: "modelos",
       titulo: "07E · Escalado de objetivos de Purdue",
       archivo: "07E_LateFusion_Hybrid_PurdueTargetScaling_HLS4ML.ipynb",
@@ -343,6 +365,8 @@ window.NOTEBOOKS = {
     },
     {
       id: "07F",
+      seccion: "surrogate",
+      sub: "modelos",
       etapa: "modelos",
       titulo: "07F · Cross-Attention con escalado de Purdue",
       archivo: "07F_CrossAttention_Hybrid_PurdueTargetScaling_HLS4ML.ipynb",
@@ -362,6 +386,8 @@ window.NOTEBOOKS = {
     },
     {
       id: "07X",
+      seccion: "surrogate",
+      sub: "modelos",
       etapa: "modelos",
       titulo: "Mejor_Modelo_07 y exportación del bundle",
       archivo: "Mejor_Modelo_07.ipynb · EXPORTAR_BUNDLE_07D_DESDE_DRIVE.ipynb",
@@ -395,6 +421,8 @@ window.NOTEBOOKS = {
     // ───────────────────────── TIEMPOS ─────────────────────────
     {
       id: "T1",
+      seccion: "tiempos",
+      sub: "estudio",
       etapa: "tiempos",
       titulo: "T1 · Tiempos de síntesis del test",
       archivo: "wa_hls4ml_synthesis_timing.ipynb",
@@ -428,6 +456,8 @@ window.NOTEBOOKS = {
     },
     {
       id: "T2",
+      seccion: "tiempos",
+      sub: "estudio",
       etapa: "tiempos",
       titulo: "T2 · Tiempos de train y val",
       archivo: "wa_hls4ml_timing_trainval.ipynb (y variantes _procesos y final_logs_test)",
@@ -453,6 +483,8 @@ window.NOTEBOOKS = {
     },
     {
       id: "T3",
+      seccion: "tiempos",
+      sub: "modelo",
       etapa: "tiempos",
       titulo: "T3 · Modelo de costo de síntesis",
       archivo: "modelo_costo_sintesis.ipynb",
@@ -477,6 +509,8 @@ window.NOTEBOOKS = {
     },
     {
       id: "T4",
+      seccion: "tiempos",
+      sub: "modelo",
       etapa: "tiempos",
       titulo: "T4 · Modelo de tiempos: dos enfoques",
       archivo: "modelo_tiempos_dos_enfoques.ipynb",
@@ -500,6 +534,8 @@ window.NOTEBOOKS = {
     },
     {
       id: "T5",
+      seccion: "tiempos",
+      sub: "modelo",
       etapa: "tiempos",
       titulo: "T5 · Notebook de verificación del modelo de tiempos",
       archivo: "verificacion_modelo_tiempos.ipynb",
@@ -521,6 +557,8 @@ window.NOTEBOOKS = {
     // ───────────────────────── PURDUE ─────────────────────────
     {
       id: "P1",
+      seccion: "surrogate",
+      sub: "referencia",
       etapa: "purdue",
       titulo: "P1 · Entrenamiento de Purdue",
       archivo: "Final_Work_Purdue.ipynb",
@@ -546,6 +584,8 @@ window.NOTEBOOKS = {
     },
     {
       id: "P2",
+      seccion: "surrogate",
+      sub: "referencia",
       etapa: "purdue",
       titulo: "P2 · Evaluación de Purdue",
       archivo: "HLS4ML_Evaluacion_Hugg_Last.ipynb",

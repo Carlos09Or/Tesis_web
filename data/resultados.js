@@ -32,6 +32,8 @@ window.RESULTADOS = {
     {
       grupo: "datos",
       archivo: "paginas/09-auditoria-datos-notebooks.html",
+      seccion: "surrogate",
+      sub: "datos",
       titulo: "Auditoría de los datos y los notebooks",
       resumen:
         "Revisión de los notebooks 01 a 07 y reproducción del 07D desde los JSON crudos: qué está bien y los cinco puntos por corregir.",
@@ -46,6 +48,8 @@ window.RESULTADOS = {
     {
       grupo: "surrogate",
       archivo: "paginas/00-entrenamiento-surrogate-07d.html",
+      seccion: "surrogate",
+      sub: "modelos",
       titulo: "Entrenamiento del surrogate · 07 a 07F",
       resumen:
         "Seis series de experimentos controlados: qué cambió en cada una, qué pasó con recursos y latencia, y por qué ganó el 07D.",
@@ -60,6 +64,8 @@ window.RESULTADOS = {
     {
       grupo: "tiempos",
       archivo: "paginas/01-tiempos-sintesis-r400.html",
+      seccion: "tiempos",
+      sub: "estudio",
       titulo: "Tiempos de síntesis · Ronda 400",
       resumen:
         "Primera muestra: se recuperan de los logs originales los tiempos de C-synthesis y de Vivado del test de wa-hls4ml.",
@@ -74,6 +80,8 @@ window.RESULTADOS = {
     {
       grupo: "tiempos",
       archivo: "paginas/02-tiempos-sintesis-r800.html",
+      seccion: "tiempos",
+      sub: "estudio",
       titulo: "Tiempos de síntesis · Ronda 800",
       resumen:
         "Se duplica la muestra y se comprueba que los resultados se sostienen; aparece el efecto de la precisión de los pesos.",
@@ -88,6 +96,8 @@ window.RESULTADOS = {
     {
       grupo: "tiempos",
       archivo: "paginas/03-tiempos-sintesis-r2000.html",
+      seccion: "tiempos",
+      sub: "estudio",
       titulo: "Tiempos de síntesis · Ronda 2,000",
       resumen:
         "Ronda final con 13,276 configuraciones y el surrogate 07D medido sobre exactamente las mismas.",
@@ -102,6 +112,8 @@ window.RESULTADOS = {
     {
       grupo: "tiempos",
       archivo: "paginas/04-sintesis-vs-surrogate-agente.html",
+      seccion: "tiempos",
+      sub: "estudio",
       titulo: "Síntesis frente al surrogate y el agente",
       resumen:
         "Los mismos 140 diseños, medidos de cuatro maneras: síntesis real, surrogate directo y agente LLM con tres formas de describir la red.",
@@ -115,6 +127,8 @@ window.RESULTADOS = {
     {
       grupo: "tiempos",
       archivo: "paginas/05-modelo-costo-sintesis.html",
+      seccion: "tiempos",
+      sub: "modelo",
       titulo: "Modelo de costo de síntesis",
       resumen:
         "Predice antes de sintetizar cuánto tardarán C-synthesis y Vivado, con un rango del 10 al 90 %, y la probabilidad de que la síntesis falle.",
@@ -128,6 +142,8 @@ window.RESULTADOS = {
     {
       grupo: "agente",
       archivo: "paginas/06-informe-evaluacion-agente.html",
+      seccion: "agente",
+      sub: "evaluacion",
       titulo: "Informe de evaluación del agente de predicción",
       resumen:
         "Pruebas funcionales, benchmark de fidelidad por grupo de arquitectura y la ficha del modelo surrogate Transformer.",
@@ -141,6 +157,8 @@ window.RESULTADOS = {
     {
       grupo: "agente",
       archivo: "paginas/07-informe-capa4-dse.html",
+      seccion: "agente",
+      sub: "evaluacion",
       titulo: "Informe Capa 4 · DSE",
       resumen:
         "Cinco experimentos sobre el agente y el surrogate 07D: reconstrucción, búsqueda frente al azar, consistencia física, honestidad de la confianza y dominio de aplicabilidad.",
@@ -155,6 +173,8 @@ window.RESULTADOS = {
     {
       grupo: "tiempos",
       archivo: "paginas/08-modelo-tiempos-iteraciones.html",
+      seccion: "tiempos",
+      sub: "modelo",
       titulo: "Modelo de tiempos · Bitácora de iteraciones",
       resumen:
         "Rehace el modelo de costo paso a paso y compara dos enfoques (3 percentiles contra valor esperado). Iteración 1: resultados en test, puntos débiles y banco de mejoras.",
