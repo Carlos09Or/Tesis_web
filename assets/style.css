@@ -1,0 +1,92 @@
+/* Misma paleta y tipografía que las páginas de resultados, claro y oscuro. */
+:root {
+  --bg: #F7F8FA;
+  --surface: #FFFFFF;
+  --fg: #17202E;
+  --muted: #5B6676;
+  --line: #DDE2EA;
+  --accent: #2E5BDB;
+  --tint: #EEF2FB;
+  --f-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0F141C; --surface: #161D28; --fg: #E6EAF1; --muted: #9AA6B7;
+    --line: #2A3444; --accent: #6E93FF; --tint: #1A2436;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--f-body);
+  font-size: 17px;
+  line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main {
+  max-width: 980px;
+  margin: 0 auto;
+  padding-block: 48px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(32px, 6vw, 52px); font-weight: 800; line-height: 1.05; }
+h2 { font-size: 24px; font-weight: 700; }
+h3 { font-size: 19px; font-weight: 700; line-height: 1.25; }
+p { margin: 0; }
+code { font-family: var(--f-mono); font-size: 0.86em; background: var(--tint); padding: 1px 5px; border-radius: 4px; }
+
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.hero { display: flex; flex-direction: column; gap: 14px; }
+.lede { font-size: 19px; color: var(--muted); max-width: 62ch; }
+
+.stats { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+.stat {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: 12px 16px; display: flex; flex-direction: column; min-width: 140px;
+}
+.stat b { font-family: var(--f-display); font-size: 24px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 13.5px; color: var(--muted); }
+
+.grupo { display: flex; flex-direction: column; gap: 12px; }
+.grupo-desc { color: var(--muted); max-width: 68ch; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; margin-top: 8px; }
+.card {
+  display: flex; flex-direction: column; gap: 10px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  padding: 18px; color: inherit; text-decoration: none; min-width: 0;
+  transition: border-color .15s ease, transform .15s ease;
+}
+.card:hover, .card:focus-visible { border-color: var(--accent); transform: translateY(-2px); }
+.card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tag {
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--accent); border: 1px solid var(--accent); border-radius: 4px; padding: 0 6px;
+}
+.fecha { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.resumen { font-size: 15.5px; color: var(--muted); }
+.cifras { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 4px 0 0; padding-top: 12px; border-top: 1px solid var(--line); }
+.cifras div { min-width: 0; }
+.cifras dt { font-family: var(--f-display); font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.cifras dd { margin: 0; font-size: 13px; color: var(--muted); }
+.ir { margin-top: auto; padding-top: 6px; font-family: var(--f-mono); font-size: 12.5px; color: var(--accent); }
+
+.pendientes { background: var(--tint); border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; }
+.pendientes h2 { font-size: 18px; }
+.pendientes ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; color: var(--muted); font-size: 15.5px; }
+
+footer { color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 16px; }
+
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }

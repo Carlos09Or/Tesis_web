@@ -1,0 +1,1041 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}</style></head><body><!-- tr-nav --><script src="../data/resultados.js"></script><script src="../assets/nav.js"></script>
+<meta charset="utf-8">
+<title>Informe Capa 4 — DSE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders:wght@600;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F6F1;
+    --surface:#FFFFFF;
+    --surface-sunken:#EEF0EA;
+    --ink:#1B2420;
+    --ink-soft:#50594F;
+    --ink-faint:#86908A;
+    --accent:#C05A17;
+    --accent-soft:#F0DCC9;
+    --line:#D8DCD1;
+    --line-strong:#B9C0B3;
+    --good:#2B7A4B;
+    --good-soft:#E1EFE3;
+    --bad:#AE3A30;
+    --bad-soft:#F6E2DF;
+    --warn:#9C6F1E;
+    --warn-soft:#F1E6CC;
+    --shadow: 0 1px 2px rgba(27,36,32,0.06), 0 6px 16px -8px rgba(27,36,32,0.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#11160F;
+      --surface:#161C14;
+      --surface-sunken:#1D241A;
+      --ink:#E8ECE3;
+      --ink-soft:#AEB6A6;
+      --ink-faint:#6E7868;
+      --accent:#E08A42;
+      --accent-soft:#3A2A19;
+      --line:#2B3326;
+      --line-strong:#3C4634;
+      --good:#5BBD85;
+      --good-soft:#1C2E20;
+      --bad:#E07C72;
+      --bad-soft:#35201D;
+      --warn:#D4AA4F;
+      --warn-soft:#352C16;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 6px 20px -8px rgba(0,0,0,0.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#11160F;
+    --surface:#161C14;
+    --surface-sunken:#1D241A;
+    --ink:#E8ECE3;
+    --ink-soft:#AEB6A6;
+    --ink-faint:#6E7868;
+    --accent:#E08A42;
+    --accent-soft:#3A2A19;
+    --line:#2B3326;
+    --line-strong:#3C4634;
+    --good:#5BBD85;
+    --good-soft:#1C2E20;
+    --bad:#E07C72;
+    --bad-soft:#35201D;
+    --warn:#D4AA4F;
+    --warn-soft:#352C16;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 6px 20px -8px rgba(0,0,0,0.5);
+  }
+
+  *{box-sizing:border-box;}
+  html{text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{ font-family:"IBM Plex Mono", ui-monospace, "SF Mono", monospace; font-variant-numeric: tabular-nums; }
+  h1,h2,h3{
+    font-family:"Big Shoulders", "Arial Narrow", sans-serif;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.01em;
+    text-wrap:balance;
+    color:var(--ink);
+    margin:0;
+  }
+  .eyebrow{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.72rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-weight:600;
+  }
+  a{ color:var(--accent); }
+
+  .shell{ max-width: 920px; margin: 0 auto; padding: 0 24px 96px; }
+
+  /* ---- Header ---- */
+  .hero{
+    padding: 56px 0 28px;
+    border-bottom: 1px solid var(--line);
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .hero h1{ font-size: clamp(2rem, 5vw, 3rem); line-height:1.02; }
+  .hero p{ color:var(--ink-soft); max-width:62ch; font-size:1.02rem; }
+  .hero-meta{
+    display:flex; flex-wrap:wrap; gap:10px 22px; margin-top:6px;
+    font-family:"IBM Plex Mono", monospace; font-size:0.82rem; color:var(--ink-soft);
+  }
+  .hero-meta b{ color:var(--ink); font-weight:600; }
+
+  /* ---- Sticky nav ---- */
+  .jumpnav{
+    position:sticky; top:0; z-index:20;
+    background:color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .jumpnav-inner{
+    max-width:920px; margin:0 auto; padding:0 24px;
+    display:flex; gap:4px; overflow-x:auto;
+  }
+  .jumpnav a{
+    flex:0 0 auto;
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.78rem; letter-spacing:0.05em;
+    text-decoration:none; color:var(--ink-soft);
+    padding:14px 14px 12px;
+    border-bottom:2px solid transparent;
+    white-space:nowrap;
+  }
+  .jumpnav a:hover{ color:var(--ink); }
+  .jumpnav a.current{ color:var(--accent); border-bottom-color:var(--accent); }
+
+  /* ---- Section ---- */
+  section.exp{ padding: 64px 0; border-bottom:1px solid var(--line); scroll-margin-top: 56px; }
+  section.exp:last-of-type{ border-bottom:none; }
+  .exp-head{ display:flex; align-items:baseline; gap:14px; margin-bottom:10px; }
+  .exp-letter{
+    font-family:"Big Shoulders", sans-serif; font-weight:800;
+    font-size:3.4rem; line-height:1; color:var(--accent);
+  }
+  .exp-head h2{ font-size:1.5rem; }
+  .exp-sub{ color:var(--ink-soft); max-width:68ch; margin:10px 0 28px; }
+  .exp-sub b{ color:var(--ink); }
+
+  /* ---- KPI row ---- */
+  .kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); margin-bottom:32px; }
+  .kpi{ background:var(--surface); padding:16px 18px; display:flex; flex-direction:column; gap:6px; }
+  .kpi .v{ font-family:"IBM Plex Mono", monospace; font-size:1.7rem; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .kpi .l{ font-size:0.72rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint); }
+  .kpi.hl .v{ color:var(--accent); }
+
+  /* ---- Chart card ---- */
+  .chart-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:3px;
+    padding:22px 24px 18px; margin-bottom:32px; box-shadow:var(--shadow);
+  }
+  .chart-card .ct{ font-family:"IBM Plex Mono",monospace; font-size:0.78rem; letter-spacing:0.04em; color:var(--ink-soft); text-transform:uppercase; margin-bottom:14px; }
+  .chart-card svg{ width:100%; display:block; overflow:visible; }
+  .legend{ display:flex; flex-wrap:wrap; gap:16px; margin-top:12px; font-family:"IBM Plex Mono",monospace; font-size:0.76rem; color:var(--ink-soft); }
+  .legend .sw{ display:inline-flex; align-items:center; gap:6px; }
+  .legend .sw::before{ content:""; width:10px; height:10px; border-radius:2px; background:var(--c); display:inline-block; }
+
+  /* ---- Callout ---- */
+  .callout{
+    border-left:3px solid var(--accent); background:var(--surface-sunken);
+    padding:16px 20px; margin:28px 0; border-radius:0 3px 3px 0;
+  }
+  .callout .eyebrow{ display:block; margin-bottom:6px; }
+  .callout p{ margin:0; color:var(--ink); font-size:0.96rem; }
+  .callout p+p{ margin-top:8px; }
+  .callout.bad{ border-left-color:var(--bad); }
+  .callout.good{ border-left-color:var(--good); }
+  .callout b{ font-weight:600; }
+  .callout .num{ font-family:"IBM Plex Mono",monospace; }
+
+  /* ---- Tables ---- */
+  .table-wrap{ border:1px solid var(--line); border-radius:3px; overflow:auto; max-height:460px; background:var(--surface); }
+  table{ width:100%; border-collapse:collapse; font-size:0.86rem; }
+  thead th{
+    position:sticky; top:0; background:var(--surface-sunken); z-index:1;
+    text-align:left; font-family:"IBM Plex Mono",monospace; font-weight:600;
+    font-size:0.72rem; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-soft);
+    padding:10px 14px; border-bottom:1px solid var(--line);
+    white-space:nowrap;
+  }
+  tbody td{ padding:9px 14px; border-bottom:1px solid var(--line); color:var(--ink); white-space:nowrap; }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:hover{ background:var(--surface-sunken); }
+  td.num, th.num{ font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums; text-align:right; }
+  .small-caption{ font-size:0.78rem; color:var(--ink-faint); margin-top:8px; }
+
+  .pill{
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:"IBM Plex Mono",monospace; font-size:0.72rem; font-weight:600;
+    padding:2px 8px; border-radius:20px; letter-spacing:0.02em;
+  }
+  .pill.ok{ background:var(--good-soft); color:var(--good); }
+  .pill.no{ background:var(--bad-soft); color:var(--bad); }
+  .pill.mid{ background:var(--warn-soft); color:var(--warn); }
+  .pill.na{ background:var(--surface-sunken); color:var(--ink-faint); }
+
+  /* ---- Dimension bars (C) ---- */
+  .dimbar-row{ display:flex; flex-direction:column; gap:18px; }
+  .dimbar{ display:grid; grid-template-columns: 130px 1fr 64px; align-items:center; gap:14px; }
+  .dimbar .lbl{ font-family:"IBM Plex Mono",monospace; font-size:0.82rem; color:var(--ink-soft); }
+  .dimbar .track{ height:14px; background:var(--surface-sunken); border-radius:3px; overflow:hidden; border:1px solid var(--line); }
+  .dimbar .fill{ height:100%; border-radius:2px 0 0 2px; }
+  .dimbar .pct{ font-family:"IBM Plex Mono",monospace; font-size:0.9rem; text-align:right; font-weight:600; }
+
+  /* ---- Synthesis ---- */
+  .synth-table th, .synth-table td{ white-space:normal; }
+  .synth-table td:nth-child(2){ color:var(--ink-soft); }
+
+  footer{ padding:40px 0 10px; color:var(--ink-faint); font-size:0.78rem; font-family:"IBM Plex Mono",monospace; }
+
+  @media (max-width:640px){
+    .exp-letter{ font-size:2.4rem; }
+    .dimbar{ grid-template-columns: 90px 1fr 54px; }
+  }
+</style>
+
+<div class="jumpnav">
+  <div class="jumpnav-inner" id="jumpnav">
+    <a href="#top">Resumen</a>
+    <a href="#modelo">Modelo 07D</a>
+    <a href="#exp-a">A · Reconstrucción</a>
+    <a href="#exp-b">B · Búsqueda</a>
+    <a href="#exp-c">C · Consistencia</a>
+    <a href="#exp-d">D · Confianza</a>
+    <a href="#exp-e">E · Aplicabilidad</a>
+    <a href="#synth">Síntesis</a>
+  </div>
+</div>
+
+<div class="shell" id="top">
+
+  <header class="hero">
+    <span class="eyebrow">Capa 4 + 5 — Evaluación DSE y límites de generalización</span>
+    <h1>Pruebas del agente de predicción FPGA</h1>
+    <p>Cinco experimentos sobre el agente ReAct + surrogate 07D: los primeros cuatro miden si el sistema completo
+      mejora el proceso de exploración de espacio de diseño (DSE) dentro de lo que conoce; el quinto mide algo más
+      crítico — si el sistema sabe cuándo ya no sabe. Documento de inspección: metodología, gráficas y detalle
+      corrida-por-corrida de cada experimento.</p>
+    <div class="hero-meta">
+      <span><b>Surrogate</b> Bplus_late_fusion_hybrid_loss (07D)</span>
+      <span><b>LLM agente</b> gemma4:31b-cloud</span>
+      <span><b>Corridas</b> 11 oct 2026</span>
+      <span><b>Fuente</b> dse_benchmark/resultados/</span>
+    </div>
+  </header>
+
+  <!-- ============================================================ MODELO 07D ============================================================ -->
+  <section class="exp" id="modelo">
+    <div class="exp-head">
+      <span class="exp-letter" style="font-size:2.6rem;">07D</span>
+      <h2>El surrogate — ficha técnica y validación</h2>
+    </div>
+    <p class="exp-sub"><b>Bplus_late_fusion_hybrid_loss</b> — arquitectura Two-Branch Late Fusion, entrenada sobre
+      el dataset <b>wa-hls4ml</b> (Hawks et al., ACM TRETS 2026) para estimar 6 métricas de recursos/latencia FPGA
+      (BRAM, DSP, FF, LUT, cycles_max, interval_max) a partir de la especificación de una red neuronal. Esta
+      sección es la base (Capas 1-2 de la pirámide de evaluación) sobre la que se apoyan los experimentos A-E.</p>
+
+    <div class="kpis">
+      <div class="kpi hl"><div class="v">1.73M</div><div class="l">Parámetros del modelo</div></div>
+      <div class="kpi"><div class="v">0.907</div><div class="l">R² general (test)</div></div>
+      <div class="kpi"><div class="v">4.88%</div><div class="l">SMAPE general (test)</div></div>
+      <div class="kpi"><div class="v">92,933</div><div class="l">Muestras de test</div></div>
+    </div>
+
+    <div class="eyebrow" style="display:block; margin-bottom:14px;">Entrenamiento y selección</div>
+    <p class="exp-sub" style="margin-top:0;">619,601 muestras de entrenamiento (split train de wa-hls4ml), 60 épocas
+      (~24 min), mejor val_loss 0.0212. El gate de clasificación DSP (cero-inflado) se seleccionó en
+      <b>validación</b>, no en test (<span class="num">test_used_for_selection: false</span>) — evita fuga de datos
+      en la selección del modelo. Un único modelo entrenado (no hubo búsqueda de arquitecturas sobre la que elegir
+      el "ganador"): la decisión fue sobre qué variante de <i>gate</i> (hard vs. soft) usar, no sobre qué red usar.</p>
+
+    <div class="callout good">
+      <span class="eyebrow">Validación de equivalencia — implementación standalone vs. notebook de entrenamiento</span>
+      <p>La inferencia local (<span class="num">surrogate_07d/inference.py</span>) se validó contra 21 muestras
+        reales de test corridas en el notebook original de Colab (126 comparaciones = 21 muestras × 6 métricas):
+        <b>124/126 coinciden exactas</b> (tolerancia 0.1%); las 2 restantes difieren por <b>0.11% y 0.18%</b>
+        (ruido de redondeo del <span class="num">round()</span> al exportar desde Colab, no un error de
+        reimplementación). Confirma que las predicciones que usan los experimentos A-E son fieles al modelo
+        realmente entrenado.</p>
+    </div>
+
+    <div class="chart-card">
+      <div class="ct">SMAPE real por métrica y grupo (test completo, 92,933 muestras)</div>
+      <svg id="chartModelo" viewBox="0 0 760 320"></svg>
+      <div class="legend">
+        <span class="sw" style="--c:var(--good)">Dense (n=89,073)</span>
+        <span class="sw" style="--c:var(--warn)">Conv1D (n=1,995)</span>
+        <span class="sw" style="--c:var(--bad)">Conv2D (n=1,865)</span>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="max-height:none;">
+      <table>
+        <thead><tr>
+          <th>Grupo</th><th class="num">n (test)</th><th class="num">R² promedio</th><th class="num">SMAPE promedio</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>Dense</td><td class="num mono">89,073</td><td class="num mono">0.9531</td><td class="num mono">4.45%</td></tr>
+          <tr><td>Conv1D</td><td class="num mono">1,995</td><td class="num mono">0.9241</td><td class="num mono">12.83%</td></tr>
+          <tr><td>Conv2D</td><td class="num mono">1,865</td><td class="num mono">0.7896</td><td class="num mono">17.00%</td></tr>
+          <tr><td><b>General (los 3 grupos)</b></td><td class="num mono">92,933</td><td class="num mono">0.9072</td><td class="num mono">4.88%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <span class="eyebrow">El caso especial de DSP — clasificador "cero-inflado"</span>
+      <p>Muchas arquitecturas reales usan <span class="num">DSP=0</span> (sin multiplicadores dedicados). El
+        modelo primero clasifica "¿es cero o no?" antes de predecir el valor — ese clasificador tiene
+        <b>accuracy 99.99%</b>, F1 <span class="num">0.9999</span>, ROC-AUC <span class="num">0.999999</span>
+        sobre el test completo. Es el mecanismo que explica por qué DSP aparece en 0.0 de forma tan consistente
+        en los experimentos C y E.</p>
+    </div>
+
+    <p class="small-caption">Fuente: surrogate_07d/artifacts/ (test_metrics_by_group.csv, test_metrics_by_target.csv,
+      test_single_model_summary.csv, Bplus_late_fusion_hybrid_loss_training_complete.json) ·
+      prediccion/metricas_baseline.py · dataset: wa-hls4ml (Hawks et al., "wa-hls4ml: A Benchmark and Surrogate
+      Models for hls4ml Resource and Latency Estimation", ACM TRETS 19(2), 2026).</p>
+  </section>
+
+  <!-- ============================================================ A ============================================================ -->
+  <section class="exp" id="exp-a">
+    <div class="exp-head">
+      <span class="exp-letter">A</span>
+      <h2>Reconstrucción de diseño conocido</h2>
+    </div>
+    <p class="exp-sub">28 arquitecturas reales de <b>split=test</b> (4 por cada uno de los 7 subsets, muestreo
+      estratificado), descritas en lenguaje natural y pasadas por el agente completo. Se mide <b>fidelidad</b>
+      de reconstrucción contra la arquitectura real y <b>SMAPE</b> de la predicción contra el valor medido por
+      síntesis real — no contra la expectativa del propio modelo.</p>
+
+    <div class="kpis">
+      <div class="kpi hl"><div class="v">100%</div><div class="l">Fidelidad (28/28)</div></div>
+      <div class="kpi"><div class="v">89%</div><div class="l">Terminaron OK (25/28)</div></div>
+      <div class="kpi"><div class="v">40s</div><div class="l">Duración promedio</div></div>
+      <div class="kpi"><div class="v">28</div><div class="l">Muestras evaluadas</div></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="ct">SMAPE real (medido en esta corrida) vs. SMAPE oficial documentado — por grupo</div>
+      <svg id="chartA" viewBox="0 0 760 290"></svg>
+      <div class="legend">
+        <span class="sw" style="--c:var(--accent)">SMAPE real (estratificado, esta corrida)</span>
+        <span class="sw" style="--c:var(--line-strong)">SMAPE oficial documentado (ponderado por muestra)</span>
+      </div>
+    </div>
+
+    <div class="callout bad">
+      <span class="eyebrow">Hallazgo — peso por subset</span>
+      <p>El SMAPE real medido es <b>2–4× peor</b> que el oficial en los tres grupos. El promedio oficial está
+        ponderado por cantidad de muestras y queda dominado por el subset fácil y mayoritario <span class="num">3layer</span>
+        (81% de Dense, SMAPE 3.4%), mientras que subsets raros como <span class="num">2_20</span> (1.6% de Dense)
+        tienen SMAPE real de ~41%. Confirmado y cuantificado con población completa en el Experimento D.</p>
+    </div>
+
+    <div class="callout">
+      <span class="eyebrow">Hallazgo — falla intermitente del LLM</span>
+      <p>3/28 corridas (11%) entraron en hasta 21 excepciones de parseo consecutivas y no llegaron a una
+        respuesta final dentro del límite. Re-ejecutar la <b>misma query exacta</b> completó sin error — es un
+        fallo no determinista del LLM, no un bug reproducible del pipeline.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Subset</th><th class="num">Fidelidad</th><th class="num">SMAPE real</th>
+          <th class="num">Candidatos</th><th class="num">Reintentos</th><th class="num">Duración</th><th>Terminó OK</th>
+        </tr></thead>
+        <tbody id="tbodyA"></tbody>
+      </table>
+    </div>
+    <p class="small-caption">dse_benchmark/resultados/experimento_a_20261011_122446.md — traza completa en el .json homónimo.</p>
+  </section>
+
+  <!-- ============================================================ B ============================================================ -->
+  <section class="exp" id="exp-b">
+    <div class="exp-head">
+      <span class="exp-letter">B</span>
+      <h2>Búsqueda bajo restricción vs. azar</h2>
+    </div>
+    <p class="exp-sub">Una tarea por grupo: diseñar libremente una arquitectura que <b>minimice LUT</b> cumpliendo
+      una restricción real (mediana del grupo). Se compara el mejor valor que logra el agente contra el promedio
+      de 30 repeticiones de <b>elegir al azar</b> entre diseños reales del catálogo, usando exactamente el mismo
+      número de evaluaciones (k) que gastó el agente.</p>
+
+    <div class="kpis">
+      <div class="kpi hl"><div class="v">3/3</div><div class="l">Tareas donde el agente gana</div></div>
+      <div class="kpi"><div class="v">~8.3×</div><div class="l">Mejor caso (Dense)</div></div>
+      <div class="kpi"><div class="v">30</div><div class="l">Repeticiones del baseline</div></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="ct">Mejor LUT logrado — agente vs. promedio del azar (mismo k)</div>
+      <svg id="chartB" viewBox="0 0 760 240"></svg>
+      <div class="legend">
+        <span class="sw" style="--c:var(--accent)">Agente</span>
+        <span class="sw" style="--c:var(--line-strong)">Azar (promedio, mismo k)</span>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Tarea</th><th>Restricción</th><th class="num">k</th><th class="num">Agente: LUT</th>
+          <th class="num">Azar: % encuentra</th><th class="num">Azar: LUT prom.</th><th>Conclusión</th>
+        </tr></thead>
+        <tbody id="tbodyB"></tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <span class="eyebrow">Caveat — B-Conv1D</span>
+      <p>El agente evaluó solo <span class="num">k=1</span> candidato, no los 5 pedidos explícitamente en la
+        query — nunca llamó a <span class="num">seleccionar_mejor</span>. Falla de instruction-following del LLM,
+        no del pipeline; la comparación sigue siendo válida porque el baseline usó el mismo k.</p>
+    </div>
+    <p class="small-caption">dse_benchmark/resultados/experimento_b_20261011_125554.md</p>
+  </section>
+
+  <!-- ============================================================ C ============================================================ -->
+  <section class="exp" id="exp-c">
+    <div class="exp-head">
+      <span class="exp-letter">C</span>
+      <h2>Consistencia física en trade-offs</h2>
+    </div>
+    <p class="exp-sub">6 arquitecturas base (2 por grupo) × 2 dimensiones = 12 pares = 24 corridas. Cada par
+      cambia <b>una sola cosa</b> (estrategia de síntesis, o precisión) y se verifica si la predicción se mueve
+      en la dirección que la ingeniería HLS4ML esperaría.</p>
+
+    <div class="kpis">
+      <div class="kpi hl"><div class="v">10/12</div><div class="l">Dirección correcta (83%)</div></div>
+      <div class="kpi"><div class="v">24/24</div><div class="l">Corridas sin excepción</div></div>
+      <div class="kpi"><div class="v">0</div><div class="l">Fallos por error del agente</div></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="ct">% de pares con dirección correcta, por dimensión</div>
+      <div class="dimbar-row">
+        <div class="dimbar">
+          <div class="lbl">Precisión<br><span style="color:var(--ink-faint)">weight_bits alto/bajo</span></div>
+          <div class="track"><div class="fill" style="width:100%; background:var(--good);"></div></div>
+          <div class="pct" style="color:var(--good)">6/6</div>
+        </div>
+        <div class="dimbar">
+          <div class="lbl">Strategy<br><span style="color:var(--ink-faint)">Latency/Resource</span></div>
+          <div class="track"><div class="fill" style="width:66.7%; background:var(--warn);"></div></div>
+          <div class="pct" style="color:var(--warn)">4/6</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout bad">
+      <span class="eyebrow">Hallazgo — strategy es más ruidosa que precisión</span>
+      <p><b>C-Dense-3layer_0</b>: inversión clara en ambos checks — Latency dio <span class="num">interval_max=947.7</span>
+        vs Resource <span class="num">821.6</span> (debería ser menor) y <span class="num">dsp=36.7</span> vs
+        <span class="num">39.9</span> (debería ser mayor).</p>
+      <p><b>C-Conv1D-conv1d_3</b>: el de latencia fue correcto, pero DSP se invirtió por un margen chico
+        (<span class="num">4.63</span> vs <span class="num">4.72</span>) — valores muy cercanos, probablemente
+        ruido del surrogate. Confirmado en traza: el agente construyó ambos pares correctamente en los 24 casos;
+        los 2 fallos son del surrogate.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Par</th><th>Grupo</th><th>Dimensión</th>
+          <th class="num">A: lut / dsp / ii</th><th class="num">B: lut / dsp / ii</th><th>Correcto</th>
+        </tr></thead>
+        <tbody id="tbodyC"></tbody>
+      </table>
+    </div>
+    <p class="small-caption">dse_benchmark/resultados/experimento_c_20261011_132812.md — ii = interval_max.</p>
+  </section>
+
+  <!-- ============================================================ D ============================================================ -->
+  <section class="exp" id="exp-d">
+    <div class="exp-head">
+      <span class="exp-letter">D</span>
+      <h2>¿La confianza comunicada es honesta?</h2>
+    </div>
+    <p class="exp-sub">El spec original pedía agrupar por nivel de confiabilidad <i>reportado</i>, pero ese nivel
+      es una <b>constante por grupo</b> (Dense=alta, Conv1D=moderada, Conv2D=limitada) — nunca varía por
+      arquitectura. Compararlo así sería circular. En su lugar, se prueba honestidad a nivel de
+      <b>subset</b> — la granularidad real que el sistema colapsa — usando la población <b>completa</b> de test
+      por subset (no una muestra).</p>
+
+    <div class="kpis">
+      <div class="kpi hl"><div class="v">6/7</div><div class="l">Subsets honestos</div></div>
+      <div class="kpi"><div class="v">1</div><div class="l">Subset sobreestimado: 2_20</div></div>
+      <div class="kpi"><div class="v">92,933</div><div class="l">Muestras de test analizadas</div></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="ct">R² mediana por subset (6 métricas) — umbrales de confiabilidad reportada</div>
+      <svg id="chartD" viewBox="0 0 760 320"></svg>
+      <div class="legend">
+        <span class="sw" style="--c:var(--good)">Le corresponde "alta"</span>
+        <span class="sw" style="--c:var(--warn)">Le corresponde "moderada"</span>
+        <span class="sw" style="--c:var(--bad)">Le corresponde "limitada"</span>
+      </div>
+    </div>
+
+    <div class="callout bad">
+      <span class="eyebrow">Hallazgo — el subset 2_20 sobreestima su confianza</span>
+      <p><span class="num">2_20</span> (1,432 muestras de test, ~1.6% de Dense) tiene R² real de
+        <span class="num">0.70</span> y SMAPE real de <span class="num">40.9%</span> — le correspondería
+        "limitada". Pero el sistema le reporta <b>"alta"</b> simplemente por pertenecer al grupo Dense. Confirma,
+        con población completa, el hallazgo de peso-por-subset del Experimento A.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Subset</th><th>Grupo</th><th class="num">n (test)</th><th class="num">R² mediana</th>
+          <th class="num">SMAPE prom.</th><th>Reportado</th><th>Le correspondería</th><th>Honesto</th>
+        </tr></thead>
+        <tbody id="tbodyD"></tbody>
+      </table>
+    </div>
+    <p class="small-caption">dse_benchmark/resultados/experimento_d_20261011_134731.md — fuente: surrogate_07d/artifacts/test_metrics_by_subset.csv (población completa).</p>
+  </section>
+
+  <!-- ============================================================ E ============================================================ -->
+  <section class="exp" id="exp-e">
+    <div class="exp-head">
+      <span class="exp-letter">E</span>
+      <h2>Dominio de aplicabilidad / generalización OOD</h2>
+    </div>
+    <p class="exp-sub">A-D miden qué tan bueno es el sistema <b>dentro</b> del territorio que conoce. E mide algo
+      distinto: si un ingeniero le da una arquitectura que se aleja de lo visto en entrenamiento, ¿las predicciones
+      siguen siendo sensatas, y el sistema <b>avisa</b> que está en territorio desconocido? Término de la
+      literatura: <i>applicability domain</i> (dominio de aplicabilidad).</p>
+
+    <div class="eyebrow" style="display:block; margin-bottom:14px;">Parte 1 — Extrapolación sintética (plausibilidad)</div>
+    <p class="exp-sub" style="margin-top:0;">3 arquitecturas base × 2 dimensiones (reuse_factor, weight_bits) × 5 pasos
+      (mediana real → máximo real → 2×/5×/10× ese máximo, territorio nunca visto) = 30 corridas del agente completo.</p>
+
+    <div class="kpis">
+      <div class="kpi hl"><div class="v">4/6</div><div class="l">Secuencias donde la etiqueta ya cambia</div></div>
+      <div class="kpi"><div class="v">17/17</div><div class="l">Avisos en texto, de los casos detectados</div></div>
+      <div class="kpi"><div class="v">29/30</div><div class="l">Corridas terminadas normalmente</div></div>
+    </div>
+
+    <div class="table-wrap" style="max-height:none;">
+      <table>
+        <thead><tr>
+          <th>Secuencia</th><th>Grupo</th><th>Dimensión</th><th>Nivel formal (los 5 pasos)</th><th>Avisos en texto</th>
+        </tr></thead>
+        <tbody id="tbodyE1"></tbody>
+      </table>
+    </div>
+
+    <div class="callout good">
+      <span class="eyebrow">Corregido — las dos señales ya están sincronizadas</span>
+      <p><b>Hallazgo original:</b> la etiqueta FORMAL de confianza nunca cambiaba, en ninguna de las 6 secuencias,
+        ni con <span class="num">reuse_factor=327650</span> (10× el máximo real). Pero el <b>texto libre</b> de la
+        respuesta final sí avisaba — de los 17 pasos donde <span class="num">verificar_limites_operativos</span>
+        detectó un valor fuera de rango, lo mencionó explícitamente en <b>17/17 (100%)</b>. Dos señales de
+        confianza no sincronizadas entre sí, no "el sistema no sabe".</p>
+      <p><b>Corrección aplicada</b> (mismo día, a pedido explícito): se conectó
+        <span class="num">verificar_limites_operativos</span> con <span class="num">evaluar_confiabilidad</span>
+        — ahora la etiqueta formal se degrada a "limitada" siempre que haya algún campo fuera de rango, sin
+        importar el R² histórico del grupo. Validado con una re-corrida completa: en <b>4/6 secuencias</b> la
+        etiqueta ya cambia, justo en el mismo paso ("2× máximo") donde se detecta la anomalía. Las otras 2
+        (Conv2D) no cambian porque ya partían de "limitada" — no hay a dónde degradar más, comportamiento
+        esperado. Un caso de control dentro de rango sigue reportando "alta" sin falsos positivos.</p>
+      <p>Para las tendencias fuertes (weight_bits→DSP/LUT, reuse_factor→latencia en Dense) la predicción se mantuvo
+        monótona y sensata hasta 10× el máximo real — notable para una red neuronal. Pero esto solo prueba
+        <b>plausibilidad</b>, no <b>exactitud</b>: sin síntesis real más allá del dataset, un número "razonable" no
+        puede confirmarse como correcto. <i>Plausible ≠ exacto.</i></p>
+    </div>
+
+    <div class="eyebrow" style="display:block; margin:36px 0 14px;">Parte 2 — Distancia real vs. error real (sí cuantifica un límite)</div>
+    <p class="exp-sub" style="margin-top:0;">Población <b>completa</b> de test (92,933 muestras, sin LLM): distancia
+      estandarizada robusta a lo "típico" del grupo (4 features) vs. SMAPE real medido contra síntesis real.</p>
+
+    <div class="kpis">
+      <div class="kpi hl"><div class="v">3.0×</div><div class="l">Error en el 10% más atípico — Dense</div></div>
+      <div class="kpi"><div class="v">1.5×</div><div class="l">Error en el 10% más atípico — Conv2D</div></div>
+      <div class="kpi"><div class="v">92,933</div><div class="l">Muestras analizadas</div></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="ct">SMAPE real promedio por decil de distancia-a-lo-típico (1 = más típico, 10 = más raro)</div>
+      <svg id="chartE" viewBox="0 0 760 290"></svg>
+      <div class="legend">
+        <span class="sw" style="--c:var(--accent)">Dense (ρ=0.235, n=89,073)</span>
+        <span class="sw" style="--c:var(--warn)">Conv2D (ρ=0.168, n=1,865)</span>
+      </div>
+    </div>
+
+    <div class="callout good">
+      <span class="eyebrow">Hallazgo — límite cuantificado y traducido a términos concretos (Dense)</span>
+      <p>El 10% más atípico (distancia > 1.8) tiene <b>22.1% de SMAPE real</b> contra 8–11% del resto — el error
+        casi se <b>triplica</b>. Traducido a features reales (no solo "distancia" abstracta): ese decil tiene
+        <b>reuse_factor bajo</b> (mediana 512, vs. 2047 típico), <b>5+ capas con peso</b> (vs. 3 típico) y
+        <b>muchos parámetros</b> (25,904 vs. 11,456 típico). Importante: NO es simplemente "ser del subset 2_20"
+        — ese subset es solo 13% de este decil; el patrón cruza varios subsets oficiales (3layer 35%, latency 29%,
+        resource 20%, 2_20 13%, 2layer 2%). Un límite más general y útil que el hallazgo original de D.</p>
+    </div>
+
+    <div class="callout">
+      <span class="eyebrow">Conv2D — mismo efecto, causa distinta</span>
+      <p>Acá reuse_factor y precisión del decil más atípico son <b>iguales</b> a la mediana del grupo — no son el
+        factor. Lo que dispara el riesgo es <b>parámetros totales ~9× más altos</b> (185,384 vs. 21,128 típico):
+        redes Conv2D grandes/profundas (muchos filtros/canales), no una configuración atípica de reuse_factor.</p>
+    </div>
+
+    <div class="callout">
+      <span class="eyebrow">Limitación reconocida — Conv1D</span>
+      <p>La correlación ahí es débil (ρ=0.073) y los deciles no muestran tendencia clara — coherente con que
+        <span class="num">reuse_factor</span> casi no correlaciona con nada en Conv1D (visto ya en Experimento C).
+        Las 4 features elegidas no capturan bien qué hace difícil a una arquitectura Conv1D; haría falta sumar
+        features de convolución (kernel_size, filtros, strides). Se reporta como limitación explícita, no se oculta.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th class="num">Decil</th><th class="num">Dense SMAPE</th><th class="num">Conv1D SMAPE</th><th class="num">Conv2D SMAPE</th>
+        </tr></thead>
+        <tbody id="tbodyE2"></tbody>
+      </table>
+    </div>
+    <p class="small-caption">dse_benchmark/resultados/experimento_e_20261011_142201.md (parte 1) ·
+      experimento_e2_20261011_145548.md (parte 2).</p>
+  </section>
+
+  <!-- ============================================================ SÍNTESIS ============================================================ -->
+  <section class="exp" id="synth" style="border-bottom:none;">
+    <div class="exp-head">
+      <span class="exp-letter" style="color:var(--ink-soft)">Σ</span>
+      <h2>Síntesis para la tesis</h2>
+    </div>
+    <div class="table-wrap" style="max-height:none;">
+      <table class="synth-table">
+        <thead><tr><th>Experimento</th><th>Responde</th><th>Resultado</th></tr></thead>
+        <tbody>
+          <tr><td><b>A</b></td><td>¿El agente reconstruye fielmente y predice bien?</td>
+            <td>Fidelidad 100%, pero SMAPE real 2–4× peor que el oficial en subsets raros; 11% de fallas intermitentes del LLM</td></tr>
+          <tr><td><b>B</b></td><td>¿La búsqueda guiada gana a la aleatoria?</td>
+            <td>Sí, 5–8× mejor en 2/3 tareas, con igual o menos evaluaciones</td></tr>
+          <tr><td><b>C</b></td><td>¿Las predicciones son físicamente coherentes al comparar variantes?</td>
+            <td>83% global: 100% en precisión, 67% en estrategia de síntesis</td></tr>
+          <tr><td><b>D</b></td><td>¿La confianza comunicada es honesta?</td>
+            <td>6/7 subsets sí; 1 subset (2_20) sobreestima su confianza</td></tr>
+          <tr><td><b>E</b></td><td>¿El sistema sabe cuándo ya no sabe (fuera del dataset)?</td>
+            <td>Se encontraron dos señales no sincronizadas (etiqueta formal fija, prosa avisaba 100%) y <b>se
+              corrigió en el código</b>: la etiqueta ya se degrada a "limitada" en el mismo paso donde se detecta
+              fuera de rango (validado en 4/6 secuencias). Límite real cuantificado: en Dense, reuse_factor bajo +
+              muchas capas + muchos parámetros triplica el error (22% vs 8–11%); en Conv2D, lo dispara tener
+              muchos parámetros (redes grandes)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="color:var(--ink-soft); max-width:70ch; margin-top:24px;">El sistema cumple el argumento central de
+      la tesis — la búsqueda guiada por surrogate+LLM es más eficiente que el azar (B) — y es mayormente coherente
+      y honesto dentro de su dominio de entrenamiento, con limitaciones concretas y medibles: fallas intermitentes
+      del LLM (~11%), menor confiabilidad comparando estrategias de síntesis que precisión (C), y un subset
+      minoritario (2_20) donde la confianza comunicada no está respaldada por el desempeño real (D). El hallazgo
+      más importante para uso responsable (E) fue encontrar <b>dos señales de confianza no sincronizadas entre
+      sí</b>: la etiqueta formal no se ajustaba ni ante arquitecturas 10 veces fuera de rango, mientras que el
+      texto libre de esa misma respuesta sí avisaba consistentemente (100% de los casos detectados). No era un
+      sistema sin autoconciencia — era un sistema que la comunicaba por un canal pero no por el otro. Esta
+      inconsistencia <b>ya se corrigió</b>: el veredicto formal ahora se degrada siempre que haya un valor fuera
+      del rango real, validado con una re-corrida completa y sin falsos positivos en casos dentro de rango.</p>
+  </section>
+
+  <footer>
+    dse_benchmark/RESULTADOS_FINALES.md · trazas completas en dse_benchmark/resultados/experimento_{a,b,c,d}_*.json
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+  function svgEl(tag, attrs){
+    var el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (var k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+
+  /* ---------- Grouped bar chart (A: SMAPE real vs oficial) ---------- */
+  function drawGroupedBars(svgId, groups, seriesColors, opts){
+    var svg = document.getElementById(svgId);
+    var W = 760, H = +svg.getAttribute("viewBox").split(" ")[3];
+    var padL = 46, padR = 14, padT = 18, padB = 46;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var maxV = 0;
+    groups.forEach(function(g){ g.values.forEach(function(v){ if (v > maxV) maxV = v; }); });
+    maxV = Math.ceil(maxV / 10) * 10;
+
+    var nGroups = groups.length, nSeries = groups[0].values.length;
+    var groupW = plotW / nGroups;
+    var gap = groupW * 0.22;
+    var barW = (groupW - gap) / nSeries;
+
+    // gridlines + axis labels
+    var ticks = 4;
+    for (var t = 0; t <= ticks; t++){
+      var val = (maxV / ticks) * t;
+      var y = padT + plotH - (val / maxV) * plotH;
+      svg.appendChild(svgEl("line", {x1:padL, x2:W-padR, y1:y, y2:y, stroke:cssVar('--line'), "stroke-width":1}));
+      var lbl = svgEl("text", {x:padL-8, y:y+4, "text-anchor":"end", class:"mono"});
+      lbl.setAttribute("font-size","11"); lbl.setAttribute("fill", cssVar('--ink-faint'));
+      lbl.textContent = Math.round(val) + (opts && opts.suffix ? opts.suffix : "");
+      svg.appendChild(lbl);
+    }
+
+    groups.forEach(function(g, gi){
+      var gx = padL + gi * groupW;
+      g.values.forEach(function(v, si){
+        var bh = (v / maxV) * plotH;
+        var bx = gx + gap/2 + si * barW;
+        var by = padT + plotH - bh;
+        svg.appendChild(svgEl("rect", {
+          x:bx+1, y:by, width:Math.max(barW-2,1), height:Math.max(bh,0.5),
+          fill: seriesColors[si], rx:1.5
+        }));
+        var vt = svgEl("text", {x:bx+barW/2, y:by-6, "text-anchor":"middle"});
+        vt.setAttribute("font-size","11"); vt.setAttribute("font-family","IBM Plex Mono, monospace");
+        vt.setAttribute("fill", cssVar('--ink-soft'));
+        vt.textContent = v.toFixed(1) + (opts && opts.suffix ? opts.suffix : "");
+        svg.appendChild(vt);
+      });
+      var lt = svgEl("text", {x:gx+groupW/2, y:H-16, "text-anchor":"middle"});
+      lt.setAttribute("font-size","12.5"); lt.setAttribute("font-family","IBM Plex Mono, monospace");
+      lt.setAttribute("font-weight","600"); lt.setAttribute("fill", cssVar('--ink'));
+      lt.textContent = g.label;
+      svg.appendChild(lt);
+    });
+
+    svg.appendChild(svgEl("line", {x1:padL, x2:W-padR, y1:padT+plotH, y2:padT+plotH, stroke:cssVar('--line-strong'), "stroke-width":1.2}));
+  }
+
+  drawGroupedBars("chartA", [
+    {label:"Dense",  values:[19.7, 4.4]},
+    {label:"Conv1D", values:[43.3, 12.8]},
+    {label:"Conv2D", values:[25.8, 17.0]}
+  ], [cssVar('--accent'), cssVar('--line-strong')], {suffix:"%"});
+
+  drawGroupedBars("chartModelo", [
+    {label:"BRAM",         values:[9.89, 17.28, 20.00]},
+    {label:"DSP",          values:[3.39, 13.48, 16.82]},
+    {label:"FF",           values:[2.48, 9.80, 14.39]},
+    {label:"LUT",          values:[3.22, 11.56, 13.50]},
+    {label:"cycles_max",   values:[3.55, 12.40, 18.64]},
+    {label:"interval_max", values:[4.15, 12.50, 18.68]}
+  ], [cssVar('--good'), cssVar('--warn'), cssVar('--bad')], {suffix:"%"});
+
+  drawGroupedBars("chartB", [
+    {label:"B-Dense (dsp≤3)",         values:[2020, 16837]},
+    {label:"B-Conv1D (ii≤95106)",     values:[9323, 18231]},
+    {label:"B-Conv2D (bram≤24)",      values:[3052, 15579]}
+  ], [cssVar('--accent'), cssVar('--line-strong')], {});
+
+  /* ---------- D: R2 mediana por subset con lineas de umbral ---------- */
+  function drawSubsetR2(svgId, rows){
+    var svg = document.getElementById(svgId);
+    var W = 760, H = 320;
+    var padL = 46, padR = 14, padT = 20, padB = 70;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var minV = 0.55, maxV = 1.0;
+    var n = rows.length;
+    var slot = plotW / n;
+    var barW = slot * 0.56;
+
+    function yOf(v){ return padT + plotH - ((v - minV) / (maxV - minV)) * plotH; }
+
+    // threshold lines
+    [[0.95,"alta ≥ 0.95"],[0.85,"moderada ≥ 0.85"]].forEach(function(pair){
+      var y = yOf(pair[0]);
+      var l = svgEl("line", {x1:padL, x2:W-padR, y1:y, y2:y, stroke:cssVar('--ink-faint'), "stroke-width":1, "stroke-dasharray":"3,4"});
+      svg.appendChild(l);
+      var t = svgEl("text", {x:W-padR, y:y-5, "text-anchor":"end"});
+      t.setAttribute("font-size","10.5"); t.setAttribute("font-family","IBM Plex Mono, monospace");
+      t.setAttribute("fill", cssVar('--ink-faint'));
+      t.textContent = pair[1];
+      svg.appendChild(t);
+    });
+
+    // y-axis ticks
+    [0.6,0.7,0.8,0.9,1.0].forEach(function(v){
+      var y = yOf(v);
+      var lbl = svgEl("text", {x:padL-8, y:y+4, "text-anchor":"end"});
+      lbl.setAttribute("font-size","11"); lbl.setAttribute("font-family","IBM Plex Mono, monospace");
+      lbl.setAttribute("fill", cssVar('--ink-faint'));
+      lbl.textContent = v.toFixed(2);
+      svg.appendChild(lbl);
+    });
+
+    rows.forEach(function(r, i){
+      var cx = padL + i*slot + slot/2;
+      var bx = cx - barW/2;
+      var by = yOf(r.r2);
+      var baseY = padT + plotH;
+      var color = r.level === "alta" ? cssVar('--good') : r.level === "moderada" ? cssVar('--warn') : cssVar('--bad');
+      svg.appendChild(svgEl("rect", {x:bx, y:by, width:barW, height:Math.max(baseY-by,1), fill:color, rx:2}));
+
+      var vt = svgEl("text", {x:cx, y:by-7, "text-anchor":"middle"});
+      vt.setAttribute("font-size","11"); vt.setAttribute("font-family","IBM Plex Mono, monospace");
+      vt.setAttribute("fill", cssVar('--ink-soft'));
+      vt.textContent = r.r2.toFixed(2);
+      svg.appendChild(vt);
+
+      var lt = svgEl("text", {x:cx, y:H-padB+22, "text-anchor":"middle"});
+      lt.setAttribute("font-size","12"); lt.setAttribute("font-family","IBM Plex Mono, monospace");
+      lt.setAttribute("font-weight", r.flag ? "700" : "500");
+      lt.setAttribute("fill", r.flag ? cssVar('--bad') : cssVar('--ink'));
+      lt.textContent = r.subset;
+      svg.appendChild(lt);
+
+      var gl = svgEl("text", {x:cx, y:H-padB+38, "text-anchor":"middle"});
+      gl.setAttribute("font-size","10"); gl.setAttribute("font-family","IBM Plex Mono, monospace");
+      gl.setAttribute("fill", cssVar('--ink-faint'));
+      gl.textContent = r.grupo;
+      svg.appendChild(gl);
+
+      if (r.flag){
+        var ft = svgEl("text", {x:cx, y:H-padB+52, "text-anchor":"middle"});
+        ft.setAttribute("font-size","9.5"); ft.setAttribute("font-family","IBM Plex Mono, monospace");
+        ft.setAttribute("font-weight","700"); ft.setAttribute("fill", cssVar('--bad'));
+        ft.textContent = "sobreestima";
+        svg.appendChild(ft);
+      }
+    });
+
+    svg.appendChild(svgEl("line", {x1:padL, x2:W-padR, y1:padT+plotH, y2:padT+plotH, stroke:cssVar('--line-strong'), "stroke-width":1.2}));
+  }
+
+  drawSubsetR2("chartD", [
+    {subset:"2_20",     grupo:"Dense",  r2:0.70, level:"limitada", flag:true},
+    {subset:"2layer",   grupo:"Dense",  r2:0.99, level:"alta",     flag:false},
+    {subset:"3layer",   grupo:"Dense",  r2:1.00, level:"alta",     flag:false},
+    {subset:"latency",  grupo:"Dense",  r2:0.97, level:"alta",     flag:false},
+    {subset:"resource", grupo:"Dense",  r2:0.97, level:"alta",     flag:false},
+    {subset:"conv1d",   grupo:"Conv1D", r2:0.91, level:"moderada", flag:false},
+    {subset:"conv2d",   grupo:"Conv2D", r2:0.80, level:"limitada", flag:false}
+  ]);
+
+  /* ---------- Tabla A ---------- */
+  var tablaA = [
+    ["2_20","100.0%","54.8%","1","0","32s",true],
+    ["2_20","100.0%","n/a","1","21","130s",false],
+    ["2_20","100.0%","55.7%","1","0","35s",true],
+    ["2_20","100.0%","50.1%","1","0","22s",true],
+    ["2layer","100.0%","8.5%","1","0","25s",true],
+    ["2layer","100.0%","3.5%","1","0","27s",true],
+    ["2layer","100.0%","12.5%","1","0","18s",true],
+    ["2layer","100.0%","6.3%","1","0","20s",true],
+    ["3layer","100.0%","18.7%","1","0","19s",true],
+    ["3layer","100.0%","4.2%","1","0","24s",true],
+    ["3layer","100.0%","3.2%","1","0","16s",true],
+    ["3layer","100.0%","8.0%","1","0","18s",true],
+    ["conv1d","100.0%","30.7%","1","0","36s",true],
+    ["conv1d","100.0%","19.1%","1","1","33s",true],
+    ["conv1d","100.0%","70.4%","1","2","38s",true],
+    ["conv1d","100.0%","52.9%","1","0","33s",true],
+    ["conv2d","100.0%","16.6%","1","1","38s",true],
+    ["conv2d","100.0%","n/a","1","21","78s",false],
+    ["conv2d","100.0%","45.8%","1","1","36s",true],
+    ["conv2d","100.0%","15.1%","1","0","35s",true],
+    ["latency","100.0%","n/a","1","20","80s",false],
+    ["latency","100.0%","30.3%","1","0","50s",true],
+    ["latency","100.0%","18.6%","1","1","45s",true],
+    ["latency","100.0%","16.5%","1","0","33s",true],
+    ["resource","100.0%","36.2%","1","1","98s",true],
+    ["resource","100.0%","11.6%","1","1","42s",true],
+    ["resource","100.0%","3.7%","1","0","32s",true],
+    ["resource","100.0%","13.1%","1","1","32s",true]
+  ];
+  var tbodyA = document.getElementById("tbodyA");
+  tablaA.forEach(function(r){
+    var tr = document.createElement("tr");
+    tr.innerHTML = "<td class='mono'>"+r[0]+"</td><td class='num mono'>"+r[1]+"</td><td class='num mono'>"+r[2]+
+      "</td><td class='num mono'>"+r[3]+"</td><td class='num mono'>"+r[4]+"</td><td class='num mono'>"+r[5]+
+      "</td><td><span class='pill "+(r[6]?"ok":"no")+"'>"+(r[6]?"OK":"NO TERMINÓ")+"</span></td>";
+    tbodyA.appendChild(tr);
+  });
+
+  /* ---------- Tabla B ---------- */
+  var tablaB = [
+    ["B-Dense","dsp ≤ 3","5","2020","97%","16837","agente_mejor_o_igual"],
+    ["B-Conv1D","interval_max ≤ 95106","1","9323","17%","18231","agente_mejor_o_igual"],
+    ["B-Conv2D","bram ≤ 24","5","3052","90%","15579","agente_mejor_o_igual"]
+  ];
+  var tbodyB = document.getElementById("tbodyB");
+  tablaB.forEach(function(r){
+    var tr = document.createElement("tr");
+    tr.innerHTML = "<td>"+r[0]+"</td><td class='mono'>"+r[1]+"</td><td class='num mono'>"+r[2]+
+      "</td><td class='num mono'>"+r[3]+"</td><td class='num mono'>"+r[4]+"</td><td class='num mono'>"+r[5]+
+      "</td><td><span class='pill ok'>gana el agente</span></td>";
+    tbodyB.appendChild(tr);
+  });
+
+  /* ---------- Tabla C ---------- */
+  var tablaC = [
+    ["C-Dense-2layer_0-strategy","Dense","strategy","24656 / 0.0 / 767.2","27192 / 0.0 / 868.5",true],
+    ["C-Dense-2layer_0-precision","Dense","precision","31264 / 24.3 / 985.1","27192 / 0.0 / 868.5",true],
+    ["C-Dense-3layer_0-strategy","Dense","strategy","49627 / 36.7 / 947.7","50577 / 39.9 / 821.6",false],
+    ["C-Dense-3layer_0-precision","Dense","precision","50577 / 39.9 / 821.6","38755 / 0.0 / 857.1",true],
+    ["C-Conv1D-conv1d_2-strategy","Conv1D","strategy","11605 / 2.88 / 32421","13066 / 2.83 / 44181",true],
+    ["C-Conv1D-conv1d_2-precision","Conv1D","precision","16902 / 4.68 / 41381","11106 / 0.0 / 28972",true],
+    ["C-Conv1D-conv1d_3-strategy","Conv1D","strategy","17796 / 4.63 / 41943","18569 / 4.72 / 53427",false],
+    ["C-Conv1D-conv1d_3-precision","Conv1D","precision","18569 / 4.72 / 53427","12264 / 0.0 / 50393",true],
+    ["C-Conv2D-conv2d_3-strategy","Conv2D","strategy","78224 / 0.0 / 3363033","77590 / 0.0 / 3659377",true],
+    ["C-Conv2D-conv2d_3-precision","Conv2D","precision","132233 / 24.7 / 2085746","77590 / 0.0 / 3659377",true],
+    ["C-Conv2D-conv2d_2-strategy","Conv2D","strategy","11348 / 0.0 / 122146","12627 / 0.0 / 175853",true],
+    ["C-Conv2D-conv2d_2-precision","Conv2D","precision","19723 / 4.27 / 226659","12627 / 0.0 / 175853",true]
+  ];
+  var tbodyC = document.getElementById("tbodyC");
+  tablaC.forEach(function(r){
+    var tr = document.createElement("tr");
+    tr.innerHTML = "<td class='mono'>"+r[0]+"</td><td>"+r[1]+"</td><td class='mono'>"+r[2]+
+      "</td><td class='num mono'>"+r[3]+"</td><td class='num mono'>"+r[4]+
+      "</td><td><span class='pill "+(r[5]?"ok":"no")+"'>"+(r[5]?"SÍ":"NO")+"</span></td>";
+    tbodyC.appendChild(tr);
+  });
+
+  /* ---------- Tabla D ---------- */
+  var tablaD = [
+    ["2_20","Dense","1432","0.7005","40.9%","alta","limitada",false],
+    ["2layer","Dense","9797","0.9935","3.9%","alta","alta",true],
+    ["3layer","Dense","72480","0.9956","3.4%","alta","alta",true],
+    ["latency","Dense","3218","0.9666","10.5%","alta","alta",true],
+    ["resource","Dense","2146","0.9731","10.3%","alta","alta",true],
+    ["conv1d","Conv1D","1995","0.9098","12.8%","moderada","moderada",true],
+    ["conv2d","Conv2D","1865","0.8038","17.0%","limitada","limitada",true]
+  ];
+  var tbodyD = document.getElementById("tbodyD");
+  tablaD.forEach(function(r){
+    var tr = document.createElement("tr");
+    tr.innerHTML = "<td class='mono'>"+r[0]+"</td><td>"+r[1]+"</td><td class='num mono'>"+r[2]+
+      "</td><td class='num mono'>"+r[3]+"</td><td class='num mono'>"+r[4]+"</td><td>"+r[5]+"</td><td>"+r[6]+
+      "</td><td><span class='pill "+(r[7]?"ok":"no")+"'>"+(r[7]?"SÍ":"NO")+"</span></td>";
+    tbodyD.appendChild(tr);
+  });
+
+  /* ---------- Tabla E1 (extrapolación sintética) ---------- */
+  var tablaE1 = [
+    ["E-Dense-2layer_0-rf","Dense","rf","alta → alta → limitada → limitada → limitada","2/3",true],
+    ["E-Dense-2layer_0-wb","Dense","wb","alta → alta → limitada → limitada → limitada","3/3",true],
+    ["E-Conv1D-conv1d_2-rf","Conv1D","rf","moderada → moderada → limitada → limitada → limitada","3/3",true],
+    ["E-Conv1D-conv1d_2-wb","Conv1D","wb","moderada → moderada → limitada → limitada → limitada","3/3",true],
+    ["E-Conv2D-conv2d_2-rf","Conv2D","rf","limitada → limitada → limitada → limitada → limitada","3/3",false],
+    ["E-Conv2D-conv2d_2-wb","Conv2D","wb","limitada → limitada → (cortada) → limitada → limitada","2/2",false]
+  ];
+  var tbodyE1 = document.getElementById("tbodyE1");
+  tablaE1.forEach(function(r){
+    var tr = document.createElement("tr");
+    var pillCambio = r[5] ? "<span class='pill ok'>cambió</span>" : "<span class='pill na'>ya en el piso</span>";
+    tr.innerHTML = "<td class='mono'>"+r[0]+"</td><td>"+r[1]+"</td><td class='mono'>"+r[2]+
+      "</td><td class='mono'>"+r[3]+" "+pillCambio+"</td><td><span class='pill ok'>"+r[4]+"</span></td>";
+    tbodyE1.appendChild(tr);
+  });
+
+  /* ---------- Tabla E2 (deciles distancia vs SMAPE real) ---------- */
+  var decilesDense  = [8.59,8.43,9.24,11.12,11.2,9.65,10.55,11.29,13.45,22.05];
+  var decilesConv1D = [17.63,19.08,19.26,21.55,20.09,18.25,22.58,21.09,22.15,19.76];
+  var decilesConv2D = [21.11,21.37,23.1,25.46,22.6,22.5,29.11,24.52,28.37,31.09];
+  var tbodyE2 = document.getElementById("tbodyE2");
+  for (var di=0; di<10; di++){
+    var tr = document.createElement("tr");
+    tr.innerHTML = "<td class='num mono'>"+(di+1)+"</td><td class='num mono'>"+decilesDense[di].toFixed(1)+
+      "%</td><td class='num mono'>"+decilesConv1D[di].toFixed(1)+"%</td><td class='num mono'>"+decilesConv2D[di].toFixed(1)+"%</td>";
+    tbodyE2.appendChild(tr);
+  }
+
+  /* ---------- Chart E: deciles Dense + Conv2D ---------- */
+  (function(){
+    var svg = document.getElementById("chartE");
+    var W = 760, H = 290;
+    var padL = 46, padR = 14, padT = 18, padB = 40;
+    var plotW = W - padL - padR, plotH = H - padT - padB;
+    var maxV = 35;
+    var n = 10, slot = plotW / n;
+
+    [0,10,20,30].forEach(function(v){
+      var y = padT + plotH - (v/maxV)*plotH;
+      svg.appendChild(svgEl("line", {x1:padL, x2:W-padR, y1:y, y2:y, stroke:cssVar('--line'), "stroke-width":1}));
+      var lbl = svgEl("text", {x:padL-8, y:y+4, "text-anchor":"end"});
+      lbl.setAttribute("font-size","11"); lbl.setAttribute("font-family","IBM Plex Mono, monospace");
+      lbl.setAttribute("fill", cssVar('--ink-faint'));
+      lbl.textContent = v + "%";
+      svg.appendChild(lbl);
+    });
+
+    var barW = slot * 0.32;
+    for (var i=0;i<10;i++){
+      var cx = padL + i*slot + slot/2;
+      [[decilesDense[i], cssVar('--accent'), -barW*0.55],[decilesConv2D[i], cssVar('--warn'), barW*0.55]].forEach(function(pair){
+        var v=pair[0], color=pair[1], offset=pair[2];
+        var bh = (v/maxV)*plotH;
+        var bx = cx + offset - barW/2;
+        var by = padT + plotH - bh;
+        svg.appendChild(svgEl("rect", {x:bx, y:by, width:barW, height:bh, fill:color, rx:1.5}));
+      });
+      var lt = svgEl("text", {x:cx, y:H-padB+22, "text-anchor":"middle"});
+      lt.setAttribute("font-size","11.5"); lt.setAttribute("font-family","IBM Plex Mono, monospace");
+      lt.setAttribute("font-weight", i===9 ? "700":"500");
+      lt.setAttribute("fill", i===9 ? cssVar('--bad') : cssVar('--ink-soft'));
+      lt.textContent = (i+1);
+      svg.appendChild(lt);
+    }
+    var axisLbl = svgEl("text", {x:padL, y:H-padB+38, "text-anchor":"start"});
+    axisLbl.setAttribute("font-size","10.5"); axisLbl.setAttribute("font-family","IBM Plex Mono, monospace");
+    axisLbl.setAttribute("fill", cssVar('--ink-faint'));
+    axisLbl.textContent = "decil de distancia (1=típico … 10=más atípico)";
+    svg.appendChild(axisLbl);
+    svg.appendChild(svgEl("line", {x1:padL, x2:W-padR, y1:padT+plotH, y2:padT+plotH, stroke:cssVar('--line-strong'), "stroke-width":1.2}));
+  })();
+
+  /* ---------- Scrollspy for jump nav ---------- */
+  var sections = ["top","modelo","exp-a","exp-b","exp-c","exp-d","exp-e","synth"].map(function(id){ return document.getElementById(id); });
+  var links = Array.prototype.slice.call(document.querySelectorAll("#jumpnav a"));
+  function onScroll(){
+    var y = window.scrollY + 80;
+    var current = sections[0].id;
+    sections.forEach(function(s){ if (s.offsetTop <= y) current = s.id; });
+    links.forEach(function(a){
+      a.classList.toggle("current", a.getAttribute("href") === "#"+current);
+    });
+  }
+  document.addEventListener("scroll", onScroll, {passive:true});
+  onScroll();
+})();
+</script>
+
+</body></html>

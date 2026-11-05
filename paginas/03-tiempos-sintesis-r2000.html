@@ -1,0 +1,367 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body><!-- tr-nav --><script src="../data/resultados.js"></script><script src="../assets/nav.js"></script>
+<title>Tiempos de Síntesis hls4ml · Ronda 2,000</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  /* Layout: single reading column (~760px), same system as rounds 400 and 800; the 07D speedup gets its own section */
+  :root {
+    --bg: #F7F8FA;
+    --surface: #FFFFFF;
+    --fg: #17202E;
+    --muted: #5B6676;
+    --line: #DDE2EA;
+    --hls: #2E5BDB;      /* C/HLS synthesis, latest round */
+    --viv: #D1830F;      /* Vivado logic synthesis */
+    --fail: #C93A3A;     /* failed syntheses */
+    --old: #9AA6B7;      /* round 400 */
+    --mid: #5E6B7E;      /* round 800 */
+    --sur: #0F8A6A;      /* surrogate 07D */
+    --tint: #EEF2FB;
+    --f-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --f-body: "Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif;
+    --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0F141C; --surface: #161D28; --fg: #E6EAF1; --muted: #9AA6B7; --line: #2A3444;
+      --hls: #6E93FF; --viv: #F0A73A; --fail: #F06B6B; --old: #4A5568; --mid: #8592A6; --sur: #3CC9A0; --tint: #1A2436;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F141C; --surface: #161D28; --fg: #E6EAF1; --muted: #9AA6B7; --line: #2A3444;
+    --hls: #6E93FF; --viv: #F0A73A; --fail: #F06B6B; --old: #4A5568; --mid: #8592A6; --sur: #3CC9A0; --tint: #1A2436;
+    color-scheme: dark;
+  }
+  body {
+    background: var(--bg); color: var(--fg);
+    font-family: var(--f-body); font-size: 17px; line-height: 1.55;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  main { max-width: 760px; margin: 0 auto; padding-block: 40px 64px; display: flex; flex-direction: column; gap: 48px; }
+  h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+  h1 { font-size: clamp(30px, 6vw, 44px); font-weight: 800; line-height: 1.08; }
+  h2 { font-size: 24px; font-weight: 700; }
+  h3 { font-size: 18px; font-weight: 700; }
+  p { margin: 0; max-width: 68ch; }
+  section { display: flex; flex-direction: column; gap: 16px; }
+  .eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .lede { font-size: 19px; color: var(--muted); }
+  .mono { font-family: var(--f-mono); font-size: 0.86em; }
+  .k-hls { color: var(--hls); font-weight: 600; }
+  .k-viv { color: var(--viv); font-weight: 600; }
+  .k-fail { color: var(--fail); font-weight: 600; }
+  .k-sur { color: var(--sur); font-weight: 600; }
+
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  .fact { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .fact b { font-family: var(--f-display); font-size: 30px; font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .fact span { font-size: 14px; color: var(--muted); line-height: 1.35; }
+  .fact small { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+  .fact.alert b { color: var(--fail); }
+  .fact.win b { color: var(--sur); }
+
+  .verdict { background: var(--tint); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+  .verdict strong { font-family: var(--f-display); font-size: 17px; }
+
+  figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  figcaption { font-size: 14px; color: var(--muted); }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 14px; color: var(--muted); }
+  .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+  svg { width: 100%; height: auto; display: block; }
+  svg text { fill: var(--fg); font-family: var(--f-body); font-size: 13px; }
+  svg .lbl { font-family: var(--f-mono); font-size: 12px; fill: var(--muted); }
+  svg .grid { stroke: var(--line); stroke-width: 1; }
+  .b-hls { fill: var(--hls); } .b-viv { fill: var(--viv); } .b-fail { fill: var(--fail); opacity: .85; } .b-ok { fill: var(--hls); opacity: .9; }
+  .b-sur { fill: var(--sur); opacity: .9; }
+  .p10 { stroke: var(--fg); stroke-width: 2; }
+  .ci-r400 { stroke: var(--old); stroke-width: 5; stroke-linecap: round; }
+  .ci-r800 { stroke: var(--mid); stroke-width: 5; stroke-linecap: round; }
+  .ci-r2000 { stroke: var(--hls); stroke-width: 5; stroke-linecap: round; }
+  .dot-r400 { fill: var(--old); } .dot-r800 { fill: var(--mid); } .dot-r2000 { fill: var(--hls); }
+  .dot-ring { fill: var(--surface); }
+
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; font-variant-numeric: tabular-nums; min-width: 600px; }
+  th, td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-family: var(--f-display); font-weight: 700; font-size: 13.5px; color: var(--muted); }
+  tr.total td { font-weight: 600; border-top: 2px solid var(--line); }
+  td.up { color: var(--fail); } td.same { color: var(--muted); }
+  td.wrap { white-space: normal; text-align: left; min-width: 220px; }
+
+  ol.findings { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 22px; counter-reset: f; }
+  ol.findings > li { counter-increment: f; display: grid; grid-template-columns: 36px 1fr; gap: 12px; }
+  ol.findings > li::before { content: counter(f); font-family: var(--f-display); font-weight: 800; font-size: 22px; color: var(--muted); line-height: 1.2; }
+  ol.findings > li > div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .tag { font-family: var(--f-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--hls); border: 1px solid var(--hls); border-radius: 4px; padding: 0 6px; align-self: flex-start; }
+
+  .note { border-left: 3px solid var(--viv); padding: 4px 0 4px 14px; color: var(--muted); font-size: 15.5px; }
+  ul.plain { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+  code { font-family: var(--f-mono); font-size: 0.86em; background: var(--tint); padding: 1px 5px; border-radius: 4px; }
+  footer { color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+
+<main>
+  <header style="display:flex;flex-direction:column;gap:14px">
+    <span class="eyebrow">Estudio de tiempos · test oficial de wa-hls4ml · ronda de 2,000 por familia</span>
+    <h1>¿Cuánto tarda sintetizar un acelerador con hls4ml? Ronda 2,000</h1>
+    <p class="lede">La ronda final: 13,276 configuraciones con sus dos tiempos de síntesis, y el surrogate 07D medido sobre exactamente las mismas. Esta página muestra los resultados, qué cambió frente a las rondas de 400 y 800, y cuánto tiempo ahorra el surrogate.</p>
+  </header>
+
+  <section aria-labelledby="s-resumen">
+    <h2 id="s-resumen">En 30 segundos</h2>
+    <div class="facts">
+      <div class="fact"><b>13,276</b><span>configuraciones con ambos tiempos (99.8% de las que tienen resultados)</span><small>ronda 800: 5,645</small></div>
+      <div class="fact"><b>7.5 min</b><span>tarda una síntesis típica (mediana del test completo)</span><small>ronda 800: 7.6 min</small></div>
+      <div class="fact"><b>17.6 min</b><span>en promedio; la más lenta tardó 37.9 h</span><small>ronda 800: 17 min y 37.9 h</small></div>
+      <div class="fact alert"><b>≈ 30%</b><span>del cómputo se gastó en síntesis que terminaron fallando</span><small>ronda 800: ≥ 27%</small></div>
+      <div class="fact win"><b>3.1 ms</b><span>tarda el surrogate 07D en predecir una configuración</span><small>las 13,276 en 44 s</small></div>
+      <div class="fact win"><b>199,000×</b><span>más rápido que la síntesis (mediana por configuración)</span><small>mínimo: 3,954×</small></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="s-cambio">
+    <h2 id="s-cambio">Qué cambió frente a las rondas 400 y 800</h2>
+    <div class="verdict">
+      <strong>Nada importante: la ronda 2,000 confirma los resultados y los hace más precisos.</strong>
+      <p>En seis de las siete familias, la mediana se movió 0.4 min o menos entre rondas. Los márgenes de incertidumbre se redujeron a la mitad o menos desde la ronda 400. Las 5,645 configuraciones de la ronda 800 volvieron a salir con exactamente los mismos tiempos.</p>
+    </div>
+    <figure>
+      <div class="legend"><span><i style="background:var(--old)"></i>Ronda 400</span><span><i style="background:var(--mid)"></i>Ronda 800</span><span><i style="background:var(--hls)"></i>Ronda 2,000</span></div>
+      <div id="chart-ci"></div>
+      <figcaption>Tiempo total típico (C-synth + Vivado) por familia. El punto es la mediana y la barra su intervalo de confianza del 95%. Escala logarítmica en minutos.</figcaption>
+    </figure>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Familia</th><th>Muestras 2,000</th><th>Ronda 400</th><th>Ronda 800</th><th>Ronda 2,000</th><th>Margen 95% (2,000)</th></tr></thead>
+        <tbody>
+          <tr><td>2_layer</td><td>2,003</td><td>7.0 min</td><td>6.6 min</td><td>6.8 min</td><td>6.6 – 7.1 min</td></tr>
+          <tr><td>3_layer</td><td>2,000</td><td>7.4 min</td><td>7.3 min</td><td>7.2 min</td><td>7.0 – 7.4 min</td></tr>
+          <tr><td>latency</td><td>1,995</td><td>13.6 min</td><td>13.6 min</td><td>13.3 min</td><td>13.0 – 13.7 min</td></tr>
+          <tr><td>resource</td><td>1,996</td><td>15.6 min</td><td>15.6 min</td><td>15.4 min</td><td>14.7 – 16.0 min</td></tr>
+          <tr><td>conv1d</td><td>1,986</td><td>6.7 min</td><td>6.5 min</td><td>6.5 min</td><td>6.1 – 6.8 min</td></tr>
+          <tr><td>conv2d</td><td>1,864</td><td>9.9 min</td><td>9.5 min</td><td>9.7 min</td><td>9.4 – 10.2 min</td></tr>
+          <tr><td>2_20 (rule4ml)</td><td>1,432</td><td>51.4 min</td><td>43.5 min</td><td>41.0 min</td><td>37.1 – 46.9 min</td></tr>
+          <tr class="total"><td>Test completo (ponderado)</td><td>13,276</td><td>7.6 min</td><td>7.6 min</td><td>7.5 min</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">2_20 siguió bajando (51.4 → 43.5 → 41.0 min). Es la familia más variable, y en esta ronda quedó medida completa: las 1,432 configuraciones del test. Por eso 41.0 min ya no es una estimación, es el valor de la familia.</p>
+  </section>
+
+  <section aria-labelledby="s-familias">
+    <h2 id="s-familias">Cuánto tarda cada familia</h2>
+    <figure>
+      <div class="legend"><span><i style="background:var(--hls)"></i>C-synthesis</span><span><i style="background:var(--viv)"></i>Logic synthesis (Vivado)</span></div>
+      <div id="chart-familias"></div>
+      <figcaption>Mediana de cada etapa, en minutos (ronda 2,000). Escala lineal.</figcaption>
+    </figure>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Familia</th><th>Muestras</th><th>C-synth</th><th>Vivado</th><th>Peso de Vivado</th><th>10% más lentas, desde</th><th>Más lenta</th></tr></thead>
+        <tbody>
+          <tr><td>2_layer</td><td>2,003</td><td>85 s</td><td>272 s</td><td>77%</td><td>29 min</td><td>6.6 h</td></tr>
+          <tr><td>3_layer</td><td>2,000</td><td>102 s</td><td>303 s</td><td>76%</td><td>22 min</td><td>8.2 h</td></tr>
+          <tr><td>latency</td><td>1,995</td><td>241 s</td><td>552 s</td><td>71%</td><td>30 min</td><td>3.7 h</td></tr>
+          <tr><td>resource</td><td>1,996</td><td>484 s</td><td>371 s</td><td>50%</td><td>62 min</td><td>5.4 h</td></tr>
+          <tr><td>conv1d</td><td>1,986</td><td>201 s</td><td>181 s</td><td>59%</td><td>5.1 h</td><td>30.4 h</td></tr>
+          <tr><td>conv2d</td><td>1,864</td><td>305 s</td><td>231 s</td><td>44%</td><td>26 min</td><td>37.9 h</td></tr>
+          <tr><td>2_20 (rule4ml)</td><td>1,432</td><td>2,000 s</td><td>388 s</td><td>20%</td><td>5.0 h</td><td>24.6 h</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="s-hallazgos">
+    <h2 id="s-hallazgos">Lo que encontramos</h2>
+    <ol class="findings">
+      <li><div>
+        <h3>Una síntesis típica tarda minutos, pero las colas son de horas</h3>
+        <p>La mitad de las configuraciones se sintetiza en menos de 7.5 minutos. Pero el 1% más lento del test pasa de 2.9 horas, el 10% más lento de conv1d y de 2_20 pasa de 5 horas, y la síntesis más larga es una conv2d de <strong>37.9 horas</strong>.</p>
+      </div></li>
+      <li><div>
+        <h3>La etapa lenta cambia según la familia</h3>
+        <p>En las redes densas (2_layer, 3_layer, latency), <span class="k-viv">Vivado</span> se lleva entre el 71% y el 77% del tiempo. En 2_20 es al revés: la <span class="k-hls">C-synthesis</span> se lleva el 80%. En el test completo, Vivado aporta el 71% del tiempo medio.</p>
+      </div></li>
+      <li><div>
+        <h3>La precisión pesa, pero no de forma ordenada</h3>
+        <p>En latency el tiempo crece con los bits: 9.4 min con 4 bits, 13.8 con 8 y 19.7 con 16. En 2_layer los pesos de 10 bits tardan 18.3 min y en 3_layer los de 12 bits tardan 18.5 min, frente a 5–7 min con 4 o 16 bits. En las convolucionales la precisión casi no cambia el tiempo.</p>
+      </div></li>
+      <li><div>
+        <h3>El reuse factor importa en algunas familias</h3>
+        <p>En resource, <span class="mono">RF=1</span> tarda 37.9 min frente a 13–16 min con los demás valores. En 2_layer el tiempo sube poco a poco con el reuse factor (de 5.0 a 8.8 min). En 2_20 el más lento es <span class="mono">RF=2</span>, con 87.8 min.</p>
+      </div></li>
+      <li><div>
+        <h3>Las síntesis fallidas consumen casi un tercio del cómputo</h3>
+        <p>De las 22,383 configuraciones del test procesadas, 9,062 fallaron. Gastaron al menos <span class="k-fail">3,790 horas</span>, frente a 9,018 horas de las exitosas: un 30% del total. En latency y conv2d se perdió más de la mitad. En 1,234 casos la C-synthesis terminó bien y después falló Vivado, así que se pagaron las dos etapas sin obtener resultado.</p>
+        <figure>
+          <div class="legend"><span><i style="background:var(--hls)"></i>Síntesis exitosas</span><span><i style="background:var(--fail)"></i>Síntesis fallidas (mínimo)</span></div>
+          <div id="chart-fallos"></div>
+          <figcaption>Horas de cómputo en la muestra de la ronda 2,000. 2_layer, 3_layer y 2_20 no tuvieron fallos.</figcaption>
+        </figure>
+      </div></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="s-surrogate">
+    <h2 id="s-surrogate">Cuánto tiempo ahorra el surrogate 07D</h2>
+    <div class="verdict">
+      <strong>Lo que la síntesis resuelve en 9,018 horas, el 07D lo resuelve en 44 segundos.</strong>
+      <p>El 07D se midió en la CPU de un portátil, una configuración a la vez, sobre las mismas 13,276 configuraciones. Tarda <span class="k-sur">3.1 ms</span> en mediana: 1.3 ms en preparar las entradas y 1.6 ms en la red. En lotes de 64 baja a 0.75 ms por configuración.</p>
+    </div>
+    <figure>
+      <div class="legend"><span><i style="background:var(--sur)"></i>Speedup mediano</span><span><i style="background:var(--fg);width:2px"></i>El 90% de las configuraciones supera esta marca</span></div>
+      <div id="chart-speedup"></div>
+      <figcaption>Speedup por configuración = (C-synth + Vivado) ÷ tiempo del 07D. Escala logarítmica.</figcaption>
+    </figure>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Familia</th><th>07D</th><th>Speedup mediano</th><th>Mínimo</th><th>Síntesis total</th><th>07D total</th></tr></thead>
+        <tbody>
+          <tr><td>2_layer</td><td>1.96 ms</td><td>196,832×</td><td>3,954×</td><td>491 h</td><td>4.4 s</td></tr>
+          <tr><td>3_layer</td><td>2.10 ms</td><td>197,409×</td><td>4,157×</td><td>452 h</td><td>4.7 s</td></tr>
+          <tr><td>latency</td><td>3.22 ms</td><td>241,723×</td><td>23,285×</td><td>596 h</td><td>6.8 s</td></tr>
+          <tr><td>resource</td><td>3.18 ms</td><td>276,185×</td><td>6,854×</td><td>948 h</td><td>6.9 s</td></tr>
+          <tr><td>conv1d</td><td>3.56 ms</td><td>105,564×</td><td>4,479×</td><td>2,555 h</td><td>7.7 s</td></tr>
+          <tr><td>conv2d</td><td>3.71 ms</td><td>151,764×</td><td>7,541×</td><td>1,367 h</td><td>7.4 s</td></tr>
+          <tr><td>2_20 (rule4ml)</td><td>4.03 ms</td><td>628,272×</td><td>9,772×</td><td>2,608 h</td><td>6.2 s</td></tr>
+          <tr class="total"><td>Test completo (ponderado)</td><td>3.10 ms</td><td>199,102×</td><td>3,954×</td><td>9,018 h</td><td>44.0 s</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">El speedup no dice nada del error. El error del 07D sobre estas configuraciones coincide con el del test oficial: es bajo en las densas (SMAPE de 1–3% en FF, LUT y latencia de 2_layer y 3_layer) y alto en 2_20 (35–55%). En 2_20 el surrogate sirve para filtrar y ordenar diseños, no para reemplazar la síntesis final.</p>
+  </section>
+
+  <section aria-labelledby="s-calidad">
+    <h2 id="s-calidad">Qué tan confiables son estos números</h2>
+    <ul class="plain">
+      <li><strong>Reproducibles:</strong> las rondas son anidadas y cada configuración de las rondas 400 y 800 dio exactamente el mismo tiempo en la ronda 2,000.</li>
+      <li><strong>Auditables:</strong> cada tiempo viene con la línea exacta del log original, y los logs están guardados en Drive.</li>
+      <li><strong>Las mismas muestras en todo:</strong> las 13,276 configuraciones se encontraron en el JSON oficial del test con el mismo proyecto y el mismo ground truth. El conjunto tiene la huella <code>9b2303a64bc13b79</code>.</li>
+      <li><strong>29 casos fuera (0.22%), todos explicados:</strong> 25 por archives defectuosos en Hugging Face (latency 197 truncado, resource 60 con un proyecto vacío, conv1d 1 con solo 100 de sus 200 proyectos), 3 síntesis fallidas que aun así tienen ground truth y 1 tiempo anómalo: una sesión de Vivado de unos 10 días, probablemente un trabajo suspendido en el clúster.</li>
+    </ul>
+    <p class="note">Las síntesis originales corrieron en clústeres con 2–3 CPUs por trabajo, y los tiempos reflejan esas máquinas. En 2_20 las dos etapas se midieron en computadores distintos, así que no deben sumarse para compararlas con un solo flujo.</p>
+  </section>
+
+  <section aria-labelledby="s-sigue">
+    <h2 id="s-sigue">Qué sigue</h2>
+    <ul class="plain">
+      <li><strong>Medir el agente LLM + 07D</strong> sobre un subconjunto de estas mismas configuraciones (por ejemplo, 20 por familia: 140 consultas, unas 1.2 h).</li>
+      <li><strong>Comparación final de métodos:</strong> síntesis completa (7.5 min), solo C-synthesis (107 s), 07D (3.1 ms) y agente + 07D.</li>
+    </ul>
+  </section>
+
+  <footer>Datos: <code>resultados_tiempos/timing_test_set_r2000.csv</code> (22,383 filas, 1,550 archives) · 07D: <code>medicion_tiempos/resultados_r2000/</code> · Informe completo: <code>docs/Informe_Final_Tiempos_Sintesis_hls4ml.docx</code> · Fuente: wa-hls4ml y wa-hls4ml-projects (Hugging Face).</footer>
+</main>
+
+<script>
+  const NS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs, text) {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function hbars(id, rows, opts) {
+    const W = 640, left = 104, right = 84, rowH = 34, barH = 20, top = 8;
+    const H = top + rows.length * rowH + 26;
+    const max = opts.max, plotW = W - left - right;
+    const x = v => left + (v / max) * plotW;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": opts.aria });
+    for (const t of opts.ticks) {
+      svg.appendChild(el("line", { x1: x(t), x2: x(t), y1: top - 4, y2: H - 22, class: "grid" }));
+      svg.appendChild(el("text", { x: x(t), y: H - 6, "text-anchor": "middle", class: "lbl" }, t + opts.unit));
+    }
+    rows.forEach((r, i) => {
+      const y = top + i * rowH;
+      svg.appendChild(el("text", { x: left - 10, y: y + barH / 2 + 4.5, "text-anchor": "end" }, r.label));
+      let acc = 0;
+      for (const p of r.parts) {
+        svg.appendChild(el("rect", { x: x(acc), y, width: Math.max(0, x(acc + p.v) - x(acc)), height: barH, class: p.cls, rx: 2 }));
+        acc += p.v;
+      }
+      svg.appendChild(el("text", { x: x(acc) + 6, y: y + barH / 2 + 4.5, class: "lbl" }, r.note));
+    });
+    document.getElementById(id).appendChild(svg);
+  }
+
+  // Median + 95% CI per family, three rounds, log-scale minutes
+  function ciChart(id, rows) {
+    const W = 640, left = 104, right = 20, rowH = 50, top = 10;
+    const H = top + rows.length * rowH + 26;
+    const lo = Math.log(4), hi = Math.log(70), plotW = W - left - right;
+    const x = v => left + (Math.log(v) - lo) / (hi - lo) * plotW;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Mediana e intervalo de confianza del tiempo total por familia en las rondas 400, 800 y 2,000" });
+    for (const t of [5, 10, 20, 40, 60]) {
+      svg.appendChild(el("line", { x1: x(t), x2: x(t), y1: top - 4, y2: H - 22, class: "grid" }));
+      svg.appendChild(el("text", { x: x(t), y: H - 6, "text-anchor": "middle", class: "lbl" }, t + " min"));
+    }
+    rows.forEach((r, i) => {
+      const y = top + i * rowH;
+      svg.appendChild(el("text", { x: left - 10, y: y + 22, "text-anchor": "end" }, r.f));
+      [[r.a, y + 6, "r400"], [r.b, y + 19, "r800"], [r.c, y + 32, "r2000"]].forEach(([d, yy, k]) => {
+        svg.appendChild(el("line", { x1: x(d[1]), x2: x(d[2]), y1: yy, y2: yy, class: "ci-" + k }));
+        svg.appendChild(el("circle", { cx: x(d[0]), cy: yy, r: 5.5, class: "dot-ring" }));
+        svg.appendChild(el("circle", { cx: x(d[0]), cy: yy, r: 4, class: "dot-" + k }));
+      });
+    });
+    document.getElementById(id).appendChild(svg);
+  }
+
+  // seconds -> minutes: [median, ci_low, ci_high]
+  const m = a => a.map(v => v / 60);
+  ciChart("chart-ci", [
+    { f: "2_layer",  a: m([418, 373, 450]),    b: m([394, 367.5, 431]),  c: m([411, 395, 427]) },
+    { f: "3_layer",  a: m([442.5, 412, 463]),  b: m([438, 421, 457]),    c: m([430, 419, 443]) },
+    { f: "latency",  a: m([817, 768, 885]),    b: m([817.5, 781.5, 880]), c: m([800, 778, 823]) },
+    { f: "resource", a: m([933.5, 839.5, 1042]), b: m([937, 884, 997]),  c: m([927, 885, 960]) },
+    { f: "conv1d",   a: m([403, 346.5, 507.5]), b: m([391, 360, 446]),   c: m([388, 368, 410.5]) },
+    { f: "conv2d",   a: m([593, 552, 645]),    b: m([571, 531, 612]),    c: m([584.5, 562.5, 609]) },
+    { f: "2_20",     a: m([3086, 2611, 3725]), b: m([2611, 2296, 3076]), c: m([2462, 2225, 2815]) },
+  ]);
+
+  const fam = [
+    ["2_layer", 85, 272], ["3_layer", 102, 303], ["latency", 241, 552], ["resource", 483.5, 371],
+    ["conv1d", 201, 181], ["conv2d", 305, 231], ["2_20", 2000.5, 388.5],
+  ];
+  hbars("chart-familias", fam.map(([f, c, l]) => ({
+    label: f, parts: [{ v: c / 60, cls: "b-hls" }, { v: l / 60, cls: "b-viv" }],
+    note: ((c + l) / 60).toFixed(1) + " min",
+  })), { max: 45, ticks: [0, 10, 20, 30, 40], unit: "", aria: "Mediana de C-synthesis y Vivado por familia, en minutos" });
+
+  const fails = [["latency", 596.4, 791.0], ["resource", 948.0, 786.9], ["conv1d", 2555.4, 710.1], ["conv2d", 1367.2, 1502.0]];
+  hbars("chart-fallos", fails.map(([f, g, l]) => ({
+    label: f, parts: [{ v: g, cls: "b-ok" }, { v: l, cls: "b-fail" }],
+    note: Math.round(100 * l / (g + l)) + "% perdido",
+  })), { max: 3600, ticks: [0, 1000, 2000, 3000], unit: " h", aria: "Horas de cómputo exitosas y perdidas en fallos por familia" });
+
+  // Speedup per family: log-scale bar to the median, tick at p10
+  (function speedup(id, rows) {
+    const W = 640, left = 104, right = 84, rowH = 34, barH = 20, top = 8;
+    const H = top + rows.length * rowH + 26;
+    const lo = Math.log10(1e4), hi = Math.log10(1e6), plotW = W - left - right;
+    const x = v => left + (Math.log10(v) - lo) / (hi - lo) * plotW;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Speedup mediano del 07D por familia, con el percentil 10" });
+    [[1e4, "10 mil×"], [1e5, "100 mil×"], [1e6, "1 millón×"]].forEach(([t, s]) => {
+      svg.appendChild(el("line", { x1: x(t), x2: x(t), y1: top - 4, y2: H - 22, class: "grid" }));
+      svg.appendChild(el("text", { x: x(t), y: H - 6, "text-anchor": "middle", class: "lbl" }, s));
+    });
+    rows.forEach(([f, med, p10], i) => {
+      const y = top + i * rowH;
+      svg.appendChild(el("text", { x: left - 10, y: y + barH / 2 + 4.5, "text-anchor": "end" }, f));
+      svg.appendChild(el("rect", { x: left, y, width: x(med) - left, height: barH, class: "b-sur", rx: 2 }));
+      svg.appendChild(el("line", { x1: x(p10), x2: x(p10), y1: y - 3, y2: y + barH + 3, class: "p10" }));
+      svg.appendChild(el("text", { x: x(med) + 6, y: y + barH / 2 + 4.5, class: "lbl" }, Math.round(med / 1000) + " mil×"));
+    });
+    document.getElementById(id).appendChild(svg);
+  })("chart-speedup", [
+    ["2_layer", 196832, 85423], ["3_layer", 197409, 96826], ["latency", 241723, 119342], ["resource", 276185, 127822],
+    ["conv1d", 105564, 40866], ["conv2d", 151764, 62175], ["2_20", 628272, 119654],
+  ]);
+</script>
+
+</body></html>

@@ -1,0 +1,305 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body><!-- tr-nav --><script src="../data/resultados.js"></script><script src="../assets/nav.js"></script>
+<title>Modelo de costo de síntesis</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: una columna de lectura de ~980px; secciones separadas por reglas finas; gráficas SVG dibujadas desde los datos */
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --ink: #1b2230; --muted: #5b6577; --rule: #dde1e8;
+  --accent: #0e6f73; --accent-soft: #d8eeee; --base: #9aa3b2;
+  --good: #1f7a4a; --good-soft: #dff2e7; --warn: #a3620a; --warn-soft: #fbeed6; --bad: #b2343a; --bad-soft: #f8e1e2;
+  --info: #3a5a9b; --info-soft: #e2e9f7;
+  --display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12161d; --panel: #1a1f29; --ink: #e6e9ef; --muted: #9aa4b5; --rule: #2c3442;
+  --accent: #4fc3c3; --accent-soft: #163536; --base: #5d6778;
+  --good: #5ccf8f; --good-soft: #15301f; --warn: #e5a94a; --warn-soft: #33270f; --bad: #ef7b80; --bad-soft: #3a1a1c;
+  --info: #8fb0ef; --info-soft: #1b2741; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #12161d; --panel: #1a1f29; --ink: #e6e9ef; --muted: #9aa4b5; --rule: #2c3442;
+  --accent: #4fc3c3; --accent-soft: #163536; --base: #5d6778;
+  --good: #5ccf8f; --good-soft: #15301f; --warn: #e5a94a; --warn-soft: #33270f; --bad: #ef7b80; --bad-soft: #3a1a1c;
+  --info: #8fb0ef; --info-soft: #1b2741; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 15px/1.6 var(--body); }
+.wrap { max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 64px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.15; margin: 0 }
+h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 700; letter-spacing: -0.01em }
+h2 { font-size: 24px; font-weight: 600; margin-bottom: 6px }
+h3 { font-size: 17px; font-weight: 600; margin-bottom: 4px }
+p { margin: 0; max-width: 68ch }
+.eyebrow { font: 500 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent) }
+.lead { font-size: 17px; color: var(--muted); margin-top: 10px }
+.num, td.n, .mono { font-family: var(--mono); font-variant-numeric: tabular-nums }
+header { display: grid; gap: 14px; padding-bottom: 28px; border-bottom: 1px solid var(--rule) }
+.pills { display: flex; flex-wrap: wrap; gap: 8px }
+.pill { font: 500 12px var(--mono); padding: 3px 10px; border-radius: 999px; border: 1px solid var(--rule); color: var(--muted) }
+.pill.ok { color: var(--good); background: var(--good-soft); border-color: transparent }
+.pill.pend { color: var(--warn); background: var(--warn-soft); border-color: transparent }
+section { padding-block: 34px; border-bottom: 1px solid var(--rule); display: grid; gap: 16px }
+section > p.sub { color: var(--muted) }
+.verdict { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px }
+.stat { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; display: grid; gap: 4px; min-width: 0 }
+.stat .big { font: 600 30px/1.1 var(--mono); font-variant-numeric: tabular-nums }
+.stat .lbl { font-size: 13px; color: var(--muted) }
+.stat .cmp { font: 12px var(--mono); color: var(--muted) }
+.big.good { color: var(--good) } .big.warn { color: var(--warn) } .big.accent { color: var(--accent) }
+.flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0; border: 1px solid var(--rule); border-radius: 10px; overflow: hidden; background: var(--panel) }
+.flow > div { padding: 14px 16px; border-right: 1px solid var(--rule); display: grid; gap: 4px; align-content: start; min-width: 0 }
+.flow > div:last-child { border-right: 0 }
+.flow .k { font: 500 11px var(--mono); color: var(--accent); letter-spacing: .06em; text-transform: uppercase }
+.flow .t { font-weight: 600 }
+.flow .d { font-size: 13px; color: var(--muted) }
+.tablebox { overflow-x: auto; border: 1px solid var(--rule); border-radius: 10px; background: var(--panel) }
+table { border-collapse: collapse; width: 100%; font-size: 14px }
+th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--rule); white-space: nowrap }
+th { font: 600 12px var(--body); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; background: var(--bg) }
+tr:last-child td { border-bottom: 0 }
+td.n, th.n { text-align: right }
+tr.hl td { background: var(--accent-soft) }
+td.wrapcell { white-space: normal; min-width: 220px }
+.chart { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 14px 8px; min-width: 0 }
+.chart svg { width: 100%; height: auto; display: block }
+.chart .cap { font-size: 13px; color: var(--muted); margin-top: 6px }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px }
+svg text { fill: var(--muted); font: 11px var(--mono) }
+svg .ax { stroke: var(--rule) }
+svg .lbl-strong { fill: var(--ink); font: 600 11px var(--mono) }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font: 12px var(--mono); color: var(--muted) }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px }
+.issues { display: grid; gap: 10px }
+.issue { display: grid; grid-template-columns: 92px 1fr; gap: 14px; background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; align-items: start }
+.issue .sev { font: 600 11px var(--mono); text-transform: uppercase; letter-spacing: .06em; padding: 4px 8px; border-radius: 6px; text-align: center }
+.sev.alta { color: var(--bad); background: var(--bad-soft) } .sev.media { color: var(--warn); background: var(--warn-soft) }
+.sev.baja { color: var(--info); background: var(--info-soft) } .sev.ok { color: var(--good); background: var(--good-soft) }
+.issue p { font-size: 14px; color: var(--muted); margin-top: 4px }
+.issue .what { color: var(--ink) }
+ol.plan { margin: 0; padding-left: 22px; display: grid; gap: 12px; max-width: 76ch }
+ol.plan li::marker { font: 600 14px var(--mono); color: var(--accent) }
+ol.plan .why { color: var(--muted); font-size: 14px; display: block }
+.note { font-size: 13px; color: var(--muted) }
+code { font: 13px var(--mono); background: var(--bg); border: 1px solid var(--rule); border-radius: 4px; padding: 0 4px }
+@media (max-width: 560px) { .issue { grid-template-columns: 1fr } .flow > div { border-right: 0; border-bottom: 1px solid var(--rule) } }
+</style>
+
+<div class="wrap">
+<header>
+  <span class="eyebrow">Tesis · predicción del costo de sintetizar con hls4ml</span>
+  <h1>Modelo de costo de síntesis</h1>
+  <p class="lead">Dada una arquitectura, el modelo estima antes de sintetizar cuánto tardarán la C-synthesis (HLS) y la síntesis lógica (Vivado), con un rango del 10 al 90 %, y la probabilidad de que la síntesis falle. Este reporte resume lo que se hizo, los resultados en test y lo que conviene revisar y mejorar antes de conectarlo al agente.</p>
+  <div class="pills">
+    <span class="pill ok">F0–F5 · datos, entradas y modelos</span>
+    <span class="pill ok">F6 · evaluado en test (una vez)</span>
+    <span class="pill pend">F7–F9 · herramienta del agente e informe</span>
+    <span class="pill">23 oct 2026</span>
+  </div>
+</header>
+
+<section>
+  <h2>Veredicto</h2>
+  <p class="sub">El tiempo de síntesis sí es predecible desde la arquitectura. El modelo supera con claridad a todas las líneas base y sus rangos están calibrados. El error que queda se explica sobre todo por esperas del clúster, no por la red.</p>
+  <div class="verdict">
+    <div class="stat"><span class="lbl">C-synthesis dentro de ×2 del real</span><span class="big good">91.8 %</span><span class="cmp">mejor línea base 65.0 %</span></div>
+    <div class="stat"><span class="lbl">Síntesis lógica dentro de ×2</span><span class="big good">92.7 %</span><span class="cmp">mejor línea base 76.9 %</span></div>
+    <div class="stat"><span class="lbl">Rango 10–90 % cubre (objetivo 80 %)</span><span class="big accent">80.2 / 79.8 %</span><span class="cmp">sin calibrar: 70.1 / 71.7 %</span></div>
+    <div class="stat"><span class="lbl">Fallo de la síntesis, AUC</span><span class="big good">0.912</span><span class="cmp">tasa por familia: 0.818</span></div>
+  </div>
+  <p class="note">Test: 13,275 configuraciones con tiempos completos y 22,337 para el fallo, nunca vistas al entrenar. Intervalos de confianza del 95 % por bootstrap: 91.3–92.2 % (C) y 92.2–93.1 % (lógica).</p>
+</section>
+
+<section>
+  <h2>Qué se hizo</h2>
+  <div class="flow">
+    <div><span class="k">Datos</span><span class="t">Tiempos reales de wa-hls4ml</span><span class="d">Extraídos de los logs en Colab: 54,043 de train, 11,565 de val y 22,383 de test.</span></div>
+    <div><span class="k">Entradas</span><span class="t">43 variables sin fuga</span><span class="d">Arquitectura canónica, configuración de hls4ml y predicciones del 07D. Ningún resultado de la síntesis.</span></div>
+    <div><span class="k">Modelos</span><span class="t">Gradient boosting</span><span class="d">Cuantiles 10/50/90 por etapa y clasificador de fallo. Hiperparámetros elegidos en val.</span></div>
+    <div><span class="k">Calibración</span><span class="t">Con val</span><span class="d">Rango 10–90 conformalizado y probabilidad de fallo con regresión isotónica.</span></div>
+    <div><span class="k">Evaluación</span><span class="t">Test, una sola vez</span><span class="d">Por familia y global, contra 3 líneas base, con bootstrap.</span></div>
+  </div>
+  <div class="tablebox"><table>
+    <thead><tr><th>Partición</th><th class="n">Proyectos</th><th class="n">Con tiempos completos</th><th class="n">Síntesis fallidas</th><th class="n">Excluidos</th><th>Uso</th></tr></thead>
+    <tbody>
+      <tr><td>Train</td><td class="n">54,043</td><td class="n">32,393</td><td class="n">21,275</td><td class="n">375</td><td>Entrenar</td></tr>
+      <tr><td>Val</td><td class="n">11,565</td><td class="n">6,986</td><td class="n">4,502</td><td class="n">77</td><td>Elegir hiperparámetros y calibrar</td></tr>
+      <tr><td>Test</td><td class="n">22,383</td><td class="n">13,275</td><td class="n">9,062</td><td class="n">46</td><td>Evaluación final</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Excluidos: proyectos de 6 archives dañados en Hugging Face, tiempos ambiguos y anomalías (más de 48 h de Vivado). Las tres particiones no comparten ningún proyecto y sus medianas de tiempo por familia coinciden (por ejemplo, C-synth de 2_layer: 85, 83 y 85 s).</p>
+</section>
+
+<section>
+  <h2>Resultados en test</h2>
+  <div class="tablebox"><table>
+    <thead><tr><th>Método</th><th class="n">C dentro ×2</th><th class="n">C error mediano</th><th class="n">C Spearman</th><th class="n">Lógica dentro ×2</th><th class="n">Lógica error mediano</th><th class="n">Lógica Spearman</th></tr></thead>
+    <tbody>
+      <tr><td>Mediana por familia</td><td class="n">51.8 %</td><td class="n">59.0 %</td><td class="n">0.59</td><td class="n">75.1 %</td><td class="n">37.1 %</td><td class="n">0.44</td></tr>
+      <tr><td>Mediana por familia, estrategia y reuse factor</td><td class="n">53.9 %</td><td class="n">56.2 %</td><td class="n">0.61</td><td class="n">75.5 %</td><td class="n">37.3 %</td><td class="n">0.47</td></tr>
+      <tr><td>Regresión lineal</td><td class="n">65.0 %</td><td class="n">48.0 %</td><td class="n">0.75</td><td class="n">76.9 %</td><td class="n">33.5 %</td><td class="n">0.62</td></tr>
+      <tr class="hl"><td><strong>Gradient boosting (este modelo)</strong></td><td class="n"><strong>91.8 %</strong></td><td class="n"><strong>12.8 %</strong></td><td class="n"><strong>0.90</strong></td><td class="n"><strong>92.7 %</strong></td><td class="n"><strong>12.3 %</strong></td><td class="n"><strong>0.82</strong></td></tr>
+    </tbody>
+  </table></div>
+  <div class="grid2">
+    <div class="chart"><h3>Aciertos dentro de ×2 por familia</h3><div id="ch-familia"></div>
+      <div class="legend"><span><i style="background:var(--accent)"></i>C-synthesis</span><span><i style="background:var(--base)"></i>Síntesis lógica</span></div>
+      <p class="cap">conv1d es la familia débil (77.6 % y 78.6 %); las demás están entre 85 % y 99 %.</p></div>
+    <div class="chart"><h3>Cobertura del rango 10–90 % por familia</h3><div id="ch-cobertura"></div>
+      <div class="legend"><span><i style="background:var(--accent)"></i>C-synthesis</span><span><i style="background:var(--base)"></i>Síntesis lógica</span><span>— objetivo 80 %</span></div>
+      <p class="cap">Global en el objetivo, pero desigual: 2_20 queda corto (71–74 %) y resource lógica, ancho (86.5 %).</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>Fallo de la síntesis</h2>
+  <p class="sub">El clasificador está muy bien calibrado: cuando dice 25 %, fallan 25 %. Separa bien en las convolucionales; en latency y resource separa poco.</p>
+  <div class="grid2">
+    <div class="chart"><h3>AUC por familia</h3><div id="ch-auc"></div>
+      <p class="cap">2_20, 2_layer y 3_layer no tienen fallos en test (el modelo predice ~0 % y acierta), así que no hay AUC. Línea: 0.5 = azar.</p></div>
+    <div class="chart"><h3>Probabilidad predicha frente a tasa real</h3><div id="ch-conf"></div>
+      <p class="cap">Diagonal = calibración perfecta. Puntos: deciles de probabilidad en test (22,337 casos).</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>Diagnóstico: las esperas del clúster</h2>
+  <p class="sub">El 3.5 % de los tiempos de síntesis lógica en test quedaron subestimados más de 5 veces, sobre todo en conv1d. Revisando los logs, en esos casos de conv1d y conv2d la CPU de <code>synth_design</code> trabajó menos del 2 % del tiempo de reloj (en latency, 6 %): la máquina estaba esperando, no sintetizando. Esas esperas no dependen de la red, así que ningún modelo basado en la arquitectura puede anticiparlas.</p>
+  <div class="grid2">
+    <div class="chart"><h3>Síntesis lógica dentro de ×2: todos frente a sin esperas</h3><div id="ch-esperas"></div>
+      <div class="legend"><span><i style="background:var(--base)"></i>Todos</span><span><i style="background:var(--good)"></i>Sin esperas (CPU/reloj ≥ 0.2)</span></div>
+      <p class="cap">Sin esperas, conv1d pasa de 78.6 % a 94.3 % y el global de 92.7 % a 95.7 % (12,811 casos).</p></div>
+    <div class="tablebox" style="align-self:start"><table>
+      <thead><tr><th>Familia</th><th class="n">Train</th><th class="n">Val</th><th class="n">Test</th><th class="n">CPU/reloj normal</th><th class="n">CPU/reloj subestimados</th></tr></thead>
+      <tbody>
+        <tr><td>conv1d</td><td class="n">17.6 %</td><td class="n">16.8 %</td><td class="n">16.6 %</td><td class="n">0.93</td><td class="n">0.013</td></tr>
+        <tr><td>conv2d</td><td class="n">3.5 %</td><td class="n">3.5 %</td><td class="n">2.8 %</td><td class="n">0.73</td><td class="n">0.007</td></tr>
+        <tr><td>2_20</td><td class="n">2.3 %</td><td class="n">3.0 %</td><td class="n">2.9 %</td><td class="n">0.46</td><td class="n">0.21</td></tr>
+        <tr><td>latency</td><td class="n">1.6 %</td><td class="n">1.1 %</td><td class="n">1.7 %</td><td class="n">0.87</td><td class="n">0.058</td></tr>
+        <tr><td>resource</td><td class="n">0.3 %</td><td class="n">0.4 %</td><td class="n">0.2 %</td><td class="n">0.81</td><td class="n">0.16</td></tr>
+        <tr><td>2_layer · 3_layer</td><td class="n">0.1 %</td><td class="n">0.0–0.1 %</td><td class="n">0.0–0.1 %</td><td class="n">1.01</td><td class="n">0.99</td></tr>
+      </tbody>
+    </table><p class="note" style="padding:8px 12px">Primeras tres columnas: síntesis lógicas con espera (CPU/reloj de <code>synth_design</code> &lt; 0.2). La proporción es igual en las tres particiones: es algo sistemático del clúster, no del azar de la muestra.</p></div>
+  </div>
+  <p class="note">El 80 % de las C-synthesis subestimadas más de 5 veces también tuvieron espera en su síntesis lógica: las esperas afectan al trabajo completo, no a una sola etapa.</p>
+</section>
+
+<section>
+  <h2>Qué revisar</h2>
+  <div class="issues">
+    <div class="issue"><span class="sev alta">Alta</span><div><h3>Las esperas contaminan las etiquetas</h3><p><span class="what">El 17 % de las síntesis de conv1d tienen tiempos inflados por esperas.</span> Con esas etiquetas el modelo aprende ruido y la evaluación castiga errores que no son del modelo. Hay que decidir qué tiempo predecir: el de reloj (incluye esperas) o el de trabajo real.</p></div></div>
+    <div class="issue"><span class="sev media">Media</span><div><h3>El 07D vio el train al entrenarse</h3><p><span class="what">Sus predicciones son "de memoria" en train y fuera de muestra en test.</span> El modelo de tiempo podría confiar en ellas más de la cuenta. El impacto es chico: quitarlas solo baja 0.9 y 0.6 puntos los aciertos en val. Conviene reportarlo o usar predicciones fuera de muestra.</p></div></div>
+    <div class="issue"><span class="sev media">Media</span><div><h3>El fallo es difícil de anticipar en latency y resource</h3><p><span class="what">AUC 0.60 y 0.69: en latency apenas supera al azar.</span> Falta entender por qué fallan esas síntesis (tiempo agotado, falta de memoria, diseño que no cabe) para crear variables que lo capten.</p></div></div>
+    <div class="issue"><span class="sev baja">Baja</span><div><h3>La cobertura del rango varía por familia</h3><p><span class="what">2_20 cubre 71–74 % y resource en lógica 86.5 %.</span> La calibración se hizo global. Calibrar por familia daría rangos honestos en cada una.</p></div></div>
+    <div class="issue"><span class="sev baja">Baja</span><div><h3>2_20 mide distinto</h3><p><span class="what">Su C-synth sale de <code>synthesis_info</code> (incluye ~10 s de arranque), se midió en otra máquina y usa Vivado HLS 2019.1.</span> No es un error, pero sus tiempos no son comparables 1 a 1 con las demás familias y su costo total no es la suma de las dos etapas.</p></div></div>
+    <div class="issue"><span class="sev baja">Baja</span><div><h3>El modelo se guardó con numpy 2</h3><p><span class="what">Carga bien en <code>hls4ml_agent-2/venv</code> (scikit-learn 1.6.1, numpy 2.0.2), pero no en el Python del sistema que usa el agente (numpy 1.26).</span> Hay que resolverlo al construir la herramienta.</p></div></div>
+    <div class="issue"><span class="sev ok">Bien</span><div><h3>Lo que ya está verificado</h3><p><span class="what">Sin fuga de información (las salidas de la síntesis están vetadas en el código), particiones disjuntas, sin sobreajuste (val 91.7/92.4 % y test 91.8/92.7 %), 0 errores al construir entradas y test usado una sola vez.</span></p></div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Plan de mejoras</h2>
+  <ol class="plan">
+    <li><strong>Separar las esperas del tiempo de trabajo.</strong><span class="why">Marcar como espera las síntesis con CPU/reloj &lt; 0.2, reentrenar con etiquetas limpias y predecir aparte el riesgo de espera (en conv1d es 17 %). La herramienta diría "tarda ~X min de trabajo; en el clúster de referencia hay un 17 % de probabilidad de esperas largas".</span></li>
+    <li><strong>Usar predicciones del 07D fuera de muestra, o quitarlas.</strong><span class="why">Aportan ~1 punto. Quitarlas simplifica la herramienta y elimina el sesgo; la otra opción es reentrenar con predicciones del 07D hechas sin ver cada muestra.</span></li>
+    <li><strong>Calibrar el rango por familia.</strong><span class="why">El mismo ajuste conformal, calculado por familia con val. Es barato y corrige 2_20 y resource.</span></li>
+    <li><strong>Investigar las causas de fallo en latency y resource.</strong><span class="why">Leer los logs de las síntesis fallidas que ya están en Drive y crear variables para la causa más frecuente.</span></li>
+    <li><strong>Probar un modelo por familia.</strong><span class="why">En val tuvo ~3 % menos error (C 0.302 frente a 0.313 de MAE en log). Mejora chica; solo si se mantiene después de 1 y 2.</span></li>
+    <li><strong>No ampliar val a 2,000.</strong><span class="why">La curva de aprendizaje se aplanó: entre 75 % y 100 % del train el error baja solo 0.005. No compensa las ~7.5 h de Colab.</span></li>
+    <li><strong>Después: herramienta del agente (F7), prueba (F8) e informe Word (F9).</strong><span class="why">Con el modelo ya revisado.</span></li>
+  </ol>
+</section>
+
+<section>
+  <h2>Detalle de validación</h2>
+  <div class="grid2">
+    <div class="chart"><h3>Curva de aprendizaje (val)</h3><div id="ch-curva"></div>
+      <div class="legend"><span><i style="background:var(--accent)"></i>C-synthesis</span><span><i style="background:var(--base)"></i>Síntesis lógica</span></div>
+      <p class="cap">MAE en escala log frente al % de train usado. La caída se frena al final.</p></div>
+    <div class="tablebox" style="align-self:start"><table>
+      <thead><tr><th>Variante (val)</th><th class="n">C dentro ×2</th><th class="n">C MAE log</th><th class="n">Lógica dentro ×2</th><th class="n">Lógica MAE log</th></tr></thead>
+      <tbody>
+        <tr class="hl"><td>Modelo global (elegido)</td><td class="n">91.7 %</td><td class="n">0.313</td><td class="n">92.4 %</td><td class="n">0.328</td></tr>
+        <tr><td>Sin predicciones del 07D</td><td class="n">90.8 %</td><td class="n">0.328</td><td class="n">91.8 %</td><td class="n">0.338</td></tr>
+        <tr><td>Un modelo por familia</td><td class="n">91.9 %</td><td class="n">0.302</td><td class="n">92.3 %</td><td class="n">0.319</td></tr>
+      </tbody>
+    </table><p class="note" style="padding:8px 12px">Hiperparámetros elegidos en val: tasa de aprendizaje 0.05–0.1, 63 hojas, 800 iteraciones. Ajuste del rango (log): 0.040 en C y 0.029 en lógica.</p></div>
+  </div>
+  <p class="note">Archivos: notebook <code>Colab_Last/modelo_costo_sintesis.ipynb</code>, código <code>React-Final-tesis-New/prediccion_tiempo/costo_sintesis.py</code>, salidas en Drive <code>wa_hls4ml_modelo_tiempo/</code>, plan en <code>prompt_modelo_costo_sintesis.md</code>.</p>
+</section>
+</div>
+
+<script>
+const FAM = ["2_20", "2_layer", "3_layer", "conv1d", "conv2d", "latency", "resource"];
+const X2 = { c: [94.3, 99.3, 96.6, 77.6, 92.0, 98.1, 85.1], l: [91.8, 91.4, 94.3, 78.6, 95.7, 97.8, 98.9] };
+const COB = { c: [71.2, 84.8, 81.2, 80.7, 77.0, 85.1, 79.0], l: [73.7, 76.3, 78.8, 79.1, 79.5, 82.8, 86.5] };
+const SIN = { todos: [91.8, 91.4, 94.2, 78.6, 95.7, 97.8, 98.9], sin: [91.9, 91.5, 94.2, 94.3, 98.5, 99.5, 99.0] };
+const AUC = [["conv1d", 0.876], ["conv2d", 0.869], ["latency", 0.603], ["resource", 0.687], ["Global", 0.912], ["Base: tasa por familia", 0.818]];
+const CONF = [[0.0003, 0.0006, 5447], [0.158, 0.169, 2631], [0.244, 0.252, 4103], [0.356, 0.363, 1384], [0.498, 0.450, 522],
+              [0.534, 0.538, 945], [0.647, 0.659, 878], [0.758, 0.791, 1856], [0.882, 0.874, 971], [0.951, 0.954, 3600]];
+const CURVA = { x: [25, 50, 75, 100], c: [0.361, 0.338, 0.320, 0.315], l: [0.359, 0.344, 0.334, 0.329] };
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs, parent, text) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = text;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function svg(host, w, h) { const s = el("svg", { viewBox: `0 0 ${w} ${h}`, role: "img" }); document.getElementById(host).appendChild(s); return s; }
+function barras(host, series, colores, ymin, ymax, ref, titulos) {
+  const W = 460, H = 230, L = 40, R = 8, T = 10, B = 34;
+  const s = svg(host, W, H), y = v => T + (H - T - B) * (1 - (v - ymin) / (ymax - ymin));
+  for (let t = ymin; t <= ymax; t += 10) { el("line", { x1: L, x2: W - R, y1: y(t), y2: y(t), class: "ax" }, s); el("text", { x: L - 6, y: y(t) + 4, "text-anchor": "end" }, s, t); }
+  if (ref) el("line", { x1: L, x2: W - R, y1: y(ref), y2: y(ref), stroke: "var(--ink)", "stroke-dasharray": "4 3", "stroke-width": 1 }, s);
+  const gw = (W - L - R) / FAM.length, bw = (gw - 10) / series.length;
+  FAM.forEach((f, i) => {
+    series.forEach((ser, j) => {
+      const v = ser[i], x = L + i * gw + 5 + j * bw;
+      el("rect", { x, y: y(Math.max(v, ymin)), width: bw - 2, height: y(ymin) - y(Math.max(v, ymin)), fill: colores[j], rx: 2 }, s);
+      el("title", {}, s.lastChild, `${f} · ${titulos[j]}: ${v} %`);
+    });
+    el("text", { x: L + i * gw + gw / 2, y: H - B + 16, "text-anchor": "middle" }, s, f);
+  });
+}
+barras("ch-familia", [X2.c, X2.l], ["var(--accent)", "var(--base)"], 70, 100, null, ["C-synthesis", "Síntesis lógica"]);
+barras("ch-cobertura", [COB.c, COB.l], ["var(--accent)", "var(--base)"], 60, 90, 80, ["C-synthesis", "Síntesis lógica"]);
+barras("ch-esperas", [SIN.todos, SIN.sin], ["var(--base)", "var(--good)"], 70, 100, null, ["Todos", "Sin esperas"]);
+(function () {
+  const W = 460, H = 230, L = 150, R = 40, T = 8, B = 26, s = svg("ch-auc", W, H);
+  const x = v => L + (W - L - R) * (v - 0.4) / 0.6, rh = (H - T - B) / AUC.length;
+  [0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0].forEach(t => { el("line", { x1: x(t), x2: x(t), y1: T, y2: H - B, class: "ax" }, s); el("text", { x: x(t), y: H - B + 14, "text-anchor": "middle" }, s, t.toFixed(1)); });
+  el("line", { x1: x(0.5), x2: x(0.5), y1: T, y2: H - B, stroke: "var(--ink)", "stroke-dasharray": "4 3" }, s);
+  AUC.forEach(([n, v], i) => {
+    const yy = T + i * rh + 4, col = n.startsWith("Base") ? "var(--base)" : (v < 0.7 ? "var(--warn)" : "var(--accent)");
+    el("rect", { x: x(0.4), y: yy, width: x(v) - x(0.4), height: rh - 8, fill: col, rx: 2 }, s);
+    el("text", { x: L - 8, y: yy + (rh - 8) / 2 + 4, "text-anchor": "end", class: n === "Global" ? "lbl-strong" : "" }, s, n);
+    el("text", { x: x(v) + 5, y: yy + (rh - 8) / 2 + 4 }, s, v.toFixed(3));
+  });
+})();
+(function () {
+  const W = 460, H = 260, L = 44, R = 12, T = 10, B = 34, s = svg("ch-conf", W, H);
+  const x = v => L + (W - L - R) * v, y = v => T + (H - T - B) * (1 - v);
+  [0, .2, .4, .6, .8, 1].forEach(t => {
+    el("line", { x1: x(t), x2: x(t), y1: T, y2: H - B, class: "ax" }, s); el("line", { x1: L, x2: W - R, y1: y(t), y2: y(t), class: "ax" }, s);
+    el("text", { x: x(t), y: H - B + 14, "text-anchor": "middle" }, s, t.toFixed(1)); el("text", { x: L - 6, y: y(t) + 4, "text-anchor": "end" }, s, t.toFixed(1));
+  });
+  el("line", { x1: x(0), y1: y(0), x2: x(1), y2: y(1), stroke: "var(--ink)", "stroke-dasharray": "4 3" }, s);
+  el("polyline", { points: CONF.map(([p, r]) => `${x(p)},${y(r)}`).join(" "), fill: "none", stroke: "var(--accent)", "stroke-width": 2 }, s);
+  CONF.forEach(([p, r, n]) => { const c = el("circle", { cx: x(p), cy: y(r), r: 3 + 3 * Math.sqrt(n / 5447), fill: "var(--accent)" }, s); el("title", {}, c, `predicha ${p.toFixed(2)} · real ${r.toFixed(2)} · ${n} casos`); });
+  el("text", { x: (L + W - R) / 2, y: H - 4, "text-anchor": "middle" }, s, "probabilidad predicha");
+})();
+(function () {
+  const W = 460, H = 230, L = 50, R = 16, T = 10, B = 34, s = svg("ch-curva", W, H);
+  const x = v => L + (W - L - R) * (v - 25) / 75, y = v => T + (H - T - B) * (1 - (v - 0.30) / 0.07);
+  [0.30, 0.32, 0.34, 0.36].forEach(t => { el("line", { x1: L, x2: W - R, y1: y(t), y2: y(t), class: "ax" }, s); el("text", { x: L - 6, y: y(t) + 4, "text-anchor": "end" }, s, t.toFixed(2)); });
+  CURVA.x.forEach(t => el("text", { x: x(t), y: H - B + 16, "text-anchor": "middle" }, s, t + " %"));
+  [["c", "var(--accent)"], ["l", "var(--base)"]].forEach(([k, col]) => {
+    el("polyline", { points: CURVA.x.map((v, i) => `${x(v)},${y(CURVA[k][i])}`).join(" "), fill: "none", stroke: col, "stroke-width": 2 }, s);
+    CURVA.x.forEach((v, i) => el("circle", { cx: x(v), cy: y(CURVA[k][i]), r: 3.5, fill: col }, s));
+  });
+})();
+</script>
+
+</body></html>
