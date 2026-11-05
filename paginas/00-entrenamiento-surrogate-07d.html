@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Entrenamiento del surrogate · 07 a 07F</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  /* Layout: una columna de lectura (~780px); la tabla por objetivo y los dos gráficos son el centro de la página */
+  :root {
+    --bg: #F7F8FA; --surface: #FFFFFF; --fg: #17202E; --muted: #5B6676; --line: #DDE2EA; --tint: #EEF2FB;
+    --win: #0F8A6A; --win-soft: #DDF1EA;
+    --base: #9AA6B7; --blue: #2E5BDB; --warn: #B45309; --bad: #C93A3A;
+    --f-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --f-body: "Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif;
+    --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0F141C; --surface: #161D28; --fg: #E6EAF1; --muted: #9AA6B7; --line: #2A3444; --tint: #1A2436;
+      --win: #3CC9A0; --win-soft: #13302A; --base: #5E6B7E; --blue: #6E93FF; --warn: #FBBF24; --bad: #F06B6B;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font-family: var(--f-body); font-size: 17px; line-height: 1.55;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  main { max-width: 780px; margin: 0 auto; padding-block: 40px 64px; display: flex; flex-direction: column; gap: 48px; }
+  h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+  h1 { font-size: clamp(30px, 6vw, 46px); font-weight: 800; line-height: 1.06; }
+  h2 { font-size: 24px; font-weight: 700; }
+  h3 { font-size: 18px; font-weight: 700; }
+  p { margin: 0; max-width: 68ch; }
+  section { display: flex; flex-direction: column; gap: 16px; }
+  .eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .lede { font-size: 19px; color: var(--muted); }
+  .mono { font-family: var(--f-mono); font-size: .86em; }
+  .k-win { color: var(--win); font-weight: 600; }
+  .k-bad { color: var(--bad); font-weight: 600; }
+  code { font-family: var(--f-mono); font-size: .86em; background: var(--tint); padding: 1px 5px; border-radius: 4px; }
+
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  .fact { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .fact b { font-family: var(--f-display); font-size: 30px; font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .fact span { font-size: 14px; color: var(--muted); line-height: 1.35; }
+  .fact.win b { color: var(--win); }
+
+  .verdict { background: var(--tint); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+  .verdict strong { font-family: var(--f-display); font-size: 17px; }
+
+  figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  figcaption { font-size: 14px; color: var(--muted); }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 14px; color: var(--muted); }
+  .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+  svg { width: 100%; height: auto; display: block; }
+  svg text { fill: var(--fg); font-family: var(--f-body); font-size: 13px; }
+  svg .lbl { font-family: var(--f-mono); font-size: 12px; fill: var(--muted); }
+  svg .grid { stroke: var(--line); stroke-width: 1; }
+
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; font-variant-numeric: tabular-nums; min-width: 620px; }
+  th, td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-family: var(--f-display); font-weight: 700; font-size: 13.5px; color: var(--muted); }
+  td.txt { text-align: left; white-space: normal; min-width: 200px; color: var(--muted); font-size: 14.5px; }
+  tr.win td { background: var(--win-soft); }
+  tr.win td:first-child { font-weight: 700; }
+  td.best { color: var(--win); font-weight: 700; }
+  td.dim { color: var(--muted); }
+
+  ol.steps { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; display: grid; grid-template-columns: 56px 1fr; gap: 14px; padding: 14px 0; border-top: 1px solid var(--line); }
+  ol.steps > li:last-child { border-bottom: 1px solid var(--line); }
+  ol.steps .id { font-family: var(--f-mono); font-weight: 600; font-size: 15px; color: var(--muted); padding-top: 2px; }
+  ol.steps li.win .id { color: var(--win); }
+  ol.steps .body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  ol.steps .body b { font-family: var(--f-display); font-size: 17px; }
+  ol.steps .body span { font-size: 15.5px; color: var(--muted); }
+
+  ol.findings { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 20px; counter-reset: f; }
+  ol.findings > li { counter-increment: f; display: grid; grid-template-columns: 36px 1fr; gap: 12px; }
+  ol.findings > li::before { content: counter(f); font-family: var(--f-display); font-weight: 800; font-size: 22px; color: var(--muted); line-height: 1.2; }
+  ol.findings > li > div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+
+  .note { border-left: 3px solid var(--warn); padding: 4px 0 4px 14px; color: var(--muted); font-size: 15.5px; }
+  ul.plain { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+  footer { color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+</head>
+<body><!-- tr-nav --><script src="../data/resultados.js"></script><script src="../assets/nav.js"></script>
+<main>
+  <header style="display:flex;flex-direction:column;gap:14px">
+    <span class="eyebrow">Surrogate · selección del modelo · wa-hls4ml</span>
+    <h1>¿Por qué el 07D? Entrenamiento y comparación de los modelos 07 a 07F</h1>
+    <p class="lede">Seis series de experimentos controlados sobre el mismo dataset, todos medidos en validación para decidir y en test (92,933 diseños) solo al final. Esta página resume qué se probó, qué pasó y por qué ganó el 07D.</p>
+  </header>
+
+  <section aria-labelledby="s-resumen">
+    <h2 id="s-resumen">En 30 segundos</h2>
+    <div class="facts">
+      <div class="fact win"><b>0.907</b><span>R² medio del 07D en test (los 6 objetivos)</span></div>
+      <div class="fact win"><b>4.88 %</b><span>SMAPE medio del 07D en test</span></div>
+      <div class="fact"><b>1.73 M</b><span>parámetros: Late Fusion de dos ramas</span></div>
+      <div class="fact"><b>60</b><span>épocas completas, OneCycleLR, sin early stopping</span></div>
+    </div>
+    <div class="verdict">
+      <strong>El 07D no gana en todos los objetivos: gana en el equilibrio.</strong>
+      <p>Cada variante mejora algo y empeora otra cosa. El 07D es la que tiene el mejor promedio y la mejor latencia, sin ser la mejor en recursos. Frente al modelo histórico de Purdue pierde en R², y por eso la tesis lo presenta como el modelo auditado y reproducible, no como el predictor más fuerte.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="s-secuencia">
+    <h2 id="s-secuencia">La secuencia de experimentos</h2>
+    <p>Cada paso cambia una cosa respecto al anterior, para saber qué fue lo que movió el resultado.</p>
+    <ol class="steps">
+      <li><span class="id">07</span><div class="body"><b>Tres arquitecturas, mismo pipeline</b><span>Una rama (A), dos ramas con fusión tardía (B, Late Fusion) y dos ramas con Cross-Attention (C). Gana B con claridad; A casi no aprende y C converge peor.</span></div></li>
+      <li><span class="id">07B</span><div class="body"><b>Variables mejoradas y cabezas para DSP</b><span>Se repite B y C con más variables y un tratamiento especial de DSP. Late Fusion sigue por delante de Cross-Attention, pero ninguna supera al baseline B en test.</span></div></li>
+      <li><span class="id">07C</span><div class="body"><b>Loss Huber en los cinco objetivos normales</b><span>El DSP mejora mucho (R² 0.961), pero Cycles e II caen, y el promedio baja.</span></div></li>
+      <li class="win"><span class="id">07D</span><div class="body"><b>MSE en cinco objetivos + DSP especializado</b><span>Vuelve a MSE para BRAM, FF, LUT, Cycles e II, y mantiene para DSP la clasificación cero/no-cero con Huber en DSP&gt;0 y balance por familia. <b style="font-size:inherit" class="k-win">Mejor promedio del pipeline.</b></span></div></li>
+      <li><span class="id">07E</span><div class="body"><b>07D con el escalado de objetivos de Purdue</b><span>Es el único cambio. Los cuatro recursos mejoran (BRAM de 0.867 a 0.920) pero la latencia se hunde (Cycles de 0.865 a 0.775).</span></div></li>
+      <li><span class="id">07F</span><div class="body"><b>07E con Cross-Attention</b><span>Es el único cambio. Cross-Attention no recupera la latencia y el promedio baja a 0.850.</span></div></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="s-resultados">
+    <h2 id="s-resultados">Resultados</h2>
+    <figure>
+      <div class="legend"><span><i style="background:var(--win)"></i>07D (elegido)</span><span><i style="background:var(--base)"></i>Otras variantes</span><span>— Purdue, referencia histórica (0.9585)</span></div>
+      <div id="chart-r2"></div>
+      <figcaption>R² medio de los seis objetivos en test. Las variantes con Cross-Attention están marcadas con CA; el resto son Late Fusion, salvo A (una sola rama).</figcaption>
+    </figure>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Experimento</th><th>Arquitectura</th><th>R² val</th><th>R² test</th><th>SMAPE test</th></tr></thead>
+        <tbody id="tabla-general"></tbody>
+      </table>
+    </div>
+    <p class="note">En el experimento 07 las variantes A y C pararon antes por early stopping (épocas 35 y 25) y B llegó a las 60, así que esa primera comparación no es equivalente en convergencia. Desde 07C todas entrenan 60 épocas.</p>
+  </section>
+
+  <section aria-labelledby="s-objetivos">
+    <h2 id="s-objetivos">Por objetivo: nadie gana en todo</h2>
+    <p>R² en test de cada objetivo para las variantes de Late Fusion y Cross-Attention con resultados por objetivo. En verde, la mejor de cada columna.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Modelo</th><th>BRAM</th><th>DSP</th><th>FF</th><th>LUT</th><th>Cycles</th><th>II</th><th>Media</th></tr></thead>
+        <tbody id="tabla-objetivos"></tbody>
+      </table>
+    </div>
+    <p>El 07E es el mejor en tres recursos (BRAM, FF y LUT) y el 07C en DSP. El 07D gana en <span class="k-win">Cycles e II</span> y es el único que no se hunde en latencia. En SMAPE, entre 07C, 07D, 07E y 07F, el 07D tiene el menor error en cinco de los seis objetivos; solo en DSP lo supera el 07C (2.57 % frente a 3.87 %).</p>
+    <figure>
+      <div class="legend"><span><i style="background:var(--win)"></i>07D</span><span><i style="background:var(--base)"></i>Otras</span></div>
+      <div id="chart-tradeoff"></div>
+      <figcaption>Cada punto es un modelo. Eje horizontal: R² medio de los cuatro recursos (BRAM, DSP, FF, LUT). Eje vertical: R² medio de la latencia (Cycles, II). Mejor es hacia arriba y a la derecha.</figcaption>
+    </figure>
+  </section>
+
+  <section aria-labelledby="s-hallazgos">
+    <h2 id="s-hallazgos">Lo que se aprendió</h2>
+    <ol class="findings">
+      <li><div><h3>Late Fusion es la arquitectura más estable</h3><p>En todas las comparaciones directas, Late Fusion superó a Cross-Attention y a la rama única. En 07F, Cross-Attention con el mismo escalado de 07E cae de 0.889 a 0.850.</p></div></li>
+      <li><div><h3>Tratar DSP aparte funciona</h3><p>DSP tiene muchos ceros exactos (entre 33 y 38 % de las muestras). Clasificar primero si es cero, predecir la magnitud solo donde no lo es y balancear por familia da un clasificador con 99.99 % de exactitud y el mejor DSP del pipeline (R² 0.961 en 07C).</p></div></li>
+      <li><div><h3>El escalado de Purdue ayuda a los recursos pero perjudica la latencia</h3><p>Con RAW + StandardScaler en los recursos, BRAM sube de 0.867 a 0.920 y DSP de 0.922 a 0.952. Pero en esta representación Cycles e II pierden unos 0.10 de R². Por eso no se adoptó.</p></div></li>
+      <li><div><h3>Huber en todo no es mejor que MSE en lo normal</h3><p>07C usa Huber también para los cinco objetivos normales y queda en 0.886; 07D vuelve a MSE y sube a 0.907. No se atribuye a una sola decisión: entre ambos también cambió el gate de DSP (de soft a hard, elegido en validación).</p></div></li>
+      <li><div><h3>Cross-Attention no explica por sí solo a Purdue</h3><p>Aislada en 07F, no reproduce el rendimiento histórico. Lo que funciona en el modelo de Purdue es el conjunto de piezas ajustadas entre sí, no una de ellas.</p></div></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="s-purdue">
+    <h2 id="s-purdue">Frente al modelo histórico de Purdue</h2>
+    <p>Purdue sigue ganando en R² dentro del test de wa-hls4ml. El 07D gana en SMAPE medio y en trazabilidad.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th></th><th>Purdue histórico</th><th>07D</th></tr></thead>
+        <tbody>
+          <tr><td>R² medio test</td><td class="best">0.9585</td><td>0.9072</td></tr>
+          <tr><td>SMAPE medio test</td><td>6.30 %</td><td class="best">4.88 %</td></tr>
+          <tr><td>Arquitectura</td><td>Dos ramas + Cross-Attention</td><td>Dos ramas, Late Fusion</td></tr>
+          <tr><td>Parámetros</td><td>2,309,959</td><td>1,728,967</td></tr>
+          <tr><td>Capas máximas</td><td>51</td><td>55</td></tr>
+          <tr><td>Loss de objetivos normales</td><td>Huber</td><td>MSE por objetivo</td></tr>
+          <tr><td>Escalado de recursos</td><td>RAW + StandardScaler</td><td>log1p + StandardScaler</td></tr>
+          <tr><td><code>io_type</code> como variable</td><td>Sí</td><td>No</td></tr>
+          <tr><td>Valores ausentes</td><td>Ceros por defecto</td><td>Máscaras explícitas</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Por qué Purdue puntúa tan alto</h3>
+    <ul class="plain">
+      <li><strong>Variables globales muy informativas.</strong> Entrega relaciones físicas ya condensadas, como parámetros densos divididos por el reuse factor. Con solo esas variables y un MLP, el DSP ya llega a R² 0.93 y la LUT a 0.96.</li>
+      <li><strong>Escalado alineado con R².</strong> El escalado de recursos en valor físico favorece el R² medido en esas mismas unidades.</li>
+      <li><strong>Piezas ajustadas entre sí.</strong> Cambiar una sola, como hicieron 07E y 07F, no reproduce el 0.9585.</li>
+      <li><strong>Un test dominado por Dense.</strong> El 95.85 % del test son redes densas (89,073 de 92,933), donde la latencia es casi perfecta en ambos modelos. La ventaja de Purdue está sobre todo en recursos y en Conv2D (por ejemplo, FF de 0.964 frente a 0.788).</li>
+    </ul>
+    <div class="note">
+      <strong>Fuera de distribución, Purdue no generaliza.</strong> En 887 muestras de un conjunto de ejemplos externo, su R² fue aproximadamente −6.5 en BRAM, −2.7 en Cycles y −1.7 en II, y entre 0.3 y 0.5 en DSP, FF y LUT. Esa prueba solo está documentada para el modelo de Purdue. El 0.9585 describe muy bien la distribución del benchmark, no un surrogate universal.
+    </div>
+    <p>Por eso la tesis plantea a Purdue como <strong>referencia histórica de máximo rendimiento dentro del benchmark</strong> y al 07D como el <strong>modelo final, seleccionado con una metodología auditada</strong>: escaladores ajustados solo con train, test reservado para el final, máscaras explícitas, sin variables que actúen como huella de familia y trazabilidad desde la limpieza hasta la evaluación.</p>
+  </section>
+
+  <section aria-labelledby="s-limites">
+    <h2 id="s-limites">Qué no está demostrado</h2>
+    <ul class="plain">
+      <li>No se reconstruyó Purdue completo (variables, arquitectura, loss y escalado exactos) sobre los artefactos auditados, así que la diferencia de unos 0.05 de R² no se puede asignar a una sola decisión.</li>
+      <li>No hay una ablación aislada de <code>io_type</code>, y por eso no se sabe cuánto R² aporta por sí sola. Es una configuración HLS legítima, pero en wa-hls4ml coincide con la familia del diseño.</li>
+      <li>Para el 07D no se documentó una prueba fuera de distribución equivalente a la de Purdue, así que no se sabe cómo se comporta allí.</li>
+    </ul>
+  </section>
+
+  <footer>Fuentes: <code>RESUMEN_RESULTADOS_NOTEBOOKS.md</code> y <code>PURDUE_vs_07D_ANALISIS.md</code> del registro de la tesis, y los notebooks 07, 07B, 07C, 07D, 07E y 07F ejecutados en Colab (A100). Selección en validación; test usado solo para la evaluación final.</footer>
+</main>
+
+<script>
+  const NS = "http://www.w3.org/2000/svg";
+  function el(tag, attrs, text) {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const f3 = v => v.toFixed(3);
+
+  // Datos: salida de los notebooks (R² por objetivo en test; resto de columnas del resumen)
+  const OBJ = ["BRAM", "DSP", "FF", "LUT", "Cycles", "II"];
+  const M = {
+    "07 · B":  { r2: [0.865281, 0.929593, 0.964621, 0.928043, 0.844793, 0.854928] },
+    "07C":     { r2: [0.861546, 0.960678, 0.954238, 0.943963, 0.802588, 0.791627] },
+    "07D":     { r2: [0.867094, 0.922002, 0.962769, 0.954769, 0.864577, 0.871915] },
+    "07E":     { r2: [0.919883, 0.951650, 0.969372, 0.958968, 0.774520, 0.759116] },
+    "07F":     { r2: [0.907366, 0.943488, 0.963010, 0.957998, 0.666143, 0.662501] },
+  };
+  const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+
+  // Tabla general (valores del resumen de resultados)
+  const general = [
+    ["07 · A", "Una rama", "0.071", "0.147", "9.30 %"],
+    ["07 · B", "Late Fusion", "0.904", "0.898", "5.64 %"],
+    ["07 · C", "Cross-Attention", "0.587", "0.580", "12.31 %"],
+    ["07B", "Late Fusion", "0.901", "0.886", "5.18 %"],
+    ["07B", "Cross-Attention", "0.877", "0.866", "5.29 %"],
+    ["07C", "Late Fusion", "0.898", "0.886", "5.14 %"],
+    ["07D", "Late Fusion", "0.913", "0.907", "4.88 %"],
+    ["07E", "Late Fusion", "0.901", "0.889", "8.73 %"],
+    ["07F", "Cross-Attention", "0.859", "0.850", "9.86 %"],
+  ];
+  const tg = document.getElementById("tabla-general");
+  general.forEach(r => {
+    const tr = document.createElement("tr");
+    if (r[0] === "07D") tr.className = "win";
+    r.forEach(c => { const td = document.createElement("td"); td.textContent = c; tr.appendChild(td); });
+    tg.appendChild(tr);
+  });
+
+  // Tabla por objetivo, con la mejor de cada columna resaltada
+  const to = document.getElementById("tabla-objetivos");
+  const names = Object.keys(M);
+  const best = OBJ.map((_, j) => Math.max(...names.map(n => M[n].r2[j])));
+  names.forEach(n => {
+    const tr = document.createElement("tr");
+    if (n === "07D") tr.className = "win";
+    const th = document.createElement("td"); th.textContent = n; tr.appendChild(th);
+    M[n].r2.forEach((v, j) => {
+      const td = document.createElement("td");
+      td.textContent = f3(v);
+      if (v === best[j]) td.className = "best";
+      tr.appendChild(td);
+    });
+    const tdm = document.createElement("td"); tdm.className = "dim"; tdm.textContent = f3(mean(M[n].r2)); tr.appendChild(tdm);
+    to.appendChild(tr);
+  });
+
+  // Gráfico 1: R² medio en test, barras horizontales
+  (function () {
+    const rows = [
+      ["07 · A (una rama)", 0.146615, 0], ["07 · B", 0.897877, 0], ["07 · C (CA)", 0.579674, 0],
+      ["07B (LF)", 0.886318, 0], ["07B (CA)", 0.866328, 0], ["07C", 0.885774, 0],
+      ["07D", 0.907188, 1], ["07E", 0.888918, 0], ["07F (CA)", 0.850084, 0],
+    ];
+    const W = 640, left = 124, right = 56, rowH = 30, barH = 18, top = 10;
+    const H = top + rows.length * rowH + 28, plotW = W - left - right;
+    const x = v => left + v * plotW;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "R² medio en test por modelo, con el 07D resaltado y Purdue como referencia en 0.9585" });
+    [0, 0.25, 0.5, 0.75, 1].forEach(t => {
+      svg.appendChild(el("line", { x1: x(t), x2: x(t), y1: top - 4, y2: H - 24, class: "grid" }));
+      svg.appendChild(el("text", { x: x(t), y: H - 8, "text-anchor": "middle", class: "lbl" }, t.toFixed(2)));
+    });
+    const px = x(0.9585);
+    svg.appendChild(el("line", { x1: px, x2: px, y1: top - 4, y2: H - 24, stroke: css("--fg"), "stroke-width": 1.5, "stroke-dasharray": "4 3" }));
+    svg.appendChild(el("text", { x: px + 4, y: top + 6, class: "lbl" }, "Purdue"));
+    rows.forEach(([lab, v, win], i) => {
+      const y = top + i * rowH;
+      svg.appendChild(el("text", { x: left - 10, y: y + barH / 2 + 4.5, "text-anchor": "end", "font-weight": win ? 700 : 400 }, lab));
+      svg.appendChild(el("rect", { x: left, y, width: v * plotW, height: barH, rx: 2, fill: win ? css("--win") : css("--base") }));
+      // El halo del color de la tarjeta evita que el valor se confunda con la línea de Purdue
+      svg.appendChild(el("text", { x: x(v) + 6, y: y + barH / 2 + 4.5, class: "lbl", stroke: css("--surface"), "stroke-width": 5, "paint-order": "stroke" }, v.toFixed(3)));
+    });
+    document.getElementById("chart-r2").appendChild(svg);
+  })();
+
+  // Gráfico 2: recursos frente a latencia
+  (function () {
+    const pts = Object.keys(M).map(n => ({
+      n, rec: mean(M[n].r2.slice(0, 4)), lat: mean(M[n].r2.slice(4)),
+    }));
+    const W = 640, H = 330, L = 56, R = 24, T = 14, B = 46;
+    const xmin = 0.915, xmax = 0.955, ymin = 0.64, ymax = 0.89;
+    const x = v => L + (v - xmin) / (xmax - xmin) * (W - L - R);
+    const y = v => T + (1 - (v - ymin) / (ymax - ymin)) * (H - T - B);
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "R² medio de recursos frente a R² medio de latencia por modelo" });
+    [0.92, 0.93, 0.94, 0.95].forEach(t => {
+      svg.appendChild(el("line", { x1: x(t), x2: x(t), y1: T, y2: H - B, class: "grid" }));
+      svg.appendChild(el("text", { x: x(t), y: H - B + 18, "text-anchor": "middle", class: "lbl" }, t.toFixed(2)));
+    });
+    [0.65, 0.70, 0.75, 0.80, 0.85].forEach(t => {
+      svg.appendChild(el("line", { x1: L, x2: W - R, y1: y(t), y2: y(t), class: "grid" }));
+      svg.appendChild(el("text", { x: L - 8, y: y(t) + 4, "text-anchor": "end", class: "lbl" }, t.toFixed(2)));
+    });
+    svg.appendChild(el("text", { x: (L + W - R) / 2, y: H - 8, "text-anchor": "middle", class: "lbl" }, "R² medio de recursos (BRAM, DSP, FF, LUT)"));
+    const yl = el("text", { x: 14, y: (T + H - B) / 2, "text-anchor": "middle", class: "lbl", transform: `rotate(-90 14 ${(T + H - B) / 2})` }, "R² medio de latencia (Cycles, II)");
+    svg.appendChild(yl);
+    pts.forEach(p => {
+      const win = p.n === "07D";
+      svg.appendChild(el("circle", { cx: x(p.rec), cy: y(p.lat), r: win ? 8 : 6, fill: win ? css("--win") : css("--base") }));
+      const izq = p.rec > 0.945;
+      svg.appendChild(el("text", { x: x(p.rec) + (izq ? -12 : 12), y: y(p.lat) + 4.5, "text-anchor": izq ? "end" : "start", "font-weight": win ? 700 : 400 }, `${p.n}  (${p.rec.toFixed(3)} · ${p.lat.toFixed(3)})`));
+    });
+    document.getElementById("chart-tradeoff").appendChild(svg);
+  })();
+</script>
+</body>
+</html>

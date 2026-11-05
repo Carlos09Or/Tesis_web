@@ -4,6 +4,12 @@
 window.RESULTADOS = {
   grupos: [
     {
+      id: "surrogate",
+      titulo: "Surrogate 07D",
+      descripcion:
+        "Cómo se entrenó y por qué se eligió el modelo 07D entre las variantes 07 a 07F, y cómo se compara con el modelo histórico de Purdue.",
+    },
+    {
       id: "tiempos",
       titulo: "Estudio de tiempos de síntesis",
       descripcion:
@@ -17,6 +23,20 @@ window.RESULTADOS = {
     },
   ],
   paginas: [
+    {
+      grupo: "surrogate",
+      archivo: "paginas/00-entrenamiento-surrogate-07d.html",
+      titulo: "Entrenamiento del surrogate · 07 a 07F",
+      resumen:
+        "Seis series de experimentos controlados: qué cambió en cada una, qué pasó con recursos y latencia, y por qué ganó el 07D.",
+      fecha: "2026-10-10",
+      etiqueta: "Selección del modelo",
+      cifras: [
+        ["0.907", "R² medio en test"],
+        ["4.88 %", "SMAPE medio"],
+        ["0.9585", "Purdue (referencia)"],
+      ],
+    },
     {
       grupo: "tiempos",
       archivo: "paginas/01-tiempos-sintesis-r400.html",
