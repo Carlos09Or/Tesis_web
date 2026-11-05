@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modelo de tiempos · Bitácora</title>
+<style>
+  :root {
+    --bg: #f6f5f1; --panel: #ffffff; --ink: #1d2230; --muted: #5d6475; --line: #e3e0d8;
+    --accent: #2b5bd7; --accent-soft: #e6edfb;
+    --a: #2b5bd7; --b: #c9731a; --base: #8a90a0;
+    --ok: #1f7a4d; --ok-soft: #e3f3ea; --warn: #a85a00; --warn-soft: #fdf0dc; --info: #3a4a7a; --info-soft: #e9ecf6;
+    --bad: #b3261e;
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14171f; --panel: #1c2029; --ink: #e8eaf0; --muted: #98a0b3; --line: #2d3340;
+      --accent: #7ea2ff; --accent-soft: #1f2b4a;
+      --a: #7ea2ff; --b: #f0a35a; --base: #7c8396;
+      --ok: #5fcf97; --ok-soft: #17301f; --warn: #f0b35a; --warn-soft: #36290f; --info: #a9b7e6; --info-soft: #232a42;
+      --bad: #ff8a80;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px 80px; }
+  header.top { padding: 28px 0 8px; }
+  header.top h1 { margin: 0; font-size: 22px; letter-spacing: -0.01em; }
+  header.top p { margin: 4px 0 0; color: var(--muted); }
+  nav.tabs {
+    position: sticky; top: 0; z-index: 5; background: var(--bg);
+    display: flex; gap: 6px; flex-wrap: wrap; padding: 12px 0; border-bottom: 1px solid var(--line); margin-bottom: 20px;
+  }
+  nav.tabs button {
+    font: inherit; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--panel); color: var(--ink); cursor: pointer;
+  }
+  nav.tabs button[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  nav.tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .spacer { flex: 1; }
+  h2 { font-size: 18px; margin: 36px 0 4px; letter-spacing: -0.01em; }
+  h2 + .lede { margin: 0 0 14px; color: var(--muted); }
+  h3 { font-size: 15px; margin: 20px 0 8px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; }
+  .meta { color: var(--muted); font-size: 13px; }
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; background: var(--ok-soft); color: var(--ok); }
+  .grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 16px; }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+  .stat .v { font-size: 30px; font-weight: 650; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .stat .l { font-weight: 600; font-size: 13.5px; }
+  .stat .d { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .two { grid-template-columns: 1fr; } }
+  dl.kv { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; font-size: 14px; }
+  dl.kv dt { color: var(--muted); } dl.kv dd { margin: 0; font-variant-numeric: tabular-nums; }
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+  th, td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th:first-child, td:first-child, th.l, td.l { text-align: left; }
+  th { color: var(--muted); font-weight: 600; font-size: 12.5px; }
+  tr.best td { font-weight: 650; }
+  tr.group td { background: var(--accent-soft); font-weight: 600; text-align: left; }
+  .num-good { color: var(--ok); } .num-bad { color: var(--bad); }
+  .barrow { display: grid; grid-template-columns: 170px 1fr 52px; align-items: center; gap: 10px; margin: 5px 0; font-size: 13.5px; }
+  @media (max-width: 560px) { .barrow { grid-template-columns: 110px 1fr 46px; } }
+  .track { height: 14px; background: var(--line); border-radius: 4px; overflow: hidden; }
+  .fill { height: 100%; border-radius: 4px; }
+  .barrow .val { text-align: right; font-variant-numeric: tabular-nums; }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin: 6px 0 10px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+  .seg button { font: inherit; padding: 5px 12px; border: 0; background: var(--panel); color: var(--ink); cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .find { border-left: 4px solid var(--line); background: var(--panel); border-radius: 0 var(--radius) var(--radius) 0; padding: 11px 16px; margin: 10px 0; border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .find.ok { border-left-color: var(--ok); } .find.warn { border-left-color: var(--warn); } .find.info { border-left-color: var(--info); }
+  .find h4 { margin: 0 0 2px; font-size: 14.5px; }
+  .find p { margin: 0; color: var(--muted); }
+  .tag { font-size: 11.5px; padding: 1px 8px; border-radius: 999px; margin-left: 8px; font-weight: 500; vertical-align: 1px; }
+  .tag.ok { background: var(--ok-soft); color: var(--ok); } .tag.warn { background: var(--warn-soft); color: var(--warn); } .tag.info { background: var(--info-soft); color: var(--info); }
+  .tag.hip { background: var(--warn-soft); color: var(--warn); }
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .filters button { font: inherit; font-size: 13px; padding: 4px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
+  .filters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; margin: 10px 0; }
+  .card.next { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+  .card header { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .card header strong { font-size: 15px; }
+  .card .id { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; }
+  .card p { margin: 6px 0 0; }
+  .card p b { font-weight: 600; }
+  .chips { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+  .chip { font-size: 12px; padding: 1px 8px; border-radius: 6px; background: var(--line); color: var(--ink); }
+  .chip.alto { background: var(--ok-soft); color: var(--ok); }
+  .chip.medio { background: var(--info-soft); color: var(--info); }
+  .chip.bajo { background: var(--line); color: var(--muted); }
+  ol.pasos { margin: 8px 0 0; padding-left: 20px; } ol.pasos li { margin: 4px 0; }
+  code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12.5px; background: var(--line); padding: 1px 5px; border-radius: 4px; word-break: break-all; }
+  svg text { fill: var(--muted); font-size: 11px; font-family: inherit; }
+  svg .axis { stroke: var(--line); } svg .target { stroke: var(--bad); stroke-dasharray: 4 3; }
+  footer { margin-top: 48px; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body><!-- tr-nav --><script src="../data/resultados.js"></script><script src="../assets/nav.js"></script>
+<div class="wrap">
+  <header class="top">
+    <h1>Modelo de tiempos de síntesis · Bitácora de iteraciones</h1>
+    <p>Predicción, antes de sintetizar, del tiempo de C-synthesis, del tiempo de síntesis lógica y de la probabilidad de fallo (hls4ml).</p>
+  </header>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Iteraciones"></nav>
+  <main id="main"></main>
+  <footer>Cada iteración se añade a esta misma página. La pestaña «Comparar» aparece desde la segunda.</footer>
+</div>
+
+<!-- Cada iteración se añade como un bloque <script> con su objeto, antes del script principal. -->
+<script>
+// Iteración 1 — resultados de la corrida en Colab con EVALUAR_EN_TEST = True.
+// Para una iteración nueva: copia este archivo como iter_02.js, cambia los datos y
+// agrega su <script> en index.html. La página se arma sola a partir de estos objetos.
+(window.ITERACIONES = window.ITERACIONES || []).push({
+  id: 1,
+  fecha: "2026-11-05",
+  titulo: "Línea base: dos enfoques",
+  subtitulo: "Enfoque A (3 percentiles) contra enfoque B (valor esperado + margen calibrado)",
+  estado: "completada",
+  notebook: "modelo_tiempos_dos_enfoques.ipynb (corrida en Colab, EVALUAR_EN_TEST = True)",
+  resumen:
+    "Primera evaluación completa en test. El enfoque A acierta más y da rangos más angostos que B. " +
+    "El tiempo de síntesis lógica y el clasificador de fallo dentro de cada familia son los puntos débiles. " +
+    "Los resultados en test coinciden con los de val, así que no hay señal de sobreajuste.",
+
+  configuracion: [
+    ["Etiquetas de tiempo", "reloj (incluye esperas del clúster)"],
+    ["Umbral de espera", "0.2 (CPU / reloj de synth_design)"],
+    ["Familias", "las 7"],
+    ["Entradas (X)", "36, solo del dataset"],
+    ["Semilla", "20261105"],
+    ["Modelos", "A: 7 (3 percentiles × 2 tiempos + fallo) · B: 3"],
+    ["Rango 10–90", "conformal, global y por familia"],
+    ["Evaluación en test", "una sola vez (ya consumida)"]
+  ],
+  datos: [
+    ["Filas train / val / test", "54.043 / 11.565 / 22.383"],
+    ["Filas con tiempos (train / val / test)", "32.390 / 6.986 / 13.275"],
+    ["Filas para fallo en test", "22.337 (40,6 % fallan)"],
+    ["Anomalías marcadas", "3 en train, 1 en test (ronda 2.000)"],
+    ["Proyectos compartidos entre conjuntos", "0"],
+    ["Verificaciones del notebook", "15 de 15 pasan"]
+  ],
+
+  // Cuatro números para el encabezado
+  veredicto: [
+    { valor: "91 %", etiqueta: "C-synth dentro de ×2", detalle: "Enfoque A en test. La mejor línea base llega a 63 %." },
+    { valor: "92 %", etiqueta: "Síntesis lógica dentro de ×2", detalle: "Enfoque A en test. La mejor línea base llega a 76 %." },
+    { valor: "0,38", etiqueta: "R² en log, síntesis lógica", detalle: "Punto débil. Sube a 0,85 si se quitan las esperas del clúster." },
+    { valor: "0,915", etiqueta: "AUC del clasificador de fallo", detalle: "Se apoya en separar familias. En latency y resource baja a 0,63 y 0,71." }
+  ],
+
+  // Tabla principal: test, todas las síntesis
+  tiempos: {
+    titulo: "Test · todas las síntesis",
+    filas: [
+      { etapa: "C-synth", variante: "A · global", x2: 0.910, err: 0.133, smape: 0.267, r2: 0.738, spearman: 0.894, cobertura: 0.803, minfam: 0.717, ancho: 2.012 },
+      { etapa: "C-synth", variante: "A · por familia", x2: 0.910, err: 0.133, smape: 0.267, r2: 0.738, spearman: 0.894, cobertura: 0.799, minfam: 0.791, ancho: 2.053 },
+      { etapa: "C-synth", variante: "B · global", x2: 0.889, err: 0.167, smape: 0.293, r2: 0.815, spearman: 0.915, cobertura: 0.786, minfam: 0.496, ancho: 2.306 },
+      { etapa: "C-synth", variante: "B · por familia", x2: 0.889, err: 0.167, smape: 0.293, r2: 0.815, spearman: 0.915, cobertura: 0.789, minfam: 0.761, ancho: 2.539 },
+      { etapa: "Lógica", variante: "A · global", x2: 0.922, err: 0.129, smape: 0.252, r2: 0.383, spearman: 0.812, cobertura: 0.784, minfam: 0.737, ancho: 1.841 },
+      { etapa: "Lógica", variante: "A · por familia", x2: 0.922, err: 0.129, smape: 0.252, r2: 0.383, spearman: 0.812, cobertura: 0.784, minfam: 0.767, ancho: 1.876 },
+      { etapa: "Lógica", variante: "B · global", x2: 0.889, err: 0.176, smape: 0.298, r2: 0.587, spearman: 0.794, cobertura: 0.798, minfam: 0.483, ancho: 2.364 },
+      { etapa: "Lógica", variante: "B · por familia", x2: 0.889, err: 0.176, smape: 0.298, r2: 0.587, spearman: 0.794, cobertura: 0.792, minfam: 0.763, ancho: 2.083 }
+    ],
+    bases: [
+      { etapa: "C-synth", nombre: "Mediana por familia", x2: 0.518, err: 0.590, r2: 0.357 },
+      { etapa: "C-synth", nombre: "Mediana por familia, estrategia y RF", x2: 0.539, err: 0.562, r2: 0.387 },
+      { etapa: "C-synth", nombre: "Regresión lineal", x2: 0.626, err: 0.512, r2: 0.572 },
+      { etapa: "Lógica", nombre: "Mediana por familia", x2: 0.751, err: 0.371, r2: -0.019 },
+      { etapa: "Lógica", nombre: "Mediana por familia, estrategia y RF", x2: 0.755, err: 0.373, r2: 0.000 },
+      { etapa: "Lógica", nombre: "Regresión lineal", x2: 0.732, err: 0.415, r2: 0.194 }
+    ],
+    // Mismo test, sin las síntesis que esperaron en el clúster
+    sinEsperas: [
+      { etapa: "C-synth", variante: "A · global", x2: 0.939, r2: 0.909, spearman: 0.958 },
+      { etapa: "C-synth", variante: "B · global", x2: 0.913, r2: 0.891, spearman: 0.938 },
+      { etapa: "Lógica", variante: "A · global", x2: 0.952, r2: 0.850, spearman: 0.908 },
+      { etapa: "Lógica", variante: "B · global", x2: 0.913, r2: 0.728, spearman: 0.813 }
+    ],
+    ic95_B_x2: { c: [0.8835, 0.8940], logic: [0.8832, 0.8944] }
+  },
+
+  // Cobertura del rango 10–90 por familia (objetivo 80 %), test, todas las síntesis
+  cobertura: {
+    objetivo: 80,
+    familias: ["2_20", "2_layer", "3_layer", "conv1d", "conv2d", "latency", "resource"],
+    c: {
+      "A · global": [71.7, 85.8, 81.4, 77.1, 76.0, 86.8, 80.7],
+      "A · por familia": [79.6, 81.5, 80.6, 79.1, 79.1, 79.3, 79.9],
+      "B · global": [72.8, 96.8, 89.2, 49.6, 74.1, 96.6, 68.6],
+      "B · por familia": [77.4, 79.4, 77.8, 76.1, 79.0, 79.4, 82.8]
+    },
+    logic: {
+      "A · global": [73.7, 75.6, 78.5, 77.7, 77.0, 81.6, 83.3],
+      "A · por familia": [77.0, 77.7, 81.4, 76.7, 77.2, 79.2, 78.8],
+      "B · global": [71.7, 82.8, 86.6, 48.3, 76.3, 93.9, 96.3],
+      "B · por familia": [81.9, 79.0, 79.0, 76.3, 80.9, 78.6, 79.7]
+    }
+  },
+
+  // Curva de aprendizaje (val): cuánto mejora el modelo B con más datos de train
+  curva: [
+    { fraccion: 0.25, c_x2: 0.828, logic_x2: 0.834, c_r2: 0.745, logic_r2: 0.358 },
+    { fraccion: 0.50, c_x2: 0.867, logic_x2: 0.858, c_r2: 0.784, logic_r2: 0.434 },
+    { fraccion: 0.75, c_x2: 0.875, logic_x2: 0.877, c_r2: 0.809, logic_r2: 0.507 },
+    { fraccion: 1.00, c_x2: 0.891, logic_x2: 0.892, c_r2: 0.833, logic_r2: 0.574 }
+  ],
+
+  fallo: {
+    resumen: [
+      ["AUC", 0.915, 0.818],
+      ["AUC-PR", 0.879, 0.667],
+      ["Brier", 0.113, 0.165],
+      ["Log-loss", 0.352, 0.474]
+    ],
+    umbrales: [
+      { u: 0.5, prec: 0.837, rec: 0.758, evitadas: 880, descartadas: 1544 },
+      { u: 0.7, prec: 0.881, rec: 0.694, evitadas: 742, descartadas: 1055 },
+      { u: 0.9, prec: 0.965, rec: 0.314, evitadas: 213, descartadas: 221 }
+    ],
+    porFamilia: [
+      { f: "2_20", n: 1432, tasa: 0.000, auc: null },
+      { f: "2_layer", n: 2003, tasa: 0.000, auc: null },
+      { f: "3_layer", n: 2000, tasa: 0.000, auc: null },
+      { f: "conv1d", n: 4675, tasa: 0.575, auc: 0.877 },
+      { f: "conv2d", n: 6484, tasa: 0.713, auc: 0.874 },
+      { f: "latency", n: 2700, tasa: 0.261, auc: 0.628 },
+      { f: "resource", n: 3043, tasa: 0.344, auc: 0.705 }
+    ]
+  },
+
+  hallazgos: [
+    { tipo: "ok", titulo: "El enfoque A es el mejor para predecir un tiempo",
+      texto: "Más aciertos dentro de ×2 (0,91 y 0,92 contra 0,89), menos error relativo mediano y rangos 10–90 más angostos (≈2,0 contra 2,3–2,5). B solo gana en R² en log." },
+    { tipo: "ok", titulo: "Test y val coinciden",
+      texto: "Por ejemplo, C-synth con A dentro de ×2: 0,901 en val y 0,910 en test. No hay señal de sobreajuste. El IC 95 % de B en test es [0,884; 0,894] para ambos tiempos." },
+    { tipo: "ok", titulo: "El ajuste por familia es necesario en B",
+      texto: "Con margen global, la cobertura de conv1d cae a 49 % (objetivo 80 %). Por familia sube a 76 %. En A el efecto es pequeño." },
+    { tipo: "warn", titulo: "Las esperas del clúster explican buena parte del error de la síntesis lógica",
+      texto: "Sin las síntesis que esperaron, el R² en log de la lógica pasa de 0,38 a 0,85 y el dentro de ×2 de 0,92 a 0,95. Es un dato sobre test, no un resultado de reentrenar: queda por comprobar entrenando sin esperas.", verificado: false },
+    { tipo: "warn", titulo: "El clasificador de fallo se apoya en separar familias",
+      texto: "2_20, 2_layer y 3_layer no tienen ningún fallo. Dentro de las demás, el AUC es 0,88 en conv1d y conv2d, pero 0,63 en latency y 0,71 en resource." },
+    { tipo: "warn", titulo: "Como filtro para no sintetizar, el clasificador cuesta más de lo que ahorra",
+      texto: "Con umbral 0,5 se evitan 880 h de fallos pero se descartan 1.544 h de síntesis buenas. Con 0,9 queda casi parejo (213 h contra 221 h) y solo se detecta el 31 % de los fallos. Sí mejora mucho a la tasa por familia (AUC 0,915 contra 0,818)." },
+    { tipo: "info", titulo: "Más datos de entrenamiento siguen ayudando",
+      texto: "En la curva de aprendizaje (val, modelo B) el dentro de ×2 sube de 0,83 a 0,89 de 25 % a 100 % de train y no se aplana. El R² en log de la lógica sube de 0,36 a 0,57." },
+    { tipo: "info", titulo: "Colas largas en C-synth de conv1d",
+      texto: "En la muestra a ojo, el p90 de A llega a 1.844 y 2.092 s con un p50 de 322 y 299 s. Son solo dos casos: hay que mirar los residuos por familia antes de sacar conclusiones.", verificado: false }
+  ],
+
+  // Banco de mejoras. impacto/esfuerzo: alto | medio | bajo
+  backlog: [
+    { id: "M1", cat: "Etiquetas", titulo: "Entrenar con tiempos sin esperas del clúster",
+      evidencia: "Sin esperas en test: lógica R² 0,38 → 0,85; C-synth ×2 0,91 → 0,94.",
+      accion: "Poner ETIQUETAS = \"sin_esperas\" (el interruptor ya existe). Después, decidir qué significa «tiempo» en la tesis: tiempo de CPU o de reloj. Si se necesita el reloj, modelar la espera por separado.",
+      impacto: "alto", esfuerzo: "bajo", sugerida: 2 },
+    { id: "M2", cat: "Modelo", titulo: "Clasificador de fallo solo con las 4 familias que fallan",
+      evidencia: "3 familias tienen 0 fallos, así que el AUC global de 0,915 mezcla separar familias con separar casos. Dentro de familia: latency 0,63, resource 0,71.",
+      accion: "Entrenar y reportar el AUC dentro de familia como métrica principal. Averiguar si el dataset guarda la causa del fallo y usarla para entender latency y resource.",
+      impacto: "alto", esfuerzo: "medio", sugerida: 3 },
+    { id: "M3", cat: "Datos nuevos", titulo: "Más síntesis donde el modelo falla",
+      evidencia: "La curva de aprendizaje no se aplana. Cobertura y AUC son los más bajos en conv1d (cola larga), latency y resource.",
+      accion: "Medir el error por familia y por región de entradas (reuse factor, estrategia, tamaño) y pedir nuevas síntesis en las zonas peor cubiertas.",
+      impacto: "alto", esfuerzo: "alto", sugerida: null },
+    { id: "M4", cat: "Entradas", titulo: "Entradas nuevas por capa",
+      evidencia: "Hoy hay 36 entradas, casi todas resúmenes de la red entera (conteos, máximos, logaritmos).",
+      accion: "Probar entradas como desviación del reuse factor entre capas, tamaño de la capa más grande en bits, o relación entre multiplicadores y reuse factor. Cada una se prueba sola.",
+      impacto: "medio", esfuerzo: "medio", sugerida: null },
+    { id: "M5", cat: "Modelo", titulo: "Modelo en cascada para la síntesis lógica",
+      evidencia: "Es el tiempo peor explicado (R² 0,38 con A).",
+      accion: "Un segundo modelo que use las salidas de C-synth (recursos y latencia estimados) como entrada. Rompe la regla 1 de «solo dataset», así que va aparte y etiquetado como «después de C-synth».",
+      impacto: "medio", esfuerzo: "medio", sugerida: null },
+    { id: "M6", cat: "Evaluación", titulo: "Medir el valor para planificar la cola",
+      evidencia: "Como filtro de fallos no compensa. Un tiempo predicho también sirve para ordenar trabajos.",
+      accion: "Simular el tiempo total del clúster con los tiempos reales, ordenando las síntesis por tiempo predicho contra orden aleatorio.",
+      impacto: "medio", esfuerzo: "bajo", sugerida: null },
+    { id: "M7", cat: "Evaluación", titulo: "Validación más robusta",
+      evidencia: "Una sola partición de val y una sola semilla.",
+      accion: "Validación cruzada agrupada por proyecto y varias semillas para dar la variación entre corridas. No se toca test.",
+      impacto: "bajo", esfuerzo: "medio", sugerida: null },
+    { id: "M8", cat: "Etiquetas", titulo: "Revisar las anomalías de la ronda 2.000",
+      evidencia: "3 anomalías en train y 1 en test marcadas.",
+      accion: "Medir cuánto cambian las métricas con y sin ellas y dejar documentado el criterio.",
+      impacto: "bajo", esfuerzo: "bajo", sugerida: null }
+  ],
+
+  siguiente: {
+    titulo: "Iteración 2: cambiar una sola cosa",
+    principio: "Cada iteración cambia una sola cosa para poder atribuir la diferencia. Test ya se usó, así que se compara en val y se vuelve a mirar test solo al cerrar la iteración.",
+    pasos: [
+      "Reentrenar con ETIQUETAS = \"sin_esperas\" (M1) y comparar contra la iteración 1 en val.",
+      "Reportar los dos tiempos con y sin esperas, con las mismas tablas de esta página.",
+      "Si el R² de la lógica sube como se espera, decidir en la tesis qué tiempo se predice y pasar a M2 en la iteración 3."
+    ],
+    criterio: "Se considera mejora si el R² en log de la lógica sube y el dentro de ×2 no baja en val, con la cobertura de familias entre 75 % y 85 %."
+  },
+
+  archivos: [
+    ["Modelos entrenados", "wa_hls4ml_modelo_tiempo_v2/modelos/modelos_tiempos_A_y_B.joblib"],
+    ["Comparación de enfoques en test", "wa_hls4ml_modelo_tiempo_v2/test/comparacion_enfoques_test.csv"],
+    ["Igual, sin esperas", "wa_hls4ml_modelo_tiempo_v2/test/comparacion_enfoques_test_sin_esperas.csv"],
+    ["Igual, por familia", "wa_hls4ml_modelo_tiempo_v2/test/comparacion_enfoques_test_por_familia.csv"],
+    ["Predicciones de test", "wa_hls4ml_modelo_tiempo_v2/test/predicciones_test.csv.gz"],
+    ["Métricas de fallo", "wa_hls4ml_modelo_tiempo_v2/test/metricas_fallo.json"]
+  ],
+
+  // Números que se comparan entre iteraciones (pestaña «Comparar»)
+  clave: {
+    c_x2: 0.910, logic_x2: 0.922,
+    c_err: 0.133, logic_err: 0.129,
+    c_r2: 0.738, logic_r2: 0.383,
+    c_ancho: 2.012, logic_ancho: 1.841,
+    c_cob_min: 0.791, logic_cob_min: 0.767,
+    fallo_auc: 0.915, fallo_auc_pr: 0.879
+  },
+  claveNota: "Enfoque A con ajuste por familia, test, todas las síntesis."
+});
+</script>
+
+<script>
+(function () {
+  "use strict";
+  var ITS = (window.ITERACIONES || []).slice().sort(function (a, b) { return a.id - b.id; });
+  var main = document.getElementById("main"), tabs = document.getElementById("tabs");
+  var fmt = function (x, d) { return (x == null || isNaN(x)) ? "—" : x.toFixed(d == null ? 3 : d).replace(".", ","); };
+  var pct = function (x, d) { return (x == null) ? "—" : (x * 100).toFixed(d == null ? 1 : d).replace(".", ",") + " %"; };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+  var VAR_COLOR = { "A": "var(--a)", "B": "var(--b)" };
+
+  function kv(rows) {
+    return '<dl class="kv">' + rows.map(function (r) { return "<dt>" + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("") + "</dl>";
+  }
+
+  // ---------- barras horizontales: dentro de ×2 ----------
+  function barras(it) {
+    var T = it.tiempos, out = "";
+    ["C-synth", "Lógica"].forEach(function (et) {
+      var items = [];
+      T.bases.filter(function (b) { return b.etapa === et; }).forEach(function (b) { items.push({ n: b.nombre, v: b.x2, c: "var(--base)" }); });
+      ["A · por familia", "B · por familia"].forEach(function (nom) {
+        var f = T.filas.filter(function (r) { return r.etapa === et && r.variante === nom; })[0];
+        if (f) items.push({ n: "Enfoque " + nom.replace(" · por familia", ""), v: f.x2, c: VAR_COLOR[nom[0]], hi: true });
+      });
+      out += "<h3>" + et + "</h3>" + items.map(function (i) {
+        return '<div class="barrow"><span' + (i.hi ? ' style="font-weight:600"' : "") + ">" + esc(i.n) + '</span><div class="track"><div class="fill" style="width:' + (i.v * 100) +
+               "%;background:" + i.c + '"></div></div><span class="val">' + pct(i.v, 1) + "</span></div>";
+      }).join("");
+    });
+    return out;
+  }
+
+  // ---------- tabla de métricas ----------
+  function tablaTiempos(it) {
+    var T = it.tiempos, head = ["Variante", "Dentro ×2", "Error rel. mediano", "sMAPE", "R² log", "Spearman", "Cobertura", "Mín. familia", "Ancho p90/p10"];
+    var h = "<table><thead><tr>" + head.map(function (x, i) { return "<th" + (i === 0 ? ' class="l"' : "") + ">" + x + "</th>"; }).join("") + "</tr></thead><tbody>";
+    ["C-synth", "Lógica"].forEach(function (et) {
+      h += '<tr class="group"><td colspan="9">' + et + "</td></tr>";
+      var rows = T.filas.filter(function (r) { return r.etapa === et; });
+      var best = Math.max.apply(null, rows.map(function (r) { return r.x2; }));
+      rows.forEach(function (r) {
+        h += "<tr" + (r.x2 === best ? ' class="best"' : "") + '><td class="l">' + esc(r.variante) + "</td><td>" + fmt(r.x2) + "</td><td>" + fmt(r.err) + "</td><td>" + fmt(r.smape) +
+             "</td><td>" + fmt(r.r2) + "</td><td>" + fmt(r.spearman) + "</td><td>" + fmt(r.cobertura) + '</td><td class="' + (r.minfam < 0.6 ? "num-bad" : "") + '">' + fmt(r.minfam) +
+             "</td><td>" + fmt(r.ancho, 2) + "</td></tr>";
+      });
+    });
+    return h + "</tbody></table>";
+  }
+
+  function tablaSinEsperas(it) {
+    var T = it.tiempos, con = {};
+    T.filas.forEach(function (r) { if (r.variante.indexOf("global") > -1) con[r.etapa + r.variante] = r; });
+    var h = '<table><thead><tr><th class="l">Variante</th><th>×2 con esperas</th><th>×2 sin esperas</th><th>R² con esperas</th><th>R² sin esperas</th></tr></thead><tbody>';
+    T.sinEsperas.forEach(function (s) {
+      var c = con[s.etapa + s.variante];
+      h += '<tr><td class="l">' + esc(s.etapa + " · " + s.variante) + "</td><td>" + fmt(c.x2) + "</td><td>" + fmt(s.x2) + "</td><td>" + fmt(c.r2) + '</td><td class="num-good">' + fmt(s.r2) + "</td></tr>";
+    });
+    return h + "</tbody></table>";
+  }
+
+  // ---------- cobertura por familia (puntos) ----------
+  function cobertura(it, etapa) {
+    var C = it.cobertura, fams = C.familias, data = C[etapa], names = Object.keys(data);
+    var W = 760, H = 270, L = 70, R = 14, Tp = 14, Bt = 40, lo = 40, hi = 100;
+    var x = function (v) { return L + (v - lo) / (hi - lo) * (W - L - R); };
+    var rowH = (H - Tp - Bt) / fams.length;
+    var cols = { "A · global": "var(--a)", "A · por familia": "var(--a)", "B · global": "var(--b)", "B · por familia": "var(--b)" };
+    var s = '<svg viewBox="0 0 ' + W + " " + H + '" width="100%" role="img" aria-label="Cobertura del rango 10 a 90 por familia">';
+    for (var v = lo; v <= hi; v += 10) {
+      s += '<line class="axis" x1="' + x(v) + '" x2="' + x(v) + '" y1="' + Tp + '" y2="' + (H - Bt) + '"/><text x="' + x(v) + '" y="' + (H - Bt + 16) + '" text-anchor="middle">' + v + " %</text>";
+    }
+    s += '<line class="target" x1="' + x(C.objetivo) + '" x2="' + x(C.objetivo) + '" y1="' + Tp + '" y2="' + (H - Bt) + '"/>';
+    s += '<text x="' + x(C.objetivo) + '" y="' + (H - 8) + '" text-anchor="middle">objetivo ' + C.objetivo + " %</text>";
+    fams.forEach(function (f, i) {
+      var y = Tp + rowH * i + rowH / 2;
+      s += '<text x="' + (L - 8) + '" y="' + (y + 4) + '" text-anchor="end">' + esc(f) + "</text>";
+      names.forEach(function (n, k) {
+        var v = data[n][i], dy = (k - (names.length - 1) / 2) * 6, glob = n.indexOf("global") > -1;
+        s += glob
+          ? '<circle cx="' + x(v) + '" cy="' + (y + dy) + '" r="4.2" fill="none" stroke="' + cols[n] + '" stroke-width="1.8"><title>' + esc(n) + ": " + v + " %</title></circle>"
+          : '<circle cx="' + x(v) + '" cy="' + (y + dy) + '" r="4.2" fill="' + cols[n] + '"><title>' + esc(n) + ": " + v + " %</title></circle>";
+      });
+    });
+    return s + "</svg>";
+  }
+
+  // ---------- curva de aprendizaje ----------
+  function curva(it) {
+    var P = it.curva, W = 360, H = 200, L = 40, R = 24, Tp = 12, Bt = 34, lo = 0.3, hi = 1.0;
+    function chart(k1, k2, ti, lo, hi) {
+      var x = function (f) { return L + (f - 0.25) / 0.75 * (W - L - R); };
+      var y = function (v) { return Tp + (hi - v) / (hi - lo) * (H - Tp - Bt); };
+      var s = '<div><b style="font-size:13px">' + ti + '</b><svg viewBox="0 0 ' + W + " " + H + '" width="100%" role="img" aria-label="' + ti + '">';
+      for (var v = Math.ceil(lo * 10) / 10; v <= hi + 1e-9; v += 0.1) s += '<line class="axis" x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v) + '" y2="' + y(v) + '"/><text x="' + (L - 6) + '" y="' + (y(v) + 4) + '" text-anchor="end">' + v.toFixed(1).replace(".", ",") + "</text>";
+      P.forEach(function (p) { s += '<text x="' + x(p.fraccion) + '" y="' + (H - 12) + '" text-anchor="middle">' + Math.round(p.fraccion * 100) + " %</text>"; });
+      [[k1, "var(--a)", "C-synth"], [k2, "var(--b)", "Lógica"]].forEach(function (z) {
+        s += '<polyline fill="none" stroke="' + z[1] + '" stroke-width="2" points="' + P.map(function (p) { return x(p.fraccion) + "," + y(p[z[0]]); }).join(" ") + '"/>';
+        P.forEach(function (p) { s += '<circle cx="' + x(p.fraccion) + '" cy="' + y(p[z[0]]) + '" r="3.5" fill="' + z[1] + '"><title>' + z[2] + " · " + Math.round(p.fraccion * 100) + " % de train: " + p[z[0]] + "</title></circle>"; });
+      });
+      return s + "</svg></div>";
+    }
+    return '<div class="legend"><span><i style="background:var(--a)"></i>C-synth</span><span><i style="background:var(--b)"></i>Lógica</span><span>Eje horizontal: fracción de train usada</span></div>' +
+           '<div class="two">' + chart("c_x2", "logic_x2", "Dentro de ×2", 0.8, 0.9) + chart("c_r2", "logic_r2", "R² en log", 0.3, 0.9) + "</div>";
+  }
+
+  // ---------- fallo ----------
+  function fallo(it) {
+    var F = it.fallo, h = '<div class="two"><div><h3>Modelo contra tasa por familia</h3><table><thead><tr><th class="l">Métrica</th><th>Modelo</th><th>Solo familia</th></tr></thead><tbody>';
+    F.resumen.forEach(function (r) { h += '<tr><td class="l">' + r[0] + "</td><td><b>" + fmt(r[1]) + "</b></td><td>" + fmt(r[2]) + "</td></tr>"; });
+    h += "</tbody></table><h3>Si no se sintetizara con riesgo alto</h3><table><thead><tr><th>Umbral</th><th>Precisión</th><th>Recall</th><th>Horas de fallo evitadas</th><th>Horas buenas descartadas</th></tr></thead><tbody>";
+    F.umbrales.forEach(function (u) { h += "<tr><td>" + fmt(u.u, 1) + "</td><td>" + fmt(u.prec) + "</td><td>" + fmt(u.rec) + '</td><td class="num-good">' + u.evitadas.toLocaleString("es") + '</td><td class="' + (u.descartadas > u.evitadas ? "num-bad" : "") + '">' + u.descartadas.toLocaleString("es") + "</td></tr>"; });
+    h += "</tbody></table></div><div><h3>AUC dentro de cada familia</h3>";
+    F.porFamilia.forEach(function (r) {
+      h += '<div class="barrow"><span>' + r.f + ' <span class="meta">n=' + r.n.toLocaleString("es") + ", " + pct(r.tasa, 0) + ' fallan</span></span><div class="track">' +
+           (r.auc == null ? "" : '<div class="fill" style="width:' + ((r.auc - 0.5) / 0.5 * 100) + '%;background:' + (r.auc < 0.75 ? "var(--b)" : "var(--a)") + '"></div>') +
+           '</div><span class="val">' + (r.auc == null ? "sin fallos" : fmt(r.auc)) + "</span></div>";
+    });
+    return h + '<p class="meta">La barra va de AUC 0,5 (azar) a 1,0. Las tres familias sin fallos no se pueden evaluar.</p></div></div>';
+  }
+
+  // ---------- hallazgos y backlog ----------
+  function hallazgos(it) {
+    var lab = { ok: "Confirmado", warn: "Atención", info: "Observación" };
+    return it.hallazgos.map(function (f) {
+      return '<div class="find ' + f.tipo + '"><h4>' + esc(f.titulo) + '<span class="tag ' + f.tipo + '">' + lab[f.tipo] + "</span>" +
+             (f.verificado === false ? '<span class="tag hip">por verificar</span>' : "") + "</h4><p>" + esc(f.texto) + "</p></div>";
+    }).join("");
+  }
+  var catSel = "Todas";
+  function backlog(it) {
+    var cats = ["Todas"]; it.backlog.forEach(function (b) { if (cats.indexOf(b.cat) < 0) cats.push(b.cat); });
+    var h = '<div class="filters" id="filt">' + cats.map(function (c) { return '<button aria-pressed="' + (c === catSel) + '" data-c="' + esc(c) + '">' + esc(c) + "</button>"; }).join("") + "</div>";
+    it.backlog.filter(function (b) { return catSel === "Todas" || b.cat === catSel; }).forEach(function (b) {
+      h += '<div class="card' + (b.sugerida ? " next" : "") + '"><header><span class="id">' + b.id + "</span><strong>" + esc(b.titulo) + '</strong><span class="chips">' +
+           '<span class="chip">' + esc(b.cat) + '</span><span class="chip ' + b.impacto + '">impacto ' + b.impacto + '</span><span class="chip">esfuerzo ' + b.esfuerzo + "</span>" +
+           (b.sugerida ? '<span class="chip alto">sugerida para iteración ' + b.sugerida + "</span>" : "") + "</span></header>" +
+           "<p><b>Evidencia.</b> " + esc(b.evidencia) + "</p><p><b>Qué se haría.</b> " + esc(b.accion) + "</p></div>";
+    });
+    return h;
+  }
+
+  // ---------- vista de una iteración ----------
+  function verIteracion(it) {
+    var s = '<section><p class="meta"><span class="badge">' + esc(it.estado) + "</span> · " + esc(it.fecha) + " · " + esc(it.notebook) + "</p>" +
+      "<h2 style=\"margin-top:8px\">Iteración " + it.id + " · " + esc(it.titulo) + '</h2><p class="lede">' + esc(it.subtitulo) + "</p>" +
+      '<div class="panel"><p style="margin:0">' + esc(it.resumen) + "</p></div>" +
+      '<div class="grid4">' + it.veredicto.map(function (v) { return '<div class="stat"><div class="v">' + esc(v.valor) + '</div><div class="l">' + esc(v.etiqueta) + '</div><div class="d">' + esc(v.detalle) + "</div></div>"; }).join("") + "</div>";
+
+    s += '<h2>Qué se corrió</h2><div class="two"><div class="panel"><h3 style="margin-top:0">Configuración</h3>' + kv(it.configuracion) + '</div><div class="panel"><h3 style="margin-top:0">Datos</h3>' + kv(it.datos) + "</div></div>";
+
+    s += "<h2>Tiempos: qué tan seguido acierta dentro de ×2</h2><p class=\"lede\">Porcentaje de síntesis cuyo tiempo predicho queda entre la mitad y el doble del real. Test, todas las síntesis.</p>" +
+         '<div class="panel"><div class="legend"><span><i style="background:var(--base)"></i>Líneas base</span><span><i style="background:var(--a)"></i>Enfoque A</span><span><i style="background:var(--b)"></i>Enfoque B</span></div>' + barras(it) + "</div>";
+
+    s += "<h2>Tabla completa</h2><p class=\"lede\">" + esc(it.tiempos.titulo) + ". En negrita, la mejor variante por dentro de ×2. «Mín. familia» es la peor cobertura entre las 7 familias (objetivo 80 %).</p>" +
+         '<div class="panel tablewrap">' + tablaTiempos(it) + "</div>";
+
+    s += "<h2>Efecto de las esperas del clúster</h2><p class=\"lede\">Mismo modelo, evaluado en test con y sin las síntesis que esperaron en el clúster. El modelo se entrenó con esperas.</p>" +
+         '<div class="panel tablewrap">' + tablaSinEsperas(it) + "</div>";
+
+    s += "<h2>Cobertura del rango 10–90 por familia</h2><p class=\"lede\">El rango debería contener el tiempo real el 80 % de las veces en cada familia. Círculo vacío: ajuste global. Círculo lleno: ajuste por familia.</p>" +
+         '<div class="panel"><div class="seg" id="segcob"><button data-e="c" aria-pressed="true">C-synth</button><button data-e="logic" aria-pressed="false">Lógica</button></div>' +
+         '<div class="legend"><span><i style="background:var(--a)"></i>Enfoque A</span><span><i style="background:var(--b)"></i>Enfoque B</span></div><div id="cobsvg">' + cobertura(it, "c") + "</div></div>";
+
+    s += "<h2>Más datos, mejor modelo</h2><p class=\"lede\">Modelo B entrenado con una fracción de train y evaluado en val. Si la curva siguiera plana, más datos no ayudarían. No se aplana.</p>" +
+         '<div class="panel">' + curva(it) + "</div>";
+
+    s += "<h2>Fallo</h2><p class=\"lede\">Clasificador único para A y B, calibrado, en test.</p><div class=\"panel\">" + fallo(it) + "</div>";
+
+    s += "<h2>Hallazgos</h2>" + hallazgos(it);
+
+    s += "<h2>Camino a seguir: banco de mejoras</h2><p class=\"lede\">Cómo mejorar el dataset y el modelo, con la evidencia que lo respalda. Las marcadas son la propuesta para la siguiente iteración.</p><div id=\"bl\">" + backlog(it) + "</div>";
+
+    var sg = it.siguiente;
+    s += "<h2>" + esc(sg.titulo) + "</h2><div class=\"card next\"><p style=\"margin-top:0\">" + esc(sg.principio) + '</p><ol class="pasos">' + sg.pasos.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") +
+         "</ol><p><b>Criterio de éxito.</b> " + esc(sg.criterio) + "</p></div>";
+
+    s += "<h2>Archivos de esta iteración</h2><div class=\"panel\"><p class=\"meta\" style=\"margin-top:0\">Rutas dentro de <code>MyDrive</code>.</p>" + kv(it.archivos.map(function (a) { return [a[0], a[1]]; })).replace(/<dd>/g, "<dd><code>").replace(/<\/dd>/g, "</code></dd>") + "</div></section>";
+    return s;
+  }
+
+  // ---------- comparar iteraciones ----------
+  function comparar() {
+    var rows = [
+      ["Dentro de ×2 · C-synth", "c_x2", "alto", 3], ["Dentro de ×2 · Lógica", "logic_x2", "alto", 3],
+      ["Error relativo mediano · C-synth", "c_err", "bajo", 3], ["Error relativo mediano · Lógica", "logic_err", "bajo", 3],
+      ["R² en log · C-synth", "c_r2", "alto", 3], ["R² en log · Lógica", "logic_r2", "alto", 3],
+      ["Ancho p90/p10 · C-synth", "c_ancho", "bajo", 2], ["Ancho p90/p10 · Lógica", "logic_ancho", "bajo", 2],
+      ["Cobertura mínima por familia · C-synth", "c_cob_min", "alto", 3], ["Cobertura mínima por familia · Lógica", "logic_cob_min", "alto", 3],
+      ["AUC de fallo", "fallo_auc", "alto", 3], ["AUC-PR de fallo", "fallo_auc_pr", "alto", 3]
+    ];
+    var h = '<section><h2 style="margin-top:8px">Comparar iteraciones</h2><p class="lede">Los mismos números clave de cada iteración, en test. Verde: mejoró contra la iteración anterior. Rojo: empeoró.</p><div class="panel tablewrap"><table><thead><tr><th class="l">Métrica</th>' +
+            ITS.map(function (i) { return "<th>Iter. " + i.id + "</th>"; }).join("") + "</tr></thead><tbody>";
+    rows.forEach(function (r) {
+      h += '<tr><td class="l">' + r[0] + "</td>" + ITS.map(function (it, k) {
+        var v = it.clave[r[1]], cls = "";
+        if (k > 0) { var p = ITS[k - 1].clave[r[1]], d = v - p; if (Math.abs(d) > 1e-9) cls = ((d > 0) === (r[2] === "alto")) ? "num-good" : "num-bad"; }
+        return '<td class="' + cls + '">' + fmt(v, r[3]) + "</td>";
+      }).join("") + "</tr>";
+    });
+    h += "</tbody></table></div><h3>Qué cambió en cada una</h3>";
+    ITS.forEach(function (it) { h += '<div class="card"><header><span class="id">Iter. ' + it.id + "</span><strong>" + esc(it.titulo) + '</strong><span class="meta">' + esc(it.fecha) + "</span></header><p>" + esc(it.resumen) + '</p><p class="meta">' + esc(it.claveNota || "") + "</p></div>"; });
+    return h + "</section>";
+  }
+
+  // ---------- navegación ----------
+  var vista = ITS.length ? String(ITS[ITS.length - 1].id) : "cmp";
+  function pintarTabs() {
+    var h = ITS.map(function (i) { return '<button role="tab" data-v="' + i.id + '" aria-selected="' + (String(i.id) === vista) + '">Iteración ' + i.id + "</button>"; }).join("");
+    if (ITS.length > 1) h += '<button role="tab" data-v="cmp" aria-selected="' + (vista === "cmp") + '">Comparar</button>';
+    tabs.innerHTML = h;
+  }
+  function pintar() {
+    pintarTabs();
+    if (!ITS.length) { main.innerHTML = '<div class="panel">No hay iteraciones cargadas. Revisa los <code>&lt;script&gt;</code> de <code>index.html</code>.</div>'; return; }
+    var it = ITS.filter(function (i) { return String(i.id) === vista; })[0];
+    main.innerHTML = (vista === "cmp" || !it) ? comparar() : verIteracion(it);
+  }
+  tabs.addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; vista = b.dataset.v; try { location.hash = vista; } catch (x) {} pintar(); window.scrollTo(0, 0); });
+  main.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    var it = ITS.filter(function (i) { return String(i.id) === vista; })[0];
+    if (b.closest("#filt")) { catSel = b.dataset.c; document.getElementById("bl").innerHTML = backlog(it); }
+    if (b.closest("#segcob")) {
+      Array.prototype.forEach.call(b.parentNode.children, function (x) { x.setAttribute("aria-pressed", x === b); });
+      document.getElementById("cobsvg").innerHTML = cobertura(it, b.dataset.e);
+    }
+  });
+  var h0 = (location.hash || "").replace("#", ""); if (h0 && (h0 === "cmp" || ITS.some(function (i) { return String(i.id) === h0; }))) vista = h0;
+  pintar();
+})();
+</script>
+</body>
+</html>

@@ -13,7 +13,7 @@ window.RESULTADOS = {
       id: "tiempos",
       titulo: "Estudio de tiempos de síntesis",
       descripcion:
-        "Cuánto tarda realmente sintetizar un acelerador con hls4ml, y cuánto tiempo ahorran el surrogate 07D y el agente. Cinco etapas, de la primera muestra al modelo de costo.",
+        "Cuánto tarda realmente sintetizar un acelerador con hls4ml, y cuánto tiempo ahorran el surrogate 07D y el agente. Cinco etapas, de la primera muestra al modelo de costo, y la bitácora de iteraciones que lo mejora.",
     },
     {
       id: "agente",
@@ -130,6 +130,19 @@ window.RESULTADOS = {
         ["3/3", "tareas ganadas al azar"],
         ["6/7", "subsets con confianza honesta"],
         ["0.907", "R² del 07D en test"],
+      ],
+    },
+    {
+      grupo: "tiempos",
+      archivo: "paginas/08-modelo-tiempos-iteraciones.html",
+      titulo: "Modelo de tiempos · Bitácora de iteraciones",
+      resumen:
+        "Rehace el modelo de costo paso a paso y compara dos enfoques (3 percentiles contra valor esperado). Iteración 1: resultados en test, puntos débiles y banco de mejoras.",
+      fecha: "2026-11-05",
+      etiqueta: "Iteración 1",
+      cifras: [
+        ["91 % / 92 %", "dentro de ×2 (C-synth / lógica)"],
+        ["0.915", "AUC del fallo"],
       ],
     },
   ],

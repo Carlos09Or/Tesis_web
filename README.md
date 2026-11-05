@@ -9,7 +9,7 @@ es HTML, CSS y JavaScript plano.
 | Área | Páginas |
 |---|---|
 | Surrogate 07D | Entrenamiento del surrogate: comparación de 07 a 07F y frente a Purdue |
-| Estudio de tiempos de síntesis | Ronda 400 · Ronda 800 · Ronda 2,000 · Síntesis frente al surrogate y el agente · Modelo de costo de síntesis |
+| Estudio de tiempos de síntesis | Ronda 400 · Ronda 800 · Ronda 2,000 · Síntesis frente al surrogate y el agente · Modelo de costo de síntesis · Modelo de tiempos: bitácora de iteraciones |
 | Agente de predicción y DSE | Informe de evaluación del agente · Informe Capa 4 (DSE) |
 
 ## Estructura
