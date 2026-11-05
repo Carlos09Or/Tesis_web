@@ -474,6 +474,135 @@
     ]
   },
 
+  // ------------------------------------------------------------------
+  // Hiperparámetros: las 8 combinaciones y los resultados por modelo.
+  // "busqueda" es el puntaje en val de CADA combinación. El notebook de la
+  // iteración 1 no lo guardó (solo guardó la ganadora). Se llena con el CSV
+  // que genera colab_busqueda_hiperparametros.py.
+  // ------------------------------------------------------------------
+  hiperparametros: {
+    // el orden es el de la rejilla del notebook: learning rate, hojas, iteraciones
+    combosTiempo: [
+      { id: "H1", lr: 0.05, hojas: 31, iter: 300 }, { id: "H2", lr: 0.05, hojas: 31, iter: 800 },
+      { id: "H3", lr: 0.05, hojas: 63, iter: 300 }, { id: "H4", lr: 0.05, hojas: 63, iter: 800 },
+      { id: "H5", lr: 0.1, hojas: 31, iter: 300 }, { id: "H6", lr: 0.1, hojas: 31, iter: 800 },
+      { id: "H7", lr: 0.1, hojas: 63, iter: 300 }, { id: "H8", lr: 0.1, hojas: 63, iter: 800 }
+    ],
+    combosFallo: [
+      { id: "F1", lr: 0.05, hojas: 31, iter: 200 }, { id: "F2", lr: 0.05, hojas: 31, iter: 500 },
+      { id: "F3", lr: 0.05, hojas: 63, iter: 200 }, { id: "F4", lr: 0.05, hojas: 63, iter: 500 },
+      { id: "F5", lr: 0.1, hojas: 31, iter: 200 }, { id: "F6", lr: 0.1, hojas: 31, iter: 500 },
+      { id: "F7", lr: 0.1, hojas: 63, iter: 200 }, { id: "F8", lr: 0.1, hojas: 63, iter: 500 }
+    ],
+    // combinación ganadora de cada modelo (la que se guardó)
+    ganadoras: [
+      { modelo: "A · C-synth · p10", grupo: "tiempo", id: "H8" },
+      { modelo: "A · C-synth · p50", grupo: "tiempo", id: "H8" },
+      { modelo: "A · C-synth · p90", grupo: "tiempo", id: "H8" },
+      { modelo: "A · Lógica · p10", grupo: "tiempo", id: "H8" },
+      { modelo: "A · Lógica · p50", grupo: "tiempo", id: "H8" },
+      { modelo: "A · Lógica · p90", grupo: "tiempo", id: "H4" },
+      { modelo: "B · C-synth · valor esperado", grupo: "tiempo", id: "H8" },
+      { modelo: "B · Lógica · valor esperado", grupo: "tiempo", id: "H8" },
+      { modelo: "Clasificador de fallo", grupo: "fallo", id: "F8" }
+    ],
+    // resultados en test de lo que cada modelo aporta (todas las síntesis)
+    central: [
+      { etapa: "C-synth", modelo: "A · p50", x2: 0.910, err: 0.133, smape: 0.267, r2: 0.738, spearman: 0.894 },
+      { etapa: "C-synth", modelo: "B · valor esperado", x2: 0.889, err: 0.167, smape: 0.293, r2: 0.815, spearman: 0.915 },
+      { etapa: "Lógica", modelo: "A · p50", x2: 0.922, err: 0.129, smape: 0.252, r2: 0.383, spearman: 0.812 },
+      { etapa: "Lógica", modelo: "B · valor esperado", x2: 0.889, err: 0.176, smape: 0.298, r2: 0.587, spearman: 0.794 }
+    ],
+    rango: [
+      { etapa: "C-synth", modelo: "A · p10 y p90", cobGlobal: 0.803, cobFam: 0.799, ancho: 2.012, anchoFam: 2.053 },
+      { etapa: "C-synth", modelo: "B · margen", cobGlobal: 0.786, cobFam: 0.789, ancho: 2.306, anchoFam: 2.539 },
+      { etapa: "Lógica", modelo: "A · p10 y p90", cobGlobal: 0.784, cobFam: 0.784, ancho: 1.841, anchoFam: 1.876 },
+      { etapa: "Lógica", modelo: "B · margen", cobGlobal: 0.798, cobFam: 0.792, ancho: 2.364, anchoFam: 2.083 }
+    ],
+    clasificador: [["AUC", 0.915], ["AUC-PR", 0.879], ["Brier", 0.113], ["Log-loss", 0.352]],
+    entrenamiento: [
+      { grupo: "A · C-synth", modelos: 3, ajustes: 24, seg: 318 },
+      { grupo: "A · Lógica", modelos: 3, ajustes: 24, seg: 281 },
+      { grupo: "B · C-synth", modelos: 1, ajustes: 8, seg: 64 },
+      { grupo: "B · Lógica", modelos: 1, ajustes: 8, seg: 60 }
+    ],
+    // puntaje en val de cada combinación (72 filas). Fuente: busqueda_hiperparametros.csv, generado en Colab el 2026-11-05
+    busqueda: [
+      {"modelo": "A · C-synth · p10", "id": "H1", "perdida": 0.06293, "frac_bajo": 0.12153, "seg": 13.9},
+      {"modelo": "A · C-synth · p10", "id": "H2", "perdida": 0.05788, "frac_bajo": 0.13656, "seg": 15.3},
+      {"modelo": "A · C-synth · p10", "id": "H3", "perdida": 0.05977, "frac_bajo": 0.13241, "seg": 9.6},
+      {"modelo": "A · C-synth · p10", "id": "H4", "perdida": 0.05644, "frac_bajo": 0.15517, "seg": 20.9},
+      {"modelo": "A · C-synth · p10", "id": "H5", "perdida": 0.0596, "frac_bajo": 0.13055, "seg": 5.6},
+      {"modelo": "A · C-synth · p10", "id": "H6", "perdida": 0.05741, "frac_bajo": 0.1503, "seg": 13.2},
+      {"modelo": "A · C-synth · p10", "id": "H7", "perdida": 0.05681, "frac_bajo": 0.14801, "seg": 9.1},
+      {"modelo": "A · C-synth · p10", "id": "H8", "perdida": 0.05601, "frac_bajo": 0.16791, "seg": 20.0},
+      {"modelo": "A · C-synth · p50", "id": "H1", "perdida": 0.18247, "x2": 0.89794, "r2": 0.73862, "frac_bajo": 0.49571, "seg": 6.9},
+      {"modelo": "A · C-synth · p50", "id": "H2", "perdida": 0.17253, "x2": 0.90338, "r2": 0.75077, "frac_bajo": 0.49914, "seg": 13.8},
+      {"modelo": "A · C-synth · p50", "id": "H3", "perdida": 0.17555, "x2": 0.90152, "r2": 0.74987, "frac_bajo": 0.50573, "seg": 8.2},
+      {"modelo": "A · C-synth · p50", "id": "H4", "perdida": 0.16774, "x2": 0.9051, "r2": 0.76625, "frac_bajo": 0.50759, "seg": 20.6},
+      {"modelo": "A · C-synth · p50", "id": "H5", "perdida": 0.17551, "x2": 0.90223, "r2": 0.74973, "frac_bajo": 0.50301, "seg": 5.6},
+      {"modelo": "A · C-synth · p50", "id": "H6", "perdida": 0.16819, "x2": 0.9071, "r2": 0.75998, "frac_bajo": 0.50616, "seg": 13.6},
+      {"modelo": "A · C-synth · p50", "id": "H7", "perdida": 0.17182, "x2": 0.90252, "r2": 0.75811, "frac_bajo": 0.50043, "seg": 7.3},
+      {"modelo": "A · C-synth · p50", "id": "H8", "perdida": 0.16419, "x2": 0.90839, "r2": 0.76987, "frac_bajo": 0.50573, "seg": 20.3},
+      {"modelo": "A · C-synth · p90", "id": "H1", "perdida": 0.1242, "frac_bajo": 0.8872, "seg": 5.8},
+      {"modelo": "A · C-synth · p90", "id": "H2", "perdida": 0.11801, "frac_bajo": 0.87446, "seg": 14.4},
+      {"modelo": "A · C-synth · p90", "id": "H3", "perdida": 0.11915, "frac_bajo": 0.87675, "seg": 9.2},
+      {"modelo": "A · C-synth · p90", "id": "H4", "perdida": 0.11437, "frac_bajo": 0.85857, "seg": 20.4},
+      {"modelo": "A · C-synth · p90", "id": "H5", "perdida": 0.11986, "frac_bajo": 0.87733, "seg": 5.2},
+      {"modelo": "A · C-synth · p90", "id": "H6", "perdida": 0.11704, "frac_bajo": 0.86101, "seg": 13.4},
+      {"modelo": "A · C-synth · p90", "id": "H7", "perdida": 0.11518, "frac_bajo": 0.8663, "seg": 9.1},
+      {"modelo": "A · C-synth · p90", "id": "H8", "perdida": 0.1127, "frac_bajo": 0.84583, "seg": 19.8},
+      {"modelo": "B · C-synth · valor esperado", "id": "H1", "perdida": 0.49923, "x2": 0.85686, "r2": 0.78577, "seg": 4.0},
+      {"modelo": "B · C-synth · valor esperado", "id": "H2", "perdida": 0.45166, "x2": 0.86888, "r2": 0.80619, "seg": 9.6},
+      {"modelo": "B · C-synth · valor esperado", "id": "H3", "perdida": 0.45401, "x2": 0.86974, "r2": 0.80518, "seg": 5.7},
+      {"modelo": "B · C-synth · valor esperado", "id": "H4", "perdida": 0.40441, "x2": 0.88205, "r2": 0.82646, "seg": 13.0},
+      {"modelo": "B · C-synth · valor esperado", "id": "H5", "perdida": 0.46645, "x2": 0.86559, "r2": 0.79984, "seg": 4.5},
+      {"modelo": "B · C-synth · valor esperado", "id": "H6", "perdida": 0.41907, "x2": 0.87618, "r2": 0.82017, "seg": 8.5},
+      {"modelo": "B · C-synth · valor esperado", "id": "H7", "perdida": 0.41981, "x2": 0.88076, "r2": 0.81986, "seg": 5.6},
+      {"modelo": "B · C-synth · valor esperado", "id": "H8", "perdida": 0.38874, "x2": 0.89135, "r2": 0.83319, "seg": 11.9},
+      {"modelo": "A · Lógica · p10", "id": "H1", "perdida": 0.05963, "frac_bajo": 0.1085, "seg": 6.9},
+      {"modelo": "A · Lógica · p10", "id": "H2", "perdida": 0.05699, "frac_bajo": 0.12783, "seg": 14.2},
+      {"modelo": "A · Lógica · p10", "id": "H3", "perdida": 0.05814, "frac_bajo": 0.12539, "seg": 7.9},
+      {"modelo": "A · Lógica · p10", "id": "H4", "perdida": 0.05643, "frac_bajo": 0.14429, "seg": 21.8},
+      {"modelo": "A · Lógica · p10", "id": "H5", "perdida": 0.05823, "frac_bajo": 0.12411, "seg": 4.9},
+      {"modelo": "A · Lógica · p10", "id": "H6", "perdida": 0.05677, "frac_bajo": 0.13942, "seg": 13.4},
+      {"modelo": "A · Lógica · p10", "id": "H7", "perdida": 0.05685, "frac_bajo": 0.13699, "seg": 8.3},
+      {"modelo": "A · Lógica · p10", "id": "H8", "perdida": 0.05601, "frac_bajo": 0.15445, "seg": 20.2},
+      {"modelo": "A · Lógica · p50", "id": "H1", "perdida": 0.17706, "x2": 0.9164, "r2": 0.31744, "frac_bajo": 0.5073, "seg": 5.4},
+      {"modelo": "A · Lógica · p50", "id": "H2", "perdida": 0.17206, "x2": 0.92156, "r2": 0.35828, "frac_bajo": 0.51331, "seg": 13.9},
+      {"modelo": "A · Lógica · p50", "id": "H3", "perdida": 0.17314, "x2": 0.92285, "r2": 0.34398, "frac_bajo": 0.51589, "seg": 9.4},
+      {"modelo": "A · Lógica · p50", "id": "H4", "perdida": 0.16918, "x2": 0.92413, "r2": 0.36104, "frac_bajo": 0.51646, "seg": 19.3},
+      {"modelo": "A · Lógica · p50", "id": "H5", "perdida": 0.17427, "x2": 0.91941, "r2": 0.34278, "frac_bajo": 0.51374, "seg": 4.6},
+      {"modelo": "A · Lógica · p50", "id": "H6", "perdida": 0.16997, "x2": 0.92027, "r2": 0.36652, "frac_bajo": 0.51646, "seg": 12.7},
+      {"modelo": "A · Lógica · p50", "id": "H7", "perdida": 0.17177, "x2": 0.91855, "r2": 0.36819, "frac_bajo": 0.50344, "seg": 8.5},
+      {"modelo": "A · Lógica · p50", "id": "H8", "perdida": 0.16892, "x2": 0.91812, "r2": 0.38936, "frac_bajo": 0.51002, "seg": 18.4},
+      {"modelo": "A · Lógica · p90", "id": "H1", "perdida": 0.13185, "frac_bajo": 0.88978, "seg": 5.1},
+      {"modelo": "A · Lógica · p90", "id": "H2", "perdida": 0.12803, "frac_bajo": 0.87833, "seg": 13.7},
+      {"modelo": "A · Lógica · p90", "id": "H3", "perdida": 0.12781, "frac_bajo": 0.88191, "seg": 9.0},
+      {"modelo": "A · Lógica · p90", "id": "H4", "perdida": 0.12631, "frac_bajo": 0.86659, "seg": 19.7},
+      {"modelo": "A · Lógica · p90", "id": "H5", "perdida": 0.1291, "frac_bajo": 0.88277, "seg": 5.5},
+      {"modelo": "A · Lógica · p90", "id": "H6", "perdida": 0.12741, "frac_bajo": 0.86788, "seg": 12.2},
+      {"modelo": "A · Lógica · p90", "id": "H7", "perdida": 0.12825, "frac_bajo": 0.86917, "seg": 8.5},
+      {"modelo": "A · Lógica · p90", "id": "H8", "perdida": 0.12646, "frac_bajo": 0.85457, "seg": 18.5},
+      {"modelo": "B · Lógica · valor esperado", "id": "H1", "perdida": 0.63834, "x2": 0.85585, "r2": 0.45764, "seg": 3.9},
+      {"modelo": "B · Lógica · valor esperado", "id": "H2", "perdida": 0.57671, "x2": 0.86759, "r2": 0.51001, "seg": 9.1},
+      {"modelo": "B · Lógica · valor esperado", "id": "H3", "perdida": 0.57856, "x2": 0.87017, "r2": 0.50843, "seg": 5.2},
+      {"modelo": "B · Lógica · valor esperado", "id": "H4", "perdida": 0.52511, "x2": 0.88133, "r2": 0.55384, "seg": 12.7},
+      {"modelo": "B · Lógica · valor esperado", "id": "H5", "perdida": 0.59954, "x2": 0.86502, "r2": 0.49061, "seg": 3.9},
+      {"modelo": "B · Lógica · valor esperado", "id": "H6", "perdida": 0.54297, "x2": 0.87489, "r2": 0.53867, "seg": 8.5},
+      {"modelo": "B · Lógica · valor esperado", "id": "H7", "perdida": 0.53906, "x2": 0.87575, "r2": 0.542, "seg": 4.5},
+      {"modelo": "B · Lógica · valor esperado", "id": "H8", "perdida": 0.50159, "x2": 0.89164, "r2": 0.57383, "seg": 12.2},
+      {"modelo": "Clasificador de fallo", "id": "F1", "perdida": 0.40933, "auc": 0.8757, "seg": 4.7},
+      {"modelo": "Clasificador de fallo", "id": "F2", "perdida": 0.39352, "auc": 0.88784, "seg": 9.6},
+      {"modelo": "Clasificador de fallo", "id": "F3", "perdida": 0.39777, "auc": 0.885, "seg": 5.8},
+      {"modelo": "Clasificador de fallo", "id": "F4", "perdida": 0.37531, "auc": 0.90044, "seg": 11.7},
+      {"modelo": "Clasificador de fallo", "id": "F5", "perdida": 0.39869, "auc": 0.88399, "seg": 5.1},
+      {"modelo": "Clasificador de fallo", "id": "F6", "perdida": 0.37589, "auc": 0.89994, "seg": 8.3},
+      {"modelo": "Clasificador de fallo", "id": "F7", "perdida": 0.38134, "auc": 0.89565, "seg": 5.8},
+      {"modelo": "Clasificador de fallo", "id": "F8", "perdida": 0.35354, "auc": 0.91346, "seg": 10.9}
+    ]
+  },
+
   archivos: [
     ["Modelos entrenados", "wa_hls4ml_modelo_tiempo_v2/modelos/modelos_tiempos_A_y_B.joblib"],
     ["Comparación de enfoques en test", "wa_hls4ml_modelo_tiempo_v2/test/comparacion_enfoques_test.csv"],
@@ -494,6 +623,7 @@
   },
   claveNota: "Enfoque A con ajuste por familia, test, todas las síntesis."
 });
+
 </script>
 
 <script>
@@ -756,6 +886,84 @@
     return h;
   }
 
+  // ---------- hiperparámetros ----------
+  function verHiperparametros(it) {
+    var H = it.hiperparametros, h = "", fl = function (v, d) { return fmt(v, d); };
+    var combo = function (c) { return "lr " + fmt(c.lr, 2) + " · " + c.hojas + " hojas · " + c.iter + " it."; };
+
+    h += "<h2>La rejilla: 8 combinaciones por modelo</h2><p class=\"lede\">Cada modelo entrena las 8 combinaciones con los datos de train y se queda con la que da la menor pérdida en val. Se combinan 2 learning rate, 2 tamaños de árbol y 2 números de iteraciones. Todo lo demás es igual en todas: <code>min_samples_leaf</code> 40, <code>l2_regularization</code> 1,0, sin parada temprana y la misma semilla.</p>";
+    h += '<div class="two"><div class="panel tablewrap"><h3 style="margin-top:0">Modelos de tiempo (8 modelos)</h3><table><thead>' + th(["Combinación", "learning rate", "Hojas máx.", "Iteraciones"]) + "</thead><tbody>" +
+      H.combosTiempo.map(function (c) { return '<tr><td class="l"><b>' + c.id + "</b></td><td>" + fmt(c.lr, 2) + "</td><td>" + c.hojas + "</td><td>" + c.iter + "</td></tr>"; }).join("") + '</tbody></table></div>' +
+      '<div class="panel tablewrap"><h3 style="margin-top:0">Clasificador de fallo (1 modelo)</h3><table><thead>' + th(["Combinación", "learning rate", "Hojas máx.", "Iteraciones"]) + "</thead><tbody>" +
+      H.combosFallo.map(function (c) { return '<tr><td class="l"><b>' + c.id + "</b></td><td>" + fmt(c.lr, 2) + "</td><td>" + c.hojas + "</td><td>" + c.iter + "</td></tr>"; }).join("") + "</tbody></table></div></div>";
+
+    // quién ganó cada combinación
+    var cuenta = {}, nT = 0, nF = 0;
+    H.ganadoras.forEach(function (g) { cuenta[g.id] = (cuenta[g.id] || 0) + 1; if (g.grupo === "tiempo") nT++; else nF++; });
+    h += "<h3>Cuántos modelos ganó cada combinación</h3><div class=\"panel\">";
+    H.combosTiempo.forEach(function (c) { h += '<div class="barrow" style="grid-template-columns:260px 1fr 70px"><span>' + c.id + " · " + combo(c) + '</span><div class="track"><div class="fill" style="width:' + ((cuenta[c.id] || 0) / nT * 100) + '%;background:var(--a)"></div></div><span class="val">' + (cuenta[c.id] || 0) + " de " + nT + "</span></div>"; });
+    h += '<div style="height:10px"></div>';
+    H.combosFallo.forEach(function (c) { h += '<div class="barrow" style="grid-template-columns:260px 1fr 70px"><span>' + c.id + " · " + combo(c) + '</span><div class="track"><div class="fill" style="width:' + ((cuenta[c.id] || 0) / nF * 100) + '%;background:var(--b)"></div></div><span class="val">' + (cuenta[c.id] || 0) + " de " + nF + "</span></div>"; });
+    h += '<p class="meta" style="margin-bottom:0">H8 y F8 son las combinaciones más grandes de cada rejilla. Si casi todos los modelos eligen la más grande, el mejor valor puede estar fuera de la rejilla.</p></div>';
+
+    h += "<h3>La combinación que se guardó en cada modelo</h3><div class=\"panel tablewrap\"><table><thead>" + th(["Modelo", "Combinación", "Detalle"], [0, 1, 2]) + "</thead><tbody>" +
+      H.ganadoras.map(function (g) {
+        var c = (g.grupo === "tiempo" ? H.combosTiempo : H.combosFallo).filter(function (x) { return x.id === g.id; })[0];
+        return '<tr><td class="l">' + esc(g.modelo) + '</td><td class="l"><b>' + g.id + '</b></td><td class="l">' + combo(c) + "</td></tr>";
+      }).join("") + "</tbody></table></div>";
+
+    // resultados por modelo (test)
+    h += "<h2>Resultados de cada modelo, en test</h2><p class=\"lede\">Lo que aporta cada modelo, medido con las síntesis de test. A y B se comparan con los mismos datos. Los modelos p10 y p90 de A no se evalúan solos: se miden juntos como rango.</p>";
+    var par = function (rows, key, etq, max) {
+      var s = "";
+      ["C-synth", "Lógica"].forEach(function (et) {
+        var a = rows.filter(function (r) { return r.etapa === et && r.modelo.charAt(0) === "A"; })[0], b = rows.filter(function (r) { return r.etapa === et && r.modelo.charAt(0) === "B"; })[0];
+        s += '<div class="barrow" style="grid-template-columns:140px 1fr 110px"><span>' + et + " · " + etq + '</span><div><div class="track" style="margin-bottom:3px"><div class="fill" style="width:' + (Math.max(a[key], 0) / max * 100) + '%;background:var(--a)"></div></div><div class="track"><div class="fill" style="width:' + (Math.max(b[key], 0) / max * 100) + '%;background:var(--b)"></div></div></div><span class="val">' + fmt(a[key]) + " · " + fmt(b[key]) + "</span></div>";
+      });
+      return s;
+    };
+    h += '<div class="panel"><div class="legend"><span><i style="background:var(--a)"></i>A · p50</span><span><i style="background:var(--b)"></i>B · valor esperado</span><span>Los valores van A · B</span></div>' +
+      par(H.central, "x2", "dentro de ×2", 1) + par(H.central, "spearman", "Spearman", 1) + par(H.central, "r2", "R² en log", 1) + "</div>";
+    h += '<div class="panel tablewrap" style="margin-top:12px"><h3 style="margin-top:0">Predicción central</h3><table><thead>' + th(["Etapa", "Modelo", "Dentro ×2", "Error rel. mediano", "sMAPE", "R² log", "Spearman"], [0, 1]) + "</thead><tbody>" +
+      H.central.map(function (r) { return '<tr><td class="l">' + r.etapa + '</td><td class="l">' + esc(r.modelo) + "</td><td>" + fmt(r.x2) + "</td><td>" + fmt(r.err) + "</td><td>" + fmt(r.smape) + "</td><td>" + fmt(r.r2) + "</td><td>" + fmt(r.spearman) + "</td></tr>"; }).join("") + "</tbody></table></div>";
+    h += '<div class="two" style="margin-top:12px"><div class="panel tablewrap"><h3 style="margin-top:0">Rango 10–90</h3><table><thead>' + th(["Etapa", "Modelo", "Cobertura global", "Cobertura por familia", "Ancho"], [0, 1]) + "</thead><tbody>" +
+      H.rango.map(function (r) { return '<tr><td class="l">' + r.etapa + '</td><td class="l">' + esc(r.modelo) + "</td><td>" + fmt(r.cobGlobal) + "</td><td>" + fmt(r.cobFam) + "</td><td>" + fmt(r.ancho, 2) + "</td></tr>"; }).join("") + '</tbody></table></div>' +
+      '<div class="panel"><h3 style="margin-top:0">Clasificador de fallo</h3>' + kv(H.clasificador.map(function (r) { return [r[0], fmt(r[1])]; })) + '<h3>Entrenamiento</h3><table><thead>' + th(["Grupo", "Modelos", "Ajustes", "Segundos"], [0]) + "</thead><tbody>" +
+      H.entrenamiento.map(function (r) { return '<tr><td class="l">' + r.grupo + "</td><td>" + r.modelos + "</td><td>" + r.ajustes + "</td><td>" + r.seg + "</td></tr>"; }).join("") + "</tbody></table></div></div>";
+
+    // puntaje de las 8 combinaciones
+    h += "<h2>Puntaje de las 8 combinaciones</h2>";
+    if (!H.busqueda || !H.busqueda.length) {
+      h += '<div class="find warn"><h4>Pendiente<span class="tag hip">por medir</span></h4><p>El notebook de la iteración 1 solo guardó la combinación ganadora de cada modelo, no el puntaje de las otras 7. Por eso aquí no se pueden comparar las 8. Se obtiene corriendo en Colab el script <code>colab_busqueda_hiperparametros.py</code>: repite las mismas búsquedas (mismos datos y semilla), así que las ganadoras no cambian, y guarda el puntaje en val de cada combinación. Cuando se tenga el CSV, esta tabla se llena sola.</p></div>';
+      return h;
+    }
+    var B = H.busqueda, mods = H.ganadoras.map(function (g) { return g.modelo; });
+    function celda(v, vals, d, menor) {
+      if (v == null) return "<td>—</td>";
+      var mn = Math.min.apply(null, vals), mxv = Math.max.apply(null, vals), t = mxv === mn ? 0 : (menor ? (mxv - v) : (v - mn)) / (mxv - mn);
+      var gan = menor ? v === mn : v === mxv;
+      return '<td style="background:color-mix(in srgb, var(--accent) ' + Math.round(t * 28) + '%, transparent);' + (gan ? "font-weight:700;" : "") + '">' + fmt(v, d) + "</td>";
+    }
+    function matriz(campo, d, menor, filtro, titulo, nota) {
+      var s = '<h3>' + titulo + '</h3><div class="panel tablewrap"><table><thead>' + th(["Modelo"].concat([1, 2, 3, 4, 5, 6, 7, 8].map(function (i) { return "#" + i; }))) + "</thead><tbody>";
+      mods.filter(filtro).forEach(function (m) {
+        var g = H.ganadoras.filter(function (x) { return x.modelo === m; })[0], pref = g.grupo === "tiempo" ? "H" : "F";
+        var fila = [1, 2, 3, 4, 5, 6, 7, 8].map(function (i) { var r = B.filter(function (x) { return x.modelo === m && x.id === pref + i; })[0]; return r ? r[campo] : null; });
+        var vals = fila.filter(function (v) { return v != null; });
+        s += '<tr><td class="l">' + esc(m) + "</td>" + fila.map(function (v) { return celda(v, vals, d, menor); }).join("") + "</tr>";
+      });
+      return s + "</tbody></table>" + (nota ? '<p class="meta" style="margin-bottom:0">' + nota + "</p>" : "") + "</div>";
+    }
+    h += '<p class="lede">Puntaje en val de cada combinación (#1 a #8, en el orden de las tablas de arriba). En negrita, la que ganó. Más oscuro, mejor dentro de cada fila.</p>';
+    h += matriz("perdida", 4, true, function () { return true; }, "Pérdida en val (menor es mejor)", "La pérdida es pinball en A, error cuadrático en log en B y log-loss en el clasificador. Cada fila usa su propia escala.");
+    h += matriz("x2", 3, false, function (m) { return /p50|valor esperado/.test(m); }, "Dentro de ×2 en val (mayor es mejor)", "");
+    h += matriz("r2", 3, false, function (m) { return /p50|valor esperado/.test(m); }, "R² en log en val (mayor es mejor)", "");
+    h += matriz("frac_bajo", 3, true, function (m) { return /p10|p90/.test(m); }, "Fracción de reales por debajo del percentil", "Ideal: 0,10 en p10 y 0,90 en p90. Cuanto más cerca, mejor calibrado el modelo.");
+    h += matriz("auc", 3, false, function (m) { return /Clasificador/.test(m); }, "AUC del clasificador en val (mayor es mejor)", "");
+    h += matriz("seg", 0, true, function () { return true; }, "Segundos de entrenamiento", "");
+    return h;
+  }
+
   // ---------- vista de una iteración ----------
   function verIteracion(it) {
     var s = '<section><p class="meta"><span class="badge">' + esc(it.estado) + "</span> · " + esc(it.fecha) + " · " + esc(it.notebook) + "</p>" +
@@ -764,8 +972,9 @@
       '<div class="grid4">' + it.veredicto.map(function (v) { return '<div class="stat"><div class="v">' + esc(v.valor) + '</div><div class="l">' + esc(v.etiqueta) + '</div><div class="d">' + esc(v.detalle) + "</div></div>"; }).join("") + "</div>";
 
     if (it.metodologia) {
-      s += '<div class="seg" id="segsub" style="margin-top:22px"><button data-s="res" aria-pressed="' + (sub === "res") + '">Resultados</button><button data-s="met" aria-pressed="' + (sub === "met") + '">Cómo se hizo</button></div>';
+      s += '<div class="seg" id="segsub" style="margin-top:22px"><button data-s="res" aria-pressed="' + (sub === "res") + '">Resultados</button><button data-s="met" aria-pressed="' + (sub === "met") + '">Cómo se hizo</button>' + (it.hiperparametros ? '<button data-s="hip" aria-pressed="' + (sub === "hip") + '">Hiperparámetros</button>' : "") + '</div>';
       if (sub === "met") return s + verMetodologia(it) + "</section>";
+      if (sub === "hip" && it.hiperparametros) return s + verHiperparametros(it) + "</section>";
     }
     s += '<h2>Qué se corrió</h2><div class="two"><div class="panel"><h3 style="margin-top:0">Configuración</h3>' + kv(it.configuracion) + '</div><div class="panel"><h3 style="margin-top:0">Datos</h3>' + kv(it.datos) + "</div></div>";
 
