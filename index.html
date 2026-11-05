@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Resultados de la tesis · hls4ml</title>
-<meta name="description" content="Resultados unificados de la tesis: estudio de tiempos de síntesis, surrogate 07D y agente de predicción para hls4ml.">
+<meta name="description" content="Qué se hizo en cada notebook de la tesis y sus resultados: datos, surrogate 07D, tiempos de síntesis y agente para hls4ml.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -14,12 +14,29 @@
 <main>
   <header class="hero">
     <span class="eyebrow">Tesis · wa-hls4ml · surrogate 07D y agente</span>
-    <h1>Resultados de la tesis</h1>
-    <p class="lede">Un solo lugar para todas las páginas de resultados: cuánto tarda sintetizar un acelerador, cuánto ahorra el surrogate 07D y qué tan bien responde el agente.</p>
+    <h1>Qué hice y qué salió</h1>
+    <p class="lede">Cada notebook resumido en una página: qué hace, qué entra y sale, las cifras clave y qué se verificó. Junto a eso, todas las páginas de resultados.</p>
     <div class="stats" id="stats" aria-label="Resumen del sitio"></div>
+    <nav class="saltos" aria-label="Secciones">
+      <a href="#flujo">El flujo en una vista</a>
+      <a href="#ruta">Notebook por notebook</a>
+      <a href="#resultados">Resultados</a>
+      <a href="paginas/09-auditoria-datos-notebooks.html">Auditoría de los datos</a>
+    </nav>
   </header>
 
-  <div id="grupos"></div>
+  <section id="flujo" aria-labelledby="h-flujo">
+    <h2 id="h-flujo">El flujo de datos en una vista</h2>
+    <p class="grupo-desc">Del JSON crudo de wa-hls4ml al modelo que usa el agente. Cada caja abre el resumen de su notebook.</p>
+    <ol class="flujo" id="flujo-lista"></ol>
+  </section>
+
+  <div id="ruta"></div>
+
+  <div id="resultados">
+    <h2 class="titulo-seccion">Resultados</h2>
+    <div id="grupos"></div>
+  </div>
 
   <section class="pendientes" aria-labelledby="h-pend">
     <h2 id="h-pend">Pendiente de incorporar</h2>
@@ -28,9 +45,10 @@
     </ul>
   </section>
 
-  <footer>Cada página es independiente y se conserva tal como se publicó. Para añadir una, ver el <code>README.md</code> del repositorio.</footer>
+  <footer>Los notebooks no están en este repositorio: aquí está su resumen y los resultados. Para añadir uno, ver el <code>README.md</code>.</footer>
 </main>
 
+<script src="data/notebooks.js"></script>
 <script src="data/resultados.js"></script>
 <script src="assets/index.js"></script>
 </body>

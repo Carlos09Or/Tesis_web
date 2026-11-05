@@ -4,6 +4,12 @@
 window.RESULTADOS = {
   grupos: [
     {
+      id: "datos",
+      titulo: "Verificación de los datos",
+      descripcion:
+        "Si la data que entra al entrenamiento es correcta: conteos, fuga entre particiones y reproducción del modelo desde los datos crudos.",
+    },
+    {
       id: "surrogate",
       titulo: "Surrogate 07D",
       descripcion:
@@ -23,6 +29,20 @@ window.RESULTADOS = {
     },
   ],
   paginas: [
+    {
+      grupo: "datos",
+      archivo: "paginas/09-auditoria-datos-notebooks.html",
+      titulo: "Auditoría de los datos y los notebooks",
+      resumen:
+        "Revisión de los notebooks 01 a 07 y reproducción del 07D desde los JSON crudos: qué está bien y los cinco puntos por corregir.",
+      fecha: "2026-11-05",
+      etiqueta: "Verificación",
+      cifras: [
+        ["0", "errores que afecten al entrenamiento"],
+        ["0", "diseños repetidos entre splits"],
+        ["0.98 a 1.05", "reproducido frente a oficial"],
+      ],
+    },
     {
       grupo: "surrogate",
       archivo: "paginas/00-entrenamiento-surrogate-07d.html",

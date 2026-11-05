@@ -207,7 +207,7 @@
     <h2 id="s-limites">Qué no está demostrado</h2>
     <ul class="plain">
       <li>No se reconstruyó Purdue completo (variables, arquitectura, loss y escalado exactos) sobre los artefactos auditados, así que la diferencia de unos 0.05 de R² no se puede asignar a una sola decisión.</li>
-      <li>No hay una ablación aislada de <code>io_type</code>, y por eso no se sabe cuánto R² aporta por sí sola. Es una configuración HLS legítima, pero en wa-hls4ml coincide con la familia del diseño.</li>
+      <li>No hay una ablación aislada de <code>io_type</code>, y por eso no se sabe cuánto R² aporta por sí sola. Es una configuración HLS legítima, pero en los datos canónicos solo viene explícita en el subset 2_20 (9,539 de 619,601 diseños) y es nula en el resto, así que como variable funciona casi como una etiqueta de ese subset.</li>
       <li>Para el 07D no se documentó una prueba fuera de distribución equivalente a la de Purdue, así que no se sabe cómo se comporta allí.</li>
     </ul>
   </section>

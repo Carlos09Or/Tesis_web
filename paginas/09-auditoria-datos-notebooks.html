@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Auditoría de los datos y los notebooks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  /* Layout: una columna de lectura (~780px); veredicto primero, luego las pruebas y los avisos */
+  :root {
+    --bg: #F7F8FA; --surface: #FFFFFF; --fg: #17202E; --muted: #5B6676; --line: #DDE2EA; --tint: #EEF2FB;
+    --ok: #0F8A6A; --ok-soft: #DDF1EA; --warn: #B45309; --warn-soft: #F7EAD2; --base: #9AA6B7; --blue: #2E5BDB;
+    --f-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --f-body: "Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif;
+    --f-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0F141C; --surface: #161D28; --fg: #E6EAF1; --muted: #9AA6B7; --line: #2A3444; --tint: #1A2436;
+      --ok: #3CC9A0; --ok-soft: #13302A; --warn: #FBBF24; --warn-soft: #33290F; --base: #5E6B7E; --blue: #6E93FF;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 17px; line-height: 1.55;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  main { max-width: 780px; margin: 0 auto; padding-block: 40px 64px; display: flex; flex-direction: column; gap: 48px; }
+  h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+  h1 { font-size: clamp(30px, 6vw, 46px); font-weight: 800; line-height: 1.06; }
+  h2 { font-size: 24px; font-weight: 700; }
+  h3 { font-size: 17px; font-weight: 700; }
+  p { margin: 0; max-width: 68ch; }
+  section { display: flex; flex-direction: column; gap: 16px; }
+  .eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .lede { font-size: 19px; color: var(--muted); }
+  code { font-family: var(--f-mono); font-size: .86em; background: var(--tint); padding: 1px 5px; border-radius: 4px; }
+
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  .fact { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .fact b { font-family: var(--f-display); font-size: 30px; font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .fact span { font-size: 14px; color: var(--muted); line-height: 1.35; }
+  .fact.ok b { color: var(--ok); }
+  .verdict { background: var(--ok-soft); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+  .verdict strong { font-family: var(--f-display); font-size: 17px; color: var(--ok); }
+
+  figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  figcaption { font-size: 14px; color: var(--muted); }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 14px; color: var(--muted); }
+  .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+  svg { width: 100%; height: auto; display: block; }
+  svg text { fill: var(--fg); font-family: var(--f-body); font-size: 13px; }
+  svg .lbl { font-family: var(--f-mono); font-size: 12px; fill: var(--muted); }
+  svg .grid { stroke: var(--line); stroke-width: 1; }
+
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; font-variant-numeric: tabular-nums; min-width: 560px; }
+  th, td { text-align: right; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-family: var(--f-display); font-weight: 700; font-size: 13.5px; color: var(--muted); }
+  td.txt { text-align: left; white-space: normal; min-width: 240px; }
+  td.si { color: var(--ok); font-weight: 700; }
+
+  .avisos { display: flex; flex-direction: column; gap: 12px; }
+  .aviso { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--warn); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+  .aviso.leve { border-left-color: var(--base); }
+  .aviso b { font-family: var(--f-display); font-size: 16.5px; }
+  .aviso span { font-size: 15.5px; color: var(--muted); }
+  .sev { font-family: var(--f-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--warn); }
+  .aviso.leve .sev { color: var(--muted); }
+  ul.plain { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+  .note { border-left: 3px solid var(--warn); padding: 4px 0 4px 14px; color: var(--muted); font-size: 15.5px; }
+  footer { color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+</head>
+<body><!-- tr-nav --><script src="../data/resultados.js"></script><script src="../assets/nav.js"></script>
+<main>
+  <header style="display:flex;flex-direction:column;gap:14px">
+    <span class="eyebrow">Verificación · notebooks 01 a 07 · 5 nov 2026</span>
+    <h1>¿Está bien la data que entra al entrenamiento?</h1>
+    <p class="lede">Revisé las salidas de cada notebook y, por separado, rehice el camino completo desde los JSON crudos hasta la predicción del 07D para ver si coincide con lo que reportó Colab.</p>
+  </header>
+
+  <section aria-labelledby="s-resumen">
+    <h2 id="s-resumen">En 30 segundos</h2>
+    <div class="facts">
+      <div class="fact ok"><b>0</b><span>errores que afecten al entrenamiento</span></div>
+      <div class="fact ok"><b>0</b><span>diseños repetidos entre train, val y test</span></div>
+      <div class="fact"><b>3,500</b><span>diseños reproducidos de punta a punta (500 por subset)</span></div>
+      <div class="fact"><b>5</b><span>puntos menores por corregir</span></div>
+    </div>
+    <div class="verdict">
+      <strong>La data es correcta y reproducible.</strong>
+      <p>Los conteos salen idénticos desde el dato crudo, no hay fuga entre particiones y el modelo reconstruido desde cero reproduce las métricas oficiales en los 7 subsets. Lo que queda son detalles de limpieza y de documentación.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="s-pruebas">
+    <h2 id="s-pruebas">Qué comprobé</h2>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Prueba</th><th style="text-align:left">Cómo</th><th>Resultado</th></tr></thead>
+        <tbody>
+          <tr><td>Conteos</td><td class="txt">Limpié el JSON crudo con la misma regla y conté</td><td class="si">433,676 · 92,992 · 92,933, exactos</td></tr>
+          <tr><td>Fuga entre splits</td><td class="txt">Comparé ids y la arquitectura con su configuración (sin nombres de capa)</td><td class="si">0 repetidos</td></tr>
+          <tr><td>Distribuciones</td><td class="txt">Prueba KS de train frente a val y test, por subset y objetivo</td><td class="si">sin diferencias (p &lt; 0.01)</td></tr>
+          <tr><td>Punta a punta</td><td class="txt">Crudo, canonicalización, variables y 07D local; comparé con las métricas oficiales</td><td class="si">cociente 0.98 a 1.05</td></tr>
+          <tr><td>Escaladores</td><td class="txt">Leí los contratos y los artefactos guardados</td><td class="si">solo train: 433,676 muestras</td></tr>
+          <tr><td>Selección</td><td class="txt">Revisé qué se eligió con validación y qué con test</td><td class="si">test solo al final</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="s-embudo">
+    <h2 id="s-embudo">Dónde se pierden datos en la limpieza</h2>
+    <p>De los 478,216 diseños crudos de train quedan 433,676. Lo que se descarta son síntesis que fallaron, y se concentra en las convolucionales.</p>
+    <figure>
+      <div class="legend"><span><i style="background:var(--blue)"></i>Se conserva</span><span><i style="background:var(--base)"></i>Se descarta (síntesis fallida)</span></div>
+      <div id="chart-embudo"></div>
+      <figcaption>Porcentaje de los diseños crudos de train de cada subset. 2_20, 2layer y 3layer casi no pierden nada.</figcaption>
+    </figure>
+  </section>
+
+  <section aria-labelledby="s-repro">
+    <h2 id="s-repro">El modelo reconstruido coincide con el de Colab</h2>
+    <p>Tomé 500 diseños de test por subset al azar, los pasé por el código de los notebooks 02B y 04 y por el 07D local, y comparé su error con el que midió el notebook en el test completo.</p>
+    <figure>
+      <div class="legend"><span><i style="background:var(--blue)"></i>Reproducido (500 por subset)</span><span><i style="background:var(--base)"></i>Oficial (test completo)</span></div>
+      <div id="chart-repro"></div>
+      <figcaption>SMAPE medio de los seis objetivos, en %. Las barras casi se superponen en todos los subsets.</figcaption>
+    </figure>
+    <p class="note">Esto prueba que el código y los artefactos guardados son consistentes entre sí. No tengo en local los archivos intermedios de Drive, así que sus conteos los comprobé por las salidas de los notebooks.</p>
+  </section>
+
+  <section aria-labelledby="s-avisos">
+    <h2 id="s-avisos">Los puntos menores</h2>
+    <div class="avisos">
+      <div class="aviso"><span class="sev">Documentación · corregido en este sitio</span><b>«619,601 muestras de entrenamiento» es incorrecto</b><span>619,601 es el total de train, val y test. El train real es 433,676. Sigue mal en tres archivos locales y en el artifact original del Informe Capa 4.</span></div>
+      <div class="aviso"><span class="sev">Métrica</span><b>R² de BRAM en latency sale −8.3e42</b><span>BRAM vale siempre 0 en ese subset, así que el R² no está definido. Cualquier promedio de R² por subset se rompe; conviene tratarlo como NaN.</span></div>
+      <div class="aviso"><span class="sev">Pruebas</span><b>Los fixtures de equivalencia cubren poco</b><span>Las 7 muestras «Dense» salen todas de 2_20. Los subsets 2layer, 3layer, latency y resource no están. Conviene regenerarlos con muestreo estratificado.</span></div>
+      <div class="aviso leve"><span class="sev">Dato</span><b>io_type solo existe en 2_20</b><span>Viene explícito en 9,539 de 619,601 diseños y es nulo en el resto. Excluirlo, como hace el 07D, es correcto.</span></div>
+      <div class="aviso leve"><span class="sev">Limpieza</span><b>Celdas con error sin efecto</b><span>Dos celdas de exploración en el notebook 01 y una línea sobrante en la celda 14 de Mejor_Modelo_07 dan NameError. Conviene borrarlas.</span></div>
+    </div>
+    <p>Una nota para el agente: el índice RAG tiene 683,171 diseños, que es el total crudo. Incluye los 63,570 sin resultados de síntesis.</p>
+  </section>
+
+  <footer>Detalle por notebook: <a href="../index.html#ruta">Notebook por notebook</a>. Código de las pruebas: reproducción en 3,500 diseños con el código de los notebooks 02B y 04 y el 07D local; recuento y prueba de fuga con los JSON crudos de wa-hls4ml.</footer>
+</main>
+
+<script>
+  const NS = "http://www.w3.org/2000/svg";
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  function el(tag, attrs, text) {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  // Embudo: % conservado por subset (train crudo -> limpio)
+  (function () {
+    const rows = [["2_20", 6677, 6677], ["2layer", 45716, 45716], ["3layer", 338231, 338229], ["latency", 20154, 15114],
+                  ["resource", 15293, 9966], ["conv1d", 21894, 9248], ["conv2d", 30253, 8726]];
+    const W = 640, left = 90, right = 120, rowH = 30, barH = 18, top = 8;
+    const H = top + rows.length * rowH + 26, plotW = W - left - right;
+    const x = v => left + v * plotW;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Porcentaje de diseños conservados por subset" });
+    [0, 0.25, 0.5, 0.75, 1].forEach(t => {
+      svg.appendChild(el("line", { x1: x(t), x2: x(t), y1: top - 4, y2: H - 24, class: "grid" }));
+      svg.appendChild(el("text", { x: x(t), y: H - 8, "text-anchor": "middle", class: "lbl" }, Math.round(t * 100) + " %"));
+    });
+    rows.forEach(([n, raw, ok], i) => {
+      const y = top + i * rowH, f = ok / raw;
+      svg.appendChild(el("text", { x: left - 10, y: y + barH / 2 + 4.5, "text-anchor": "end" }, n));
+      svg.appendChild(el("rect", { x: left, y, width: plotW, height: barH, rx: 2, fill: css("--base"), opacity: 0.55 }));
+      svg.appendChild(el("rect", { x: left, y, width: f * plotW, height: barH, rx: 2, fill: css("--blue") }));
+      svg.appendChild(el("text", { x: left + plotW + 8, y: y + barH / 2 + 4.5, class: "lbl" }, `${ok.toLocaleString("en-US")} de ${raw.toLocaleString("en-US")}`));
+    });
+    document.getElementById("chart-embudo").appendChild(svg);
+  })();
+
+  // Reproducido frente a oficial, SMAPE medio de los 6 objetivos
+  (function () {
+    const rows = [["2_20", 41.2, 40.9], ["2layer", 4.0, 3.9], ["3layer", 3.4, 3.4], ["latency", 10.3, 10.5],
+                  ["resource", 10.3, 10.3], ["conv1d", 12.9, 12.8], ["conv2d", 17.3, 17.0]];
+    const W = 640, left = 90, right = 50, rowH = 38, barH = 14, top = 8, max = 45;
+    const H = top + rows.length * rowH + 26, plotW = W - left - right;
+    const x = v => left + v / max * plotW;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "SMAPE medio reproducido frente a oficial por subset" });
+    [0, 10, 20, 30, 40].forEach(t => {
+      svg.appendChild(el("line", { x1: x(t), x2: x(t), y1: top - 4, y2: H - 24, class: "grid" }));
+      svg.appendChild(el("text", { x: x(t), y: H - 8, "text-anchor": "middle", class: "lbl" }, t + " %"));
+    });
+    rows.forEach(([n, rep, ofi], i) => {
+      const y = top + i * rowH;
+      svg.appendChild(el("text", { x: left - 10, y: y + barH + 2, "text-anchor": "end" }, n));
+      svg.appendChild(el("rect", { x: left, y, width: rep / max * plotW, height: barH, rx: 2, fill: css("--blue") }));
+      svg.appendChild(el("rect", { x: left, y: y + barH + 2, width: ofi / max * plotW, height: barH, rx: 2, fill: css("--base") }));
+      svg.appendChild(el("text", { x: x(Math.max(rep, ofi)) + 8, y: y + barH + 2, class: "lbl" }, `${rep.toFixed(1)} · ${ofi.toFixed(1)}`));
+    });
+    document.getElementById("chart-repro").appendChild(svg);
+  })();
+</script>
+</body>
+</html>
