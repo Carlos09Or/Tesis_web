@@ -11,16 +11,33 @@
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-<main>
-  <header class="hero">
+<main class="inicio">
+  <header class="inicio-hero">
     <span class="eyebrow">Tesis · wa-hls4ml · surrogate 07D y agente</span>
-    <h1>Qué hice y qué salió</h1>
-    <p class="lede">Tres secciones: el surrogate que predice recursos, el modelo de tiempos y el agente que los usa. Entra a la que quieras ver; cada una reúne sus notebooks y sus resultados.</p>
+    <h1>Predecir el hardware de una red neuronal <span>antes de sintetizarla</span></h1>
+    <p class="lede">Un surrogate que estima recursos y latencia de un acelerador FPGA en milisegundos, un modelo que
+      anticipa cuánto costará sintetizarlo y un agente conversacional que los usa para explorar diseños. Aquí están
+      los notebooks, los resultados y cómo funciona todo.</p>
+    <div class="inicio-cta">
+      <a class="btn btn-pri" href="proyecto.html">Cómo funciona el agente →</a>
+      <a class="btn" href="#secciones">Ver los resultados ↓</a>
+    </div>
   </header>
 
-  <div class="secciones" id="secciones"></div>
+  <section class="inicio-ruta" aria-labelledby="ruta-t">
+    <h2 id="ruta-t" class="inicio-h">Cómo se conecta todo</h2>
+    <ol class="ruta4" id="ruta4"></ol>
+  </section>
 
-  <p class="conexion" id="conexion"></p>
+  <section aria-labelledby="sec-t">
+    <h2 id="sec-t" class="inicio-h">Tres secciones</h2>
+    <div class="secciones" id="secciones"></div>
+  </section>
+
+  <section class="ultimos" aria-labelledby="ult-t">
+    <h2 id="ult-t" class="inicio-h">Lo más reciente</h2>
+    <ol class="ult-lista" id="ultimos"></ol>
+  </section>
 
   <footer>Los notebooks no están en este repositorio: aquí están su resumen y los resultados. Para añadir uno, ver el <code>README.md</code>.</footer>
 </main>

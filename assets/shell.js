@@ -6,7 +6,8 @@
   var SEC = window.SECCIONES || [];
   var NB = (window.NOTEBOOKS && window.NOTEBOOKS.notebooks) || [];
   var PAG = (window.RESULTADOS && window.RESULTADOS.paginas) || [];
-  var CLARO = { surrogate: "#3CC9A0", tiempos: "#F0A73A", agente: "#A78BFA" };
+  var CLARO = { proyecto: "#6E93FF", surrogate: "#3CC9A0", tiempos: "#F0A73A", agente: "#A78BFA" };
+  var PROYECTO = { archivo: "proyecto.html", titulo: "El proyecto" };
 
   function el(tag, clase, texto) {
     var n = document.createElement(tag);
@@ -36,6 +37,7 @@
 
     var porArchivo = SEC.filter(function (s) { return s.archivo === archivo; })[0];
     if (porArchivo) { tipo = "seccion"; sec = porArchivo; titulo = sec.titulo; }
+    else if (archivo === PROYECTO.archivo) { tipo = "proyecto"; titulo = PROYECTO.titulo; }
     else if (archivo === "notebook.html") {
       tipo = "notebook";
       var n = NB.filter(function (x) { return x.id === q.get("id"); })[0];
@@ -63,7 +65,8 @@
     "font:500 13px/1.3 ui-monospace,Menlo,Consolas,monospace;overflow:hidden}" +
     "#tr-nav a{color:inherit;text-decoration:none}" +
     "#tr-nav .tr-top{display:flex;align-items:stretch;flex-wrap:wrap;gap:4px 18px;padding:0 14px}" +
-    "#tr-nav .tr-brand{display:flex;align-items:center;padding:11px 0;font-weight:700;letter-spacing:.02em}" +
+    "#tr-nav .tr-brand{display:flex;align-items:center;gap:8px;padding:11px 0;font-weight:700;letter-spacing:.02em}" +
+    "#tr-nav .tr-brand:before{content:'';width:12px;height:12px;border-radius:3px;background:linear-gradient(135deg,#6E93FF,#3CC9A0 50%,#F0A73A)}" +
     "#tr-nav .tr-menu{display:flex;flex-wrap:wrap;gap:0 4px}" +
     "#tr-nav .tr-menu a{display:flex;align-items:center;padding:11px 10px 8px;border-bottom:3px solid transparent;color:#9AA6B7}" +
     "#tr-nav .tr-menu a:hover{color:#fff}" +
@@ -90,6 +93,11 @@
     var top = el("div", "tr-top");
     var brand = el("a", "tr-brand", "Tesis · hls4ml"); brand.href = base + "index.html"; top.appendChild(brand);
     var menu = el("nav", "tr-menu"); menu.setAttribute("aria-label", "Secciones");
+    var pj = el("a", cx.tipo === "proyecto" ? "on" : "", PROYECTO.titulo);
+    pj.href = base + PROYECTO.archivo;
+    pj.style.setProperty("--c", CLARO.proyecto);
+    if (cx.tipo === "proyecto") pj.setAttribute("aria-current", "page");
+    menu.appendChild(pj);
     SEC.forEach(function (s) {
       var a = el("a", cx.sec && cx.sec.id === s.id ? "on" : "", s.titulo);
       a.href = base + s.archivo;
@@ -114,7 +122,7 @@
         miga(cx.sec.titulo, cx.tipo === "seccion" ? null : base + cx.sec.archivo);
         if (cx.sub && cx.tipo !== "seccion") miga(cx.sub.titulo, base + cx.sec.archivo + "#sub-" + cx.sub.id);
         if (cx.tipo !== "seccion") miga(cx.titulo);
-      }
+      } else if (cx.tipo === "proyecto") miga(cx.titulo);
       sub.appendChild(ol);
       sub.appendChild(el("span", "tr-sp"));
       if (cx.prev || cx.next) {
@@ -127,6 +135,33 @@
     }
     document.body.insertBefore(nav, document.body.firstChild);
     if (cx.titulo && cx.tipo === "notebook") document.title = cx.titulo + " · Resultados de la tesis";
+    if (enPaginas) arreglarMovil();
+  }
+
+  // Páginas de resultados: se conservan tal como se publicaron, pero en el teléfono algunas desbordaban
+  // a lo ancho (rutas largas en <code> y tablas sin contenedor con scroll). Se corrige sin tocar su HTML.
+  function arreglarMovil() {
+    if (!document.getElementById("tr-movil-css")) {
+      var st = el("style"); st.id = "tr-movil-css";
+      st.textContent =
+        "code{overflow-wrap:anywhere}" +
+        ".tr-tabla-scroll{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}" +
+        "@media (max-width:700px){p,li,dd,footer,figcaption{overflow-wrap:break-word}.two>*{min-width:0}}";
+      document.head.appendChild(st);
+    }
+    function envolver() {
+      [].forEach.call(document.querySelectorAll("table"), function (t) {
+        for (var a = t.parentElement; a && a !== document.body; a = a.parentElement) {
+          var ox = getComputedStyle(a).overflowX;
+          if (ox === "auto" || ox === "scroll" || ox === "hidden") return;
+        }
+        var w = el("div", "tr-tabla-scroll");
+        t.parentNode.insertBefore(w, t);
+        w.appendChild(t);
+      });
+    }
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", envolver);
+    else envolver();
   }
 
   window.Shell = { montar: montar, contexto: contexto, seccion: seccionPor, ordenados: ordenados };

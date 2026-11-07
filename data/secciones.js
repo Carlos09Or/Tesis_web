@@ -102,13 +102,26 @@ window.SECCIONES = [
     corto: "Agente",
     archivo: "agente.html",
     resumen:
-      "Un agente ReAct que usa el surrogate para explorar diseños. Pruebas funcionales, fidelidad al reconstruir diseños conocidos, búsqueda frente al azar y honestidad de la confianza que comunica.",
+      "Un agente ReAct que usa el surrogate para explorar diseños. Cómo funciona, pruebas funcionales, fidelidad al reconstruir diseños conocidos, búsqueda frente al azar, honestidad de la confianza que comunica y el banco nuevo para comparar modelos.",
     cifras: [
-      ["22/23", "checks funcionales OK"],
+      ["11", "herramientas del agente"],
+      ["61/63", "chequeos smoke OK (7 nov)"],
       ["3/3", "tareas de búsqueda ganadas al azar"],
       ["6/7", "subsets con confianza honesta"],
     ],
     subs: [
+      {
+        id: "funciona",
+        titulo: "Cómo funciona",
+        desc: "El sistema por dentro: el clasificador, el bucle ReAct, las 11 herramientas, las salvaguardas en código y una corrida real paso a paso.",
+        destacado: {
+          href: "proyecto.html",
+          sec: "proyecto",
+          titulo: "El proyecto y el agente",
+          texto: "Arquitectura del sistema, cómo razona el agente, qué hace cada herramienta y qué no se deja al LLM. Sistema base sin RAG, con gemma4:31b-cloud.",
+          cifras: [["11", "herramientas"], ["22", "iteraciones máx."], ["17–24 s", "por pedido"]],
+        },
+      },
       {
         id: "evaluacion",
         titulo: "Evaluación",

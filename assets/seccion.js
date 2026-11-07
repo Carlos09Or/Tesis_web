@@ -94,6 +94,23 @@
     return w;
   }
 
+  // Tarjeta destacada que lleva a otra página del sitio
+  function destacado(d) {
+    var a = el("a", "destacado"); a.href = d.href;
+    if (d.sec) a.style.setProperty("--dest", "var(--s-" + d.sec + ")");
+    var c = el("div");
+    c.appendChild(el("h3", null, d.titulo));
+    c.appendChild(el("p", null, d.texto));
+    if (d.cifras) {
+      var dl = el("dl", "dest-cifras");
+      d.cifras.forEach(function (x) { var w = el("div"); w.appendChild(el("dt", null, x[0])); w.appendChild(el("dd", null, x[1])); dl.appendChild(w); });
+      c.appendChild(dl);
+    }
+    a.appendChild(c);
+    a.appendChild(el("span", "dest-ir", "Abrir →"));
+    return a;
+  }
+
   sec.subs.forEach(function (b) {
     var nbs = NB.filter(function (n) { return n.seccion === sec.id && n.sub === b.id; });
     var pgs = PAG.filter(function (p) { return p.seccion === sec.id && p.sub === b.id; });
@@ -104,6 +121,7 @@
     if (b.flujo) s.appendChild(flujo());
 
     if (b.experimento) s.appendChild(experimento(b.experimento));
+    if (b.destacado) s.appendChild(destacado(b.destacado));
 
     if (nbs.length) {
       s.appendChild(el("h3", "sub-h", "Cómo se hizo"));

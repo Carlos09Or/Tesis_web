@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>El proyecto y el agente · Resultados de la tesis</title>
+<meta name="description" content="Qué es el proyecto, cómo está armado el sistema, cómo razona el agente ReAct y qué hace cada una de sus 11 herramientas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/proyecto.css">
+</head>
+<body>
+<main class="pj" data-sec="proyecto">
+
+  <!-- ───────────── Portada ───────────── -->
+  <header class="pj-hero">
+    <span class="eyebrow sec-color">El proyecto · agente ReAct para hls4ml</span>
+    <h1>Un agente que explora diseños de FPGA <span class="pj-h1-acento">sin sintetizarlos</span></h1>
+    <p class="lede">Un ingeniero describe una red neuronal en lenguaje natural. El agente la traduce a una arquitectura,
+      la contrasta con lo que existe de verdad en el dataset, predice recursos y latencia con el surrogate 07D en
+      milisegundos y le dice qué tan confiable es esa predicción.</p>
+    <div class="pj-kpis">
+      <div class="pj-kpi"><b>11</b><span>herramientas del agente de predicción</span></div>
+      <div class="pj-kpi"><b>3.1 ms</b><span>por predicción del 07D, frente a 11.2 min de síntesis</span></div>
+      <div class="pj-kpi"><b>61/63</b><span>chequeos del smoke test OK (7 nov 2026)</span></div>
+      <div class="pj-kpi"><b>17–24 s</b><span>un pedido completo con <code>gemma4:31b-cloud</code></span></div>
+    </div>
+  </header>
+
+  <div class="pj-layout">
+    <nav class="pj-toc" aria-label="En esta página">
+      <span class="pj-toc-t">En esta página</span>
+      <ol>
+        <li><a href="#problema">El problema</a></li>
+        <li><a href="#arquitectura">Cómo está armado</a></li>
+        <li><a href="#funcionamiento">Cómo funciona un pedido</a></li>
+        <li><a href="#react">El bucle ReAct</a></li>
+        <li><a href="#recorrido">Una corrida, paso a paso</a></li>
+        <li><a href="#herramientas">Las 11 herramientas</a></li>
+        <li><a href="#salvaguardas">Lo que no se deja al LLM</a></li>
+        <li><a href="#llm">Los modelos de lenguaje</a></li>
+        <li><a href="#surrogate">El surrogate 07D</a></li>
+        <li><a href="#estado">Estado y lo que sigue</a></li>
+      </ol>
+    </nav>
+
+    <div class="pj-body">
+
+      <!-- ───────────── 1. Problema ───────────── -->
+      <section class="pj-sec" id="problema">
+        <span class="pj-num">01</span>
+        <h2>El problema: sintetizar es lento, explorar exige muchas evaluaciones</h2>
+        <p class="pj-p">Llevar una red neuronal a una FPGA con <strong>hls4ml</strong> exige sintetizarla para saber cuántos
+          recursos (BRAM, DSP, FF, LUT) y cuánta latencia va a tener. Cada síntesis tarda minutos, y explorar el espacio
+          de diseño (probar precisiones, reuse factors, estrategias y tamaños) exige decenas o cientos de ellas.</p>
+        <p class="pj-p">La tesis reemplaza la síntesis por un <strong>surrogate</strong>, un modelo entrenado sobre
+          el dataset <strong>wa-hls4ml</strong> que predice las seis salidas en milisegundos, y lo pone en manos de un
+          <strong>agente conversacional</strong> que el ingeniero usa en lenguaje natural.</p>
+
+        <div class="pj-versus" role="img" aria-label="Síntesis real 11.2 minutos frente a 3.1 milisegundos del surrogate 07D, mediana sobre los mismos 140 diseños">
+          <div class="pj-vs-fila">
+            <span class="pj-vs-et">Síntesis real (hls4ml + Vivado)</span>
+            <span class="pj-vs-barra lenta"><i></i></span>
+            <b>11.2 min</b>
+          </div>
+          <div class="pj-vs-fila">
+            <span class="pj-vs-et">Surrogate 07D (local, CPU)</span>
+            <span class="pj-vs-barra rapida"><i></i></span>
+            <b>3.1 ms</b>
+          </div>
+          <p class="pj-vs-nota">Mediana sobre los mismos 140 diseños (ver <a href="paginas/04-sintesis-vs-surrogate-agente.html">Síntesis frente al surrogate y el agente</a>).
+            La barra del surrogate no se ve porque es unas 200,000 veces más corta.</p>
+        </div>
+
+        <div class="pj-tres">
+          <div class="pj-tres-c">
+            <span class="pj-tres-n">1</span>
+            <h3>Describir</h3>
+            <p>Con una arquitectura completa o con una idea vaga («una red densa pequeña»). Si faltan datos, el agente parte de ejemplos reales.</p>
+          </div>
+          <div class="pj-tres-c">
+            <span class="pj-tres-n">2</span>
+            <h3>Predecir y calificar</h3>
+            <p>Recursos y latencia del 07D, con el nivel de confiabilidad medido para ese tipo de arquitectura (Dense, Conv1D o Conv2D).</p>
+          </div>
+          <div class="pj-tres-c">
+            <span class="pj-tres-n">3</span>
+            <h3>Comparar y llevarse el reporte</h3>
+            <p>Varios candidatos en una misma conversación, el mejor seleccionado y un reporte HTML autocontenido.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───────────── 2. Arquitectura ───────────── -->
+      <section class="pj-sec" id="arquitectura">
+        <span class="pj-num">02</span>
+        <h2>Cómo está armado el sistema</h2>
+        <p class="pj-p">Dos agentes y un clasificador. Todo corre en local salvo el LLM, que es el único servicio externo.
+          El surrogate se carga una sola vez en memoria y no depende de ninguna API.</p>
+
+        <div class="arq" aria-label="Diagrama de la arquitectura del sistema">
+          <div class="arq-col arq-main">
+            <div class="arq-n arq-user"><span class="arq-k">Entrada</span><b>Usuario en el chat</b><span>lenguaje natural</span></div>
+            <div class="arq-flecha" aria-hidden="true"></div>
+            <div class="arq-n"><span class="arq-k"><code>main.py</code></span><b>Bucle de chat</b><span>reinicia los candidatos en cada pedido y traza el flujo en <code>trazas/</code></span></div>
+            <div class="arq-flecha" aria-hidden="true"></div>
+            <div class="arq-n arq-llm-uso"><span class="arq-k"><code>clasificador.py</code> · LLM</span><b>¿Predicción o charla?</b><span>responde solo «prediccion» o «charla»; un pedido vago sigue siendo predicción</span></div>
+            <div class="arq-split" aria-hidden="true"><i></i><i></i></div>
+            <div class="arq-dos">
+              <div class="arq-n arq-sec"><span class="arq-k">charla</span><b>Agente general</b><span>ReAct conversacional con memoria · Wikipedia, CSV y Python · 15 iteraciones, 240 s</span></div>
+              <div class="arq-n arq-star"><span class="arq-k">prediccion</span><b>Agente de predicción</b><span>ReAct estructurado · 11 herramientas · 22 iteraciones, 360 s</span></div>
+            </div>
+            <div class="arq-flecha arq-flecha-der" aria-hidden="true"></div>
+            <div class="arq-recursos">
+              <div class="arq-r"><b>Surrogate 07D</b><span>PyTorch local · <code>surrogate_07d/</code></span></div>
+              <div class="arq-r"><b>Rangos reales</b><span><code>limites_operativos.json</code></span></div>
+              <div class="arq-r"><b>Métricas del 07D</b><span>R² y SMAPE por grupo, en test</span></div>
+              <div class="arq-r"><b>Reporte HTML</b><span><code>reportes/</code></span></div>
+            </div>
+          </div>
+          <aside class="arq-nube">
+            <span class="arq-k">Único servicio externo</span>
+            <b>LLM en Ollama Cloud</b>
+            <code class="arq-modelo">gemma4:31b-cloud</code>
+            <p>Lo usan el clasificador, los dos agentes y dos herramientas: <code>generar_candidato</code> y <code>validar_especificacion</code>.</p>
+            <p class="arq-aviso">El modelo se fija con <code>OLLAMA_MODEL</code> en <code>.env</code>. Si falta, el código cae a <code>nemotron-3-super:cloud</code>.</p>
+          </aside>
+        </div>
+        <p class="pj-nota">El sistema base va sin RAG desde el 7 nov 2026: Qdrant, el índice de embeddings y <code>buscar_similares</code> están archivados en <code>legacy_rag/</code>.</p>
+      </section>
+
+      <!-- ───────────── 3. Funcionamiento ───────────── -->
+      <section class="pj-sec" id="funcionamiento">
+        <span class="pj-num">03</span>
+        <h2>Cómo funciona un pedido, de punta a punta</h2>
+        <p class="pj-p">El recorrido completo de un mensaje, con cada decisión y quién la toma: el LLM o el código.
+          Dentro del recuadro punteado cada paso es una vuelta del bucle ReAct (Thought → Action → Observation).</p>
+
+        <div class="fx-leyenda" aria-label="Leyenda">
+          <span class="fx-ley llm">Decide el LLM</span>
+          <span class="fx-ley codigo">Código determinista</span>
+          <span class="fx-ley modelo">Surrogate 07D</span>
+          <span class="fx-ley dec">Decisión</span>
+        </div>
+
+        <ol class="fx" aria-label="Diagrama de funcionamiento del sistema">
+          <li class="fx-fila">
+            <div class="fx-n fx-usuario"><span class="fx-k">Inicio</span><b>El usuario escribe un pedido</b><span>en lenguaje natural, completo o vago</span></div>
+          </li>
+          <li class="fx-v" aria-hidden="true"></li>
+          <li class="fx-fila">
+            <div class="fx-n codigo"><span class="fx-k"><code>main.py</code></span><b>Registra la consulta</b><span>abre la traza en <code>trazas/</code></span></div>
+          </li>
+          <li class="fx-v" aria-hidden="true"></li>
+          <li class="fx-fila">
+            <div class="fx-n fx-d llm"><span class="fx-k"><code>clasificador.py</code> · LLM</span><b>¿Pide una predicción o es charla?</b></div>
+            <div class="fx-rama">
+              <span class="fx-et">charla</span>
+              <div class="fx-n fx-alt"><b>Agente general</b><span>ReAct con memoria: Wikipedia, CSV y Python</span><span class="fx-fin">→ responde y termina</span></div>
+            </div>
+          </li>
+          <li class="fx-v" aria-hidden="true"><span>predicción</span></li>
+          <li class="fx-fila">
+            <div class="fx-n codigo"><span class="fx-k"><code>main.py</code> · callback</span><b>Reinicia los candidatos y guarda el pedido original</b><span>arranca el agente de predicción</span></div>
+          </li>
+          <li class="fx-v" aria-hidden="true"></li>
+
+          <li class="fx-bucle">
+            <span class="fx-bucle-t">Bucle ReAct · máx. 22 vueltas o 360 s · el <code>ParserTolerante</code> lee cada acción</span>
+            <ol>
+              <li class="fx-fila">
+                <div class="fx-n fx-d llm"><span class="fx-k">LLM · paso 0 del prompt</span><b>¿Trae capas, bits y reuse factor global?</b></div>
+                <div class="fx-rama">
+                  <span class="fx-et">no</span>
+                  <div class="fx-n codigo"><span class="fx-k">herramienta</span><b><code>sugerir_ejemplo_real</code></b><span>ejemplos reales por subgrupo; el LLM completa los valores que faltan</span></div>
+                </div>
+              </li>
+              <li class="fx-v" aria-hidden="true"><span>sí</span></li>
+              <li class="fx-fila">
+                <div class="fx-n llm"><span class="fx-k">herramienta · LLM arquitecto</span><b><code>generar_candidato</code></b><span>traduce el pedido a JSON <code>{arch, cfg}</code> y lo registra con un <code>candidate_id</code></span></div>
+                <div class="fx-rama">
+                  <span class="fx-et">compuerta</span>
+                  <div class="fx-n fx-d codigo fx-chica"><b>¿Faltan datos y no se consultaron ejemplos?</b><span class="fx-fin">sí → se niega y pide <code>sugerir_ejemplo_real</code></span></div>
+                </div>
+              </li>
+              <li class="fx-v" aria-hidden="true"></li>
+              <li class="fx-fila">
+                <div class="fx-n fx-opc"><span class="fx-k">opcionales · formato</span><b><code>validar_especificacion</code> · <code>evaluar_restricciones</code></b><span>el prompt pide usarlas solo si se sospecha un JSON mal formado</span></div>
+              </li>
+              <li class="fx-v" aria-hidden="true"></li>
+              <li class="fx-fila">
+                <div class="fx-n fx-d llm"><span class="fx-k">LLM</span><b>¿Completó algún valor que el usuario no dio?</b></div>
+                <div class="fx-rama">
+                  <span class="fx-et">sí</span>
+                  <div class="fx-n codigo"><span class="fx-k">herramienta</span><b><code>verificar_limites_operativos</code></b><span>compara con el rango real del grupo; si algo está fuera, lo corrige o lo avisa</span></div>
+                </div>
+              </li>
+              <li class="fx-v" aria-hidden="true"></li>
+              <li class="fx-fila">
+                <div class="fx-n modelo"><span class="fx-k">herramienta · obligatoria</span><b><code>predecir_recursos</code></b><span>el surrogate 07D devuelve BRAM, DSP, FF, LUT, ciclos e II</span></div>
+              </li>
+              <li class="fx-v" aria-hidden="true"></li>
+              <li class="fx-fila">
+                <div class="fx-n codigo"><span class="fx-k">herramienta · obligatoria</span><b><code>estimar_baseline</code></b><span>confiabilidad alta, moderada o limitada; baja a limitada si hubo valores fuera de rango</span></div>
+              </li>
+              <li class="fx-v" aria-hidden="true"></li>
+              <li class="fx-fila">
+                <div class="fx-n codigo"><span class="fx-k">herramienta · obligatoria</span><b><code>generar_reporte</code></b><span>reporte HTML con la predicción y la confiabilidad</span></div>
+              </li>
+              <li class="fx-v" aria-hidden="true"></li>
+              <li class="fx-fila">
+                <div class="fx-n fx-d llm"><span class="fx-k">LLM</span><b>¿Pidió comparar variantes?</b></div>
+                <div class="fx-rama">
+                  <span class="fx-et">sí</span>
+                  <div class="fx-n fx-alt"><b>Repite con otros parámetros</b><span>otro candidato por variante y al final <code>seleccionar_mejor</code></span><span class="fx-fin">↺ vuelve a <code>generar_candidato</code></span></div>
+                </div>
+              </li>
+              <li class="fx-v" aria-hidden="true"><span>no</span></li>
+              <li class="fx-fila">
+                <div class="fx-n fx-d llm"><span class="fx-k">LLM · regla estricta</span><b>¿Ya llamó a las tres obligatorias?</b></div>
+                <div class="fx-rama">
+                  <span class="fx-et">no</span>
+                  <div class="fx-n fx-alt"><b>Llama a la que falta</b><span class="fx-fin">↺ otra vuelta del bucle</span></div>
+                </div>
+              </li>
+              <li class="fx-v" aria-hidden="true"><span>sí</span></li>
+              <li class="fx-fila">
+                <div class="fx-n llm"><span class="fx-k">LLM</span><b>Final Answer</b><span>en español, con recursos, latencia y confiabilidad</span></div>
+              </li>
+            </ol>
+          </li>
+
+          <li class="fx-v" aria-hidden="true"></li>
+          <li class="fx-fila">
+            <div class="fx-n fx-d codigo"><span class="fx-k"><code>main.py</code> · red de seguridad</span><b>¿El mejor candidato tiene reporte?</b></div>
+            <div class="fx-rama">
+              <span class="fx-et">no</span>
+              <div class="fx-n codigo"><b><code>asegurar_reporte_mejor_candidato</code></b><span>lo genera sin pasar por el LLM</span></div>
+            </div>
+          </li>
+          <li class="fx-v" aria-hidden="true"></li>
+          <li class="fx-fila">
+            <div class="fx-n fx-usuario"><span class="fx-k">Fin</span><b>Respuesta al usuario</b><span>el texto del agente más la ruta del reporte</span></div>
+          </li>
+        </ol>
+        <p class="pj-nota">Si se agotan las 22 vueltas o los 360 s, el agente corta con un mensaje y la red de seguridad igual intenta dejar el reporte del mejor candidato con predicción.
+          <a href="#recorrido">Ver una corrida real paso a paso →</a></p>
+      </section>
+
+      <!-- ───────────── 4. ReAct ───────────── -->
+      <section class="pj-sec" id="react">
+        <span class="pj-num">04</span>
+        <h2>Cómo razona: el bucle ReAct</h2>
+        <p class="pj-p"><strong>ReAct</strong> (<em>Reason + Act</em>) alterna razonamiento y acción. El bucle, las
+          herramientas y los límites son código; <strong>qué herramienta llamar, con qué argumentos y cuándo parar lo
+          decide el LLM</strong>, guiado por el prompt de sistema.</p>
+
+        <div class="react">
+          <svg class="react-svg" viewBox="0 0 420 330" role="img" aria-labelledby="react-t">
+            <title id="react-t">Ciclo ReAct: Thought, Action y Observation se repiten hasta Final Answer</title>
+            <defs>
+              <marker id="pj-fl" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" class="react-cabeza"/>
+              </marker>
+              <marker id="pj-fl-fin" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 z" class="react-cabeza-fin"/>
+              </marker>
+            </defs>
+            <path class="react-arco" d="M 236 62 A 120 120 0 0 1 320 214" marker-end="url(#pj-fl)"/>
+            <path class="react-arco" d="M 282 262 A 120 120 0 0 1 128 262" marker-end="url(#pj-fl)"/>
+            <path class="react-arco" d="M 90 214 A 120 120 0 0 1 174 62" marker-end="url(#pj-fl)"/>
+            <g class="react-nodo n1"><rect x="140" y="20" width="140" height="56" rx="12"/><text x="210" y="44" class="react-k">1 · Thought</text><text x="210" y="62">razona el paso</text></g>
+            <g class="react-nodo n2"><rect x="270" y="214" width="140" height="56" rx="12"/><text x="340" y="238" class="react-k">2 · Action</text><text x="340" y="256">JSON con la herramienta</text></g>
+            <g class="react-nodo n3"><rect x="10" y="214" width="140" height="56" rx="12"/><text x="80" y="238" class="react-k">3 · Observation</text><text x="80" y="256">salida real</text></g>
+            <text x="210" y="150" class="react-centro">LLM</text>
+            <text x="210" y="170" class="react-centro-s">temperatura 0.0</text>
+            <path class="react-salida" d="M 340 270 L 340 312 L 250 312" marker-end="url(#pj-fl-fin)"/>
+            <text x="172" y="316" class="react-fin">Final Answer</text>
+          </svg>
+
+          <div class="react-pasos">
+            <div class="react-paso">
+              <b>Thought</b>
+              <p>El LLM escribe qué sabe y qué le falta: «el pedido trae bits y reuse factor global, puedo generar el candidato».</p>
+            </div>
+            <div class="react-paso">
+              <b>Action</b>
+              <p>Un único objeto JSON <code>{"action": …, "action_input": {…}}</code>. LangChain lo valida contra el esquema de la herramienta, inferido de la firma de la función.</p>
+            </div>
+            <div class="react-paso">
+              <b>Observation</b>
+              <p>El ejecutor corre la herramienta de verdad y le devuelve su salida. El LLM nunca inventa números: los lee de aquí.</p>
+            </div>
+            <div class="react-paso fin">
+              <b>Final Answer</b>
+              <p>Cuando ya llamó a las tres obligatorias, responde en español con recursos, latencia y confiabilidad.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pj-cod">
+          <div class="pj-cod-cab"><span>Formato que escribe el LLM en cada vuelta</span><span class="pj-cod-tag">STRUCTURED_CHAT</span></div>
+<pre><code><span class="c-k">Thought:</span> El pedido especifica capas, bits y reuse factor global.
+         Paso directo a traducirlo.
+<span class="c-k">Action:</span>
+{
+  <span class="c-s">"action"</span>: <span class="c-v">"generar_candidato"</span>,
+  <span class="c-s">"action_input"</span>: { <span class="c-s">"pedido_usuario"</span>: <span class="c-v">"una red con dos capas densas…"</span> }
+}
+<span class="c-k">Observation:</span> Candidato generado y registrado con id=cnd_…</code></pre>
+        </div>
+
+        <div class="pj-grid2">
+          <div class="pj-caja">
+            <h3>El flujo que pide el prompt</h3>
+            <ol class="pj-ol">
+              <li><strong>Paso 0:</strong> si falta un solo dato (capas, bits o reuse factor global), la primera acción es <code>sugerir_ejemplo_real</code>.</li>
+              <li><code>generar_candidato</code> traduce el pedido a JSON.</li>
+              <li><code>predecir_recursos</code> con el <code>candidate_id</code>.</li>
+              <li><code>estimar_baseline</code>: la confiabilidad, siempre.</li>
+              <li><code>generar_reporte</code>: el entregable visual, siempre.</li>
+            </ol>
+            <p class="pj-chica">Si completó un valor que el usuario no dio, debe pasar por <code>verificar_limites_operativos</code> antes de predecir. Para comparar variantes, repite el flujo y cierra con <code>seleccionar_mejor</code>.</p>
+          </div>
+          <div class="pj-caja">
+            <h3>Cómo está configurado</h3>
+            <dl class="pj-dl">
+              <div><dt>Tipo de agente</dt><dd><code>STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION</code> (LangChain)</dd></div>
+              <div><dt>Herramientas</dt><dd><code>StructuredTool</code> con varios argumentos</dd></div>
+              <div><dt>Límites</dt><dd>22 iteraciones y 360 s en total</dd></div>
+              <div><dt>Errores de formato</dt><dd><code>handle_parsing_errors=True</code>: el error se le muestra al LLM y reintenta</dd></div>
+              <div><dt>Parser</dt><dd><code>ParserTolerante</code>, propio (ver <a href="#salvaguardas">salvaguardas</a>)</dd></div>
+              <div><dt>Regla estricta</dt><dd>no hay «Final Answer» sin las tres obligatorias</dd></div>
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───────────── 4. Recorrido ───────────── -->
+      <section class="pj-sec" id="recorrido">
+        <span class="pj-num">05</span>
+        <h2>Una corrida real, paso a paso</h2>
+        <p class="pj-p">El pedido Dense de la verificación del 7 nov 2026 con <code>gemma4:31b-cloud</code>: siete
+          herramientas en 16.9 s. Avanza con los botones o con las flechas del teclado y mira cómo se llena la ficha del candidato.</p>
+
+        <div class="rec" id="rec">
+          <div class="rec-barra">
+            <button type="button" class="rec-btn" id="rec-prev" aria-label="Paso anterior">←</button>
+            <ol class="rec-puntos" id="rec-puntos" aria-label="Pasos de la corrida"></ol>
+            <button type="button" class="rec-btn" id="rec-next" aria-label="Paso siguiente">→</button>
+          </div>
+          <div class="rec-cuerpo">
+            <div class="rec-paso" id="rec-paso" aria-live="polite"></div>
+            <aside class="rec-ficha" aria-label="Ficha del candidato">
+              <span class="rec-ficha-t">Ficha del candidato</span>
+              <code class="rec-id" id="rec-id">sin candidato</code>
+              <ul id="rec-campos"></ul>
+              <p class="rec-ficha-n">La guarda <code>CandidateManager</code>, en memoria, durante la conversación.</p>
+            </aside>
+          </div>
+        </div>
+        <p class="pj-nota">Las acciones, el orden y las salidas son los de esa corrida; las salidas de las herramientas
+          deterministas se reprodujeron en local con el mismo pedido. Los Thought están resumidos y el id del candidato es ilustrativo.
+          Detalle en <code>pruebas/resultados_smoke/agente_vivo_sin_rag_2026-11-07.json</code>.</p>
+      </section>
+
+      <!-- ───────────── 5. Herramientas ───────────── -->
+      <section class="pj-sec" id="herramientas">
+        <span class="pj-num">06</span>
+        <h2>Las 11 herramientas</h2>
+        <p class="pj-p">Están en <code>tools/hls4ml_tool.py</code>. Solo dos llaman a un LLM; las demás son código
+          determinista, así que dan siempre la misma salida para la misma entrada.</p>
+
+        <div class="tl-filtros" role="group" aria-label="Filtrar herramientas">
+          <button type="button" class="tl-f on" data-f="todas">Todas <span></span></button>
+          <button type="button" class="tl-f" data-f="obligatoria">Obligatorias <span></span></button>
+          <button type="button" class="tl-f" data-f="condicional">Condicionales <span></span></button>
+          <button type="button" class="tl-f" data-f="opcional">Opcionales <span></span></button>
+          <button type="button" class="tl-f" data-f="llm">Usan LLM <span></span></button>
+        </div>
+
+        <div class="tl-fases" id="tl-fases"></div>
+      </section>
+
+      <!-- ───────────── 6. Salvaguardas ───────────── -->
+      <section class="pj-sec" id="salvaguardas">
+        <span class="pj-num">07</span>
+        <h2>Lo que no se deja al LLM</h2>
+        <p class="pj-p">Cada vez que una regla importante dependía de que el modelo «se acordara», falló en alguna prueba.
+          Esas reglas pasaron a código. Cada una nació de un hallazgo concreto.</p>
+
+        <div class="sg">
+          <article class="sg-c">
+            <span class="sg-d">generar_candidato</span>
+            <h3>Compuerta de grounding</h3>
+            <p>Detecta con expresiones regulares si el pedido no dice los bits ni el reuse factor global. Si faltan y no se consultaron ejemplos reales, se niega a generar y pide <code>sugerir_ejemplo_real</code>.</p>
+            <span class="sg-o">Por qué: tres intentos de reforzarlo solo con el prompt no cambiaron el comportamiento.</span>
+          </article>
+          <article class="sg-c">
+            <span class="sg-d">callback del agente</span>
+            <h3>Recupera el pedido original</h3>
+            <p>Guarda lo que escribió el usuario. Si el agente resume el pedido y pierde datos que sí estaban, la herramienta traduce el original en vez de rechazar.</p>
+            <span class="sg-o">Por qué: en los pilotos C2 y C3 el agente repetía el mismo resumen hasta agotar las iteraciones.</span>
+          </article>
+          <article class="sg-c">
+            <span class="sg-d">ParserTolerante</span>
+            <h3>Lee solo la primera acción</h3>
+            <p>Descarta los bloques <code>&lt;think&gt;</code>, toma el primer JSON balanceado e ignora las Observation que el modelo invente después. Si no hay JSON, lanza un error para que reintente.</p>
+            <span class="sg-o">Por qué: algunos backends ignoran <code>stop</code> y el modelo alucinaba la secuencia entera.</span>
+          </article>
+          <article class="sg-c">
+            <span class="sg-d">ParserTolerante</span>
+            <h3>Repara llaves de cierre</h3>
+            <p>Si la acción solo quedó sin cerrar por llaves o corchetes faltantes al final, los completa y cuenta la reparación.</p>
+            <span class="sg-o">Por qué: con arquitecturas largas el modelo repetía la misma llave de menos en cada reintento (piloto C2).</span>
+          </article>
+          <article class="sg-c">
+            <span class="sg-d">estimar_baseline</span>
+            <h3>Degrada la confianza fuera de rango</h3>
+            <p>Si algún valor cae fuera del rango real del grupo, el nivel pasa a «limitada» aunque el R² histórico del grupo sea alto.</p>
+            <span class="sg-o">Por qué: el Experimento E mostró la confianza fija con un reuse factor 10× fuera de todo valor real.</span>
+          </article>
+          <article class="sg-c">
+            <span class="sg-d">main.py</span>
+            <h3>Reporte asegurado</h3>
+            <p>Si el agente termina sin llamar a <code>generar_reporte</code>, <code>asegurar_reporte_mejor_candidato</code> lo genera para el mejor candidato.</p>
+            <span class="sg-o">Por qué: el entregable no debe depender de que el LLM se acuerde.</span>
+          </article>
+          <article class="sg-c">
+            <span class="sg-d">generar_candidato</span>
+            <h3>Tres intentos de traducción</h3>
+            <p>Si la respuesta llega vacía o no se puede parsear, reintenta dentro de la herramienta. Si los tres fallan, registra el candidato como inválido.</p>
+            <span class="sg-o">Por qué: en pedidos Conv largos el modelo a veces se quedaba en blanco al primer intento.</span>
+          </article>
+          <article class="sg-c">
+            <span class="sg-d">llms/clients.py</span>
+            <h3>Límites de tiempo</h3>
+            <p>90 s por llamada al LLM y un tope de tiempo total para cada agente (360 s el de predicción).</p>
+            <span class="sg-o">Por qué: con streaming, el timeout por llamada no corta una respuesta que llega lenta.</span>
+          </article>
+        </div>
+      </section>
+
+      <!-- ───────────── 7. LLM ───────────── -->
+      <section class="pj-sec" id="llm">
+        <span class="pj-num">08</span>
+        <h2>Los modelos de lenguaje</h2>
+        <p class="pj-p">Un solo modelo, <code>gemma4:31b-cloud</code>, en varios roles con temperaturas distintas. Todos
+          son clientes <code>ChatOllama</code> contra Ollama Cloud con dos claves de API.</p>
+        <div class="tablebox">
+          <table class="pj-tabla">
+            <thead><tr><th>Rol</th><th>Dónde se usa</th><th>Temperatura</th></tr></thead>
+            <tbody>
+              <tr class="base"><td><code>llm_agente_prediccion</code></td><td>El «cerebro» del agente ReAct: elige herramienta y argumentos</td><td class="num">0.0</td></tr>
+              <tr><td><code>llm_arquitecto</code></td><td>El clasificador y <code>generar_candidato</code></td><td class="num">0.2</td></tr>
+              <tr><td><code>llm_revisor</code></td><td><code>validar_especificacion</code></td><td class="num">0.0</td></tr>
+              <tr><td><code>llm_general</code></td><td>El agente general (charla, Wikipedia, CSV, Python)</td><td class="num">0.1</td></tr>
+              <tr class="apagada"><td><code>llm_validador</code></td><td>Definido, hoy sin uso</td><td class="num">0.0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="pj-nota">El modelo es la variable que cambia en el banco de pruebas DSE: <code>gemma4:31b-cloud</code> como línea base frente a modelos open source locales.</p>
+      </section>
+
+      <!-- ───────────── 8. Surrogate ───────────── -->
+      <section class="pj-sec" id="surrogate">
+        <span class="pj-num">09</span>
+        <h2>El surrogate 07D, la herramienta que predice</h2>
+        <p class="pj-p">Un transformer de dos ramas con fusión tardía (<em>Two-Branch Late Fusion</em>), 1,728,967
+          parámetros, entrenado sobre 433,676 diseños. Recibe la arquitectura canónica y devuelve las seis salidas.</p>
+
+        <div class="sur">
+          <div class="sur-rama">
+            <span class="sur-k">Rama global</span>
+            <b>Configuración del modelo</b>
+            <p><code>strategy</code> y 17 variables numéricas (3 de base y 14 derivadas físicas)</p>
+            <span class="sur-b">2 bloques transformer</span>
+          </div>
+          <div class="sur-rama">
+            <span class="sur-k">Rama de capas</span>
+            <b>Hasta 55 capas</b>
+            <p>Por capa: tipo, padding y activación; 19 numéricas (formas, filtros, kernel, reuse factor, bits); <code>use_bias</code> y activación cuantizada</p>
+            <span class="sur-b">4 bloques transformer</span>
+          </div>
+          <div class="sur-fusion" aria-hidden="true"><span>fusión por cross-attention</span></div>
+          <div class="sur-salida">
+            <span class="sur-k">Cabeza multitarea</span>
+            <div class="sur-targets"><span>BRAM</span><span>DSP</span><span>FF</span><span>LUT</span><span>ciclos</span><span>II</span></div>
+            <p>Más una compuerta que decide si DSP = 0 (umbral 0.50).</p>
+          </div>
+        </div>
+        <p class="pj-chica pj-centro"><code>d_model</code> 192 · 8 cabezas · <code>d_ff</code> 256 · dropout 0.05 · PyTorch en CPU</p>
+
+        <h3 class="pj-h3">Qué nivel de confianza comunica, por grupo</h3>
+        <p class="pj-p">La confiabilidad sale del desempeño real del 07D en su test completo, no de comparar con unos pocos vecinos.</p>
+        <div class="conf">
+          <div class="conf-c alta">
+            <span class="conf-n">Alta</span>
+            <b>Dense</b>
+            <dl><div><dt>0.953</dt><dd>R² medio</dd></div><div><dt>4.4 %</dt><dd>SMAPE medio</dd></div><div><dt>89,073</dt><dd>muestras de test</dd></div></dl>
+            <span class="conf-bar"><i style="--v:.953"></i></span>
+          </div>
+          <div class="conf-c moderada">
+            <span class="conf-n">Moderada</span>
+            <b>Conv1D</b>
+            <dl><div><dt>0.924</dt><dd>R² medio</dd></div><div><dt>12.8 %</dt><dd>SMAPE medio</dd></div><div><dt>1,995</dt><dd>muestras de test</dd></div></dl>
+            <span class="conf-bar"><i style="--v:.924"></i></span>
+          </div>
+          <div class="conf-c limitada">
+            <span class="conf-n">Limitada</span>
+            <b>Conv2D</b>
+            <dl><div><dt>0.790</dt><dd>R² medio</dd></div><div><dt>17.0 %</dt><dd>SMAPE medio</dd></div><div><dt>1,865</dt><dd>muestras de test</dd></div></dl>
+            <span class="conf-bar"><i style="--v:.790"></i></span>
+          </div>
+        </div>
+        <p class="pj-nota">Regla: alta si R² ≥ 0.95, moderada si ≥ 0.85 y limitada por debajo, o siempre que haya un valor fuera del rango real.
+          En los tres grupos juntos: R² 0.907 y SMAPE 4.88 % sobre 92,933 diseños. <a href="surrogate.html">Cómo se entrenó y eligió →</a></p>
+      </section>
+
+      <!-- ───────────── 9. Estado ───────────── -->
+      <section class="pj-sec" id="estado">
+        <span class="pj-num">10</span>
+        <h2>Estado y lo que sigue</h2>
+
+        <div class="evo">
+          <div class="evo-c antes">
+            <span class="evo-k">Antes</span>
+            <ul>
+              <li>Predicción con la API externa del modelo de Purdue</li>
+              <li>LLM <code>nemotron-3-super:cloud</code></li>
+              <li>RAG con Qdrant y búsqueda de vecinos</li>
+            </ul>
+          </div>
+          <span class="evo-flecha" aria-hidden="true">→</span>
+          <div class="evo-c ahora">
+            <span class="evo-k">Ahora (sistema base)</span>
+            <ul>
+              <li>Surrogate 07D local, sin servicios externos</li>
+              <li>LLM <code>gemma4:31b-cloud</code></li>
+              <li>Sin RAG; 11 herramientas</li>
+            </ul>
+          </div>
+        </div>
+
+        <ol class="hito" aria-label="Línea de tiempo">
+          <li><time>22 jul 2026</time><b>Primer informe del agente</b><span>22/23 checks funcionales y benchmark de fidelidad con 40 casos.</span></li>
+          <li><time>10 oct 2026</time><b>Se elige el 07D</b><span>Seis series de experimentos, de 07 a 07F.</span></li>
+          <li><time>11 oct 2026</time><b>Capa 4 · DSE</b><span>Cinco experimentos; el agente le gana al azar en las tres tareas de búsqueda.</span></li>
+          <li><time>20–23 oct 2026</time><b>Estudio de tiempos</b><span>Tiempos de 13,276 síntesis recuperados de los logs y el modelo de costo.</span></li>
+          <li><time>7 nov 2026</time><b>Sistema base sin RAG</b><span>Smoke 61/63 OK y el agente completo en vivo en las tres familias.</span></li>
+          <li class="futuro"><time>Siguiente</time><b>Banco de pruebas DSE</b><span>90 tareas, 3 repeticiones, modelos open source frente a la línea base.</span></li>
+        </ol>
+
+        <div class="pj-grid2">
+          <div class="pj-caja aviso">
+            <h3>Límites conocidos del sistema base</h3>
+            <ul class="pj-ul">
+              <li><code>seleccionar_mejor</code> recibe un criterio en texto pero hoy lo ignora: ordena siempre igual.</li>
+              <li><code>evaluar_restricciones</code> solo revisa el formato, no las restricciones de recursos del usuario.</li>
+              <li>BRAM sale con advertencia de sanidad en Conv1D y Conv2D en el smoke test.</li>
+              <li>La verificación del 7 nov es una corrida por familia: prueba que funciona, no mide calidad.</li>
+            </ul>
+          </div>
+          <div class="pj-caja">
+            <h3>Lo que sigue</h3>
+            <ul class="pj-ul">
+              <li><strong>Ficha del dataset</strong> por familia: el primer paso del banco DSE.</li>
+              <li><strong>Banco de pruebas DSE</strong>: el sistema base frente al <em>sistema mejorado</em>, que verifica restricciones en código.</li>
+              <li><strong>Modelo de tiempos como herramienta</strong> (<code>estimar_tiempo_sintesis</code>), cuando tenga contrato de entrada y salida.</li>
+              <li>Cliente de Ollama configurable para correr modelos locales.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="pj-enlaces">
+          <a class="pj-enlace" href="agente.html"><span>Resultados</span><b>Evaluación del agente y banco DSE →</b></a>
+          <a class="pj-enlace" href="surrogate.html"><span>Datos y modelo</span><b>Surrogate 07D →</b></a>
+          <a class="pj-enlace" href="tiempos.html"><span>Costo de sintetizar</span><b>Modelo de tiempos →</b></a>
+        </div>
+      </section>
+
+      <footer>Fuente: código del proyecto en <code>~/Documents/Thesis_Last</code> (huella <code>ba4e6eb0b520</code>, 7 nov 2026) y los informes de este sitio.</footer>
+    </div>
+  </div>
+</main>
+
+<script src="data/secciones.js"></script>
+<script src="data/notebooks.js"></script>
+<script src="data/resultados.js"></script>
+<script src="assets/shell.js"></script>
+<script src="assets/proyecto.js"></script>
+</body>
+</html>
