@@ -1,0 +1,835 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}</style></head><body><!-- tr-nav --><script src="../data/secciones.js"></script><script src="../data/notebooks.js"></script><script src="../data/resultados.js"></script><script src="../assets/shell.js"></script><script src="../assets/nav.js"></script><title>Banco DSE v2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: artículo técnico de una columna ancha, con bloques de plano (rejilla fina, etiquetas en mono) y una calculadora de puntaje en el centro. */
+:root{
+  --bg:#F2F5F7; --surface:#FFFFFF; --ink:#12202B; --muted:#52636E; --line:#D3DCE2;
+  --accent:#0B6E8E; --accent-soft:#DCEEF4;
+  --good:#2B7A4B; --good-soft:#E0F0E6;
+  --bad:#B03E2D; --bad-soft:#F6E3DF;
+  --warn:#8F6200; --warn-soft:#F7ECCB;
+  --grid:rgba(18,32,43,.045);
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D161C; --surface:#15212A; --ink:#E5EDF2; --muted:#9BAEB9; --line:#2A3A45;
+    --accent:#5DC1DF; --accent-soft:#12313D;
+    --good:#6FCB91; --good-soft:#14301F;
+    --bad:#F18C7A; --bad-soft:#3A1F1A;
+    --warn:#E2B545; --warn-soft:#33290F;
+    --grid:rgba(229,237,242,.05);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D161C; --surface:#15212A; --ink:#E5EDF2; --muted:#9BAEB9; --line:#2A3A45;
+  --accent:#5DC1DF; --accent-soft:#12313D;
+  --good:#6FCB91; --good-soft:#14301F;
+  --bad:#F18C7A; --bad-soft:#3A1F1A;
+  --warn:#E2B545; --warn-soft:#33290F;
+  --grid:rgba(229,237,242,.05);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:16px/1.6 var(--f-body);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:32px 32px;
+  padding-block:0 64px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.wrap{max-width:1040px;margin:0 auto}
+header.top{padding-block:40px 24px}
+.kicker{font:500 12px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font:800 clamp(34px,6vw,60px)/1.02 var(--f-display);letter-spacing:-.02em;margin:0 0 16px;text-wrap:balance}
+.lede{font-size:18px;max-width:62ch;color:var(--muted);margin:0 0 18px}
+.stamp{display:inline-flex;flex-wrap:wrap;gap:8px;font:400 12px/1.3 var(--f-mono);color:var(--muted)}
+.stamp span{border:1px solid var(--line);background:var(--surface);padding:4px 8px;border-radius:4px}
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-block:1px solid var(--line);margin-bottom:8px}
+nav.toc ul{list-style:none;margin:0;padding:0;display:flex;gap:4px;overflow-x:auto}
+nav.toc a{display:block;padding:11px 12px;font:500 13px/1 var(--f-mono);color:var(--muted);text-decoration:none;white-space:nowrap;border-bottom:2px solid transparent}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--accent);border-bottom-color:var(--accent);outline:none}
+section{padding-block:44px 8px}
+h2{font:700 clamp(24px,3.4vw,34px)/1.1 var(--f-display);letter-spacing:-.01em;margin:0 0 8px;text-wrap:balance}
+.sub{color:var(--muted);max-width:68ch;margin:0 0 24px}
+h3{font:700 18px/1.25 var(--f-display);margin:0 0 6px}
+p{margin:0 0 12px;max-width:70ch}
+code,.mono{font-family:var(--f-mono);font-size:.88em}
+code{background:var(--accent-soft);padding:1px 5px;border-radius:3px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.tag{display:inline-block;font:500 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;padding:4px 7px;border-radius:3px;border:1px solid currentColor}
+.tag.alta{color:var(--bad)} .tag.media{color:var(--warn)} .tag.baja{color:var(--muted)} .tag.hecho{color:var(--good)} .tag.prep{color:var(--accent)} .tag.sis{color:var(--warn)}
+.tag.cmp{color:var(--accent)}
+
+/* Fases */
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:0;counter-reset:s}
+.steps li{display:grid;grid-template-columns:56px 1fr;gap:16px;padding:18px 0;border-top:1px solid var(--line);position:relative}
+.steps li:last-child{border-bottom:1px solid var(--line)}
+.steps .n{font:700 28px/1 var(--f-display);color:var(--accent)}
+.steps .n small{display:block;font:400 11px/1.2 var(--f-mono);color:var(--muted);margin-top:6px;letter-spacing:.04em}
+.steps p{margin:0 0 6px}
+.steps .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pill{font:400 12px/1 var(--f-mono);padding:5px 8px;border-radius:3px;background:var(--accent-soft);color:var(--ink)}
+.pill.gpu{background:var(--warn-soft)}
+.pill.nogpu{background:var(--good-soft)}
+
+/* Flujo de herramientas */
+.flow{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin:6px 0 0}
+.node{flex:1 1 150px;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:12px 14px;position:relative}
+.node b{display:block;font:500 13px/1.2 var(--f-mono);color:var(--accent);margin-bottom:4px}
+.node span{font-size:14px;color:var(--muted);display:block}
+.node.new{border-style:dashed;border-color:var(--warn)}
+.node.new b{color:var(--warn)}
+.node .arrow{display:none}
+@media(min-width:900px){
+  .node:not(:last-child)::after{content:"→";position:absolute;right:-17px;top:50%;transform:translateY(-50%);font:500 18px var(--f-mono);color:var(--muted);z-index:2}
+  .flow{gap:20px}
+}
+
+/* Tablas */
+.tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:14.5px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 11.5px/1.2 var(--f-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+td.id{font:500 13px var(--f-mono);color:var(--accent);white-space:nowrap}
+.dots{display:inline-flex;gap:4px;vertical-align:middle}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.dots i.o{background:transparent;border:1.5px solid var(--line)}
+
+/* Dos columnas */
+.two{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:820px){.two{grid-template-columns:1fr 1fr}}
+pre{margin:0;padding:16px;background:var(--bg);border:1px solid var(--line);border-radius:6px;overflow-x:auto;font:400 13px/1.55 var(--f-mono);color:var(--ink)}
+
+/* Calculadora */
+.calc{display:grid;grid-template-columns:1fr;gap:20px}
+@media(min-width:860px){.calc{grid-template-columns:1.05fr .95fr;gap:28px}}
+.ctl{margin-bottom:16px}
+.ctl label{display:flex;justify-content:space-between;gap:12px;font:500 13px/1.3 var(--f-mono);margin-bottom:6px}
+.ctl label output{color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.out{display:grid;gap:12px;align-content:start}
+.read{border:1px solid var(--line);border-radius:6px;padding:14px 16px;background:var(--bg)}
+.read .k{font:400 11.5px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.read .v{font:800 34px/1.1 var(--f-display);margin-top:4px;font-variant-numeric:tabular-nums}
+.read .h{font-size:13.5px;color:var(--muted);margin-top:4px}
+.read.hot{border-color:var(--accent);background:var(--accent-soft)}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:8px}
+.bar>i{display:block;height:100%;background:var(--accent);width:0;transition:width .2s}
+@media(prefers-reduced-motion:reduce){.bar>i{transition:none}html{scroll-behavior:auto}}
+
+/* En concreto */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px}
+.stat b{display:block;font:800 40px/1 var(--f-display);color:var(--accent);font-variant-numeric:tabular-nums}
+.stat span{display:block;margin-top:6px;font-size:14px;color:var(--muted)}
+.formula{font:500 14px/1.6 var(--f-mono);margin:0 0 20px;max-width:none}
+.seg{display:inline-flex;flex-wrap:wrap;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:14px}
+.seg button{font:500 13px/1 var(--f-mono);padding:10px 16px;border:0;background:var(--surface);color:var(--ink);cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--bg)}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.u0{background:var(--accent-soft)} .u1{background:var(--good-soft)} .u2{background:var(--warn-soft)} .u3{background:var(--bad-soft)} .u4{background:var(--bg);box-shadow:inset 0 0 0 1px var(--line)}
+td.cell{font:500 12.5px/1.3 var(--f-mono);text-align:center;white-space:nowrap}
+.ugrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:14px}
+.ucard{border-radius:6px;padding:10px 12px;min-width:0}
+.ucard b{display:block;font:500 13px/1.3 var(--f-mono);margin-bottom:6px}
+.ucard span{display:inline-block;font:400 11.5px/1 var(--f-mono);background:var(--surface);border-radius:3px;padding:4px 6px;margin:0 4px 4px 0}
+
+/* Mapa de muestras */
+.legend{display:flex;flex-wrap:wrap;gap:14px;font:400 12.5px/1.3 var(--f-mono);color:var(--muted);margin:0 0 14px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:6px;border:1px solid var(--line)}
+.legend i.d1,.sq.d1{background:var(--good-soft)} .legend i.d2,.sq.d2{background:var(--warn-soft)} .legend i.d3,.sq.d3{background:var(--bad-soft)}
+.legend i.dev{background:transparent;border:2px dashed var(--ink)}
+.fam{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px;margin-bottom:12px}
+.fam h4{font:700 18px/1.2 var(--f-display);margin:0 0 12px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.fam h4 small{font:400 12px var(--f-mono);color:var(--muted)}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(262px,1fr));gap:10px}
+.ubox{border:1px solid var(--line);border-radius:6px;padding:10px;min-width:0}
+.ubox b{display:block;font:500 12.5px/1.3 var(--f-mono);margin-bottom:8px}
+.sqs{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
+.sq{font:500 12px/1.1 var(--f-mono);color:var(--ink);padding:8px 0;border:1px solid var(--line);border-radius:4px;cursor:pointer;text-align:center;min-width:0}
+.sq.dev{border:2px dashed var(--ink)}
+.sq:hover,.sq:focus-visible,.sq[aria-pressed="true"]{outline:2px solid var(--accent);outline-offset:1px}
+.sqinfo{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 6px 6px 0;font-size:15px;min-height:70px}
+.sqinfo b{font-weight:600}
+.anat .node span{font-size:13.5px}
+
+/* Reparto por unidades */
+.units{display:grid;gap:10px}
+.urow{display:grid;grid-template-columns:1fr;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px}
+@media(min-width:820px){.urow{grid-template-columns:130px 1fr;align-items:center}}
+.ulab{font:700 17px/1.2 var(--f-display)}
+.ulab small{display:block;font:400 11.5px var(--f-mono);color:var(--muted);margin-top:2px}
+.ucells{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px}
+.ucell{background:var(--accent-soft);border-radius:4px;padding:8px 10px;min-width:0}
+.ucell b{display:block;font:500 12px/1.3 var(--f-mono);overflow-wrap:anywhere}
+.ucell span{font:800 22px/1.2 var(--f-display);font-variant-numeric:tabular-nums}
+
+/* Sugerencias */
+.cols{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:960px){.cols{grid-template-columns:repeat(3,1fr)}}
+.col{background:var(--surface);border:1px solid var(--line);border-radius:6px;border-top-width:4px;padding:18px 18px 6px;min-width:0}
+.col.mej{border-top-color:var(--accent)} .col.qui{border-top-color:var(--bad)} .col.pon{border-top-color:var(--good)}
+.col h3{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.col h3 small{font:400 12px var(--f-mono);color:var(--muted)}
+.item{padding:14px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0}
+.item b{display:block;font-weight:600;margin-bottom:4px}
+.item p{font-size:14.5px;color:var(--muted);margin:0 0 8px}
+.item .row{display:flex;flex-wrap:wrap;gap:6px}
+
+.note{border-left:4px solid var(--warn);background:var(--warn-soft);padding:12px 16px;border-radius:0 6px 6px 0;max-width:78ch;font-size:15px}
+.note.ok{border-left-color:var(--good);background:var(--good-soft)}
+ul.plain{margin:0;padding-left:20px;max-width:70ch}
+ul.plain li{margin-bottom:6px}
+.qs{counter-reset:q;list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.qs li{counter-increment:q;display:grid;grid-template-columns:34px 1fr;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px}
+.qs li::before{content:"Q" counter(q);font:500 13px/1.6 var(--f-mono);color:var(--accent)}
+.qs b{font-weight:600}
+.qs span{display:block;color:var(--muted);font-size:14.5px}
+footer{padding-top:40px;font:400 12.5px/1.6 var(--f-mono);color:var(--muted)}
+a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <p class="kicker">Tesis · Capa 4 · Evaluación del sistema completo</p>
+  <h1>Banco DSE v2</h1>
+  <p class="lede">Un banco de pruebas nuevo, construido desde cero, para evaluar el sistema completo (el agente ReAct con todas sus herramientas, incluido el surrogate 07D) en tareas de exploración de diseño (DSE). El LLM es la variable: el mismo banco se repite con distintos modelos open source. Las pruebas viejas no se tocan.</p>
+  <div class="stamp"><span>Borrador de diseño</span><span>Nada implementado todavía</span><span>Línea base: gemma4:31b-cloud</span><span>Destino: RTX 3060 Laptop · 6 GB</span></div>
+</header>
+
+<nav class="toc" aria-label="Secciones">
+  <ul>
+    <li><a href="#idea">Idea</a></li>
+    <li><a href="#concreto">En concreto</a></li>
+    <li><a href="#dataset">Dataset primero</a></li>
+    <li><a href="#fases">Cómo se construye</a></li>
+    <li><a href="#escalera">Escalera de targets</a></li>
+    <li><a href="#pruebas">Las pruebas</a></li>
+    <li><a href="#puntaje">Cómo se puntúa</a></li>
+    <li><a href="#tiempos">Modelo de tiempos</a></li>
+    <li><a href="#sugerencias">Mejorar · Quitar · Poner</a></li>
+    <li><a href="#decidir">Por decidir</a></li>
+  </ul>
+</nav>
+
+<section id="idea">
+  <h2>Qué mide y qué no</h2>
+  <p class="sub">Una sola pregunta: ¿el sistema completo (agente, herramientas y surrogate) encuentra buenos diseños bajo restricciones? La exactitud del surrogate ya está evaluada y no se vuelve a medir: aquí es una herramienta más del sistema. El LLM cambia entre corridas; lo que se evalúa es el sistema con ese LLM.</p>
+  <div class="two">
+    <div class="panel">
+      <h3>Una tarea cuenta como DSE si…</h3>
+      <ul class="plain">
+        <li>tiene un <b>espacio de diseño</b> explícito (qué se puede variar y en qué rango);</li>
+        <li>tiene un <b>objetivo</b> y una o más <b>restricciones</b>;</li>
+        <li>tiene un <b>presupuesto</b> de k candidatos;</li>
+        <li>se <b>verifica en código</b>, nunca leyendo la prosa del LLM.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Qué aprendimos de las pruebas anteriores</h3>
+      <ul class="plain">
+        <li>De los experimentos A–E con gemma4, solo <b>B</b> es DSE de verdad (3 tareas, hasta 5 candidatos).</li>
+        <li>En Platino, 4 de 6 casos generaron un solo candidato y <code>seleccionar_mejor</code> se usó 0 de 6 veces.</li>
+        <li><code>seleccionar_mejor</code> ignora el criterio y <code>evaluar_restricciones</code> solo revisa formato: la restricción la cumple (o no) el LLM leyendo texto. Eso es parte del sistema, así que el banco lo debe medir y no esconder.</li>
+      </ul>
+    </div>
+  </div>
+  <h3 style="margin-top:28px">Ruta de trabajo del agente</h3>
+  <div class="flow">
+    <div class="node"><b>pedido + espacio</b><span>Texto en español con perillas y rangos</span></div>
+    <div class="node"><b>generar_candidato</b><span>Texto → JSON de arquitectura</span></div>
+    <div class="node"><b>predecir_recursos</b><span>Surrogate 07D: BRAM, DSP, FF, LUT, ciclos, II</span></div>
+    <div class="node new"><b>estimar_tiempo</b><span>Herramienta nueva · en desarrollo</span></div>
+    <div class="node"><b>verificar + elegir</b><span>Restricción aplicada en código</span></div>
+  </div>
+</section>
+
+<section id="concreto">
+  <h2>En concreto: qué pruebas hay y cuántas veces se evalúa cada cosa</h2>
+  <p class="sub">Una <b>muestra</b> es una arquitectura real del dataset (split de test) que sirve de punto de partida de una tarea; cada tarea usa una muestra distinta y ninguna se repite. Una <b>plantilla</b> es un tipo de tarea (por ejemplo "optimizar con restricciones"). Una <b>tarea</b> es una plantilla en una dificultad, sobre una muestra. Una <b>corrida</b> es una ejecución de una tarea; cada tarea se corre 3 veces.</p>
+  <div class="panel" style="margin-bottom:20px">
+    <h3>Tres ejes que no hay que confundir</h3>
+    <div class="tscroll" style="margin-bottom:14px"><table>
+      <thead><tr><th>Eje</th><th>Qué es</th><th>Cuántos hay</th></tr></thead>
+      <tbody>
+        <tr><td class="id">Banco</td><td>Las 90 tareas fijas de esta página. No cambia entre corridas.</td><td>1</td></tr>
+        <tr><td class="id">Sistema</td><td>El agente con su prompt, sus herramientas y el surrogate. Cada cambio es una versión nueva.</td><td>2 previstos: <b>sistema base</b> (el actual, sin RAG) y <b>sistema mejorado</b> (verificación de restricciones en código, sin las herramientas que no se puntúan y con el reporte opcional)</td></tr>
+        <tr><td class="id">Modelo (LLM)</td><td>El cerebro del agente.</td><td>gemma4:31b-cloud y los modelos open source locales</td></tr>
+      </tbody>
+    </table></div>
+    <p style="margin-bottom:10px">Una corrida es un modelo, con un sistema, sobre una tarea del banco. Cada casilla de esta tabla son 270 corridas (90 tareas × 3):</p>
+    <div class="tscroll"><table>
+      <thead><tr><th>Modelo</th><th>Sistema base</th><th>Sistema mejorado (propuesta)</th></tr></thead>
+      <tbody>
+        <tr><td class="id">gemma4:31b-cloud</td><td>270</td><td>270</td></tr>
+        <tr><td class="id">Local que pasa el filtro</td><td>270</td><td>270, solo los 1 o 2 mejores</td></tr>
+        <tr><td class="id">Local que no pasa el filtro</td><td>solo el filtro (33)</td><td>no se corre</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>6</b><span>muestras por unidad (subconjunto de Dense o estrato de Conv)</span></div>
+    <div class="stat"><b>30</b><span>muestras por familia: Dense, Conv1D y Conv2D iguales</span></div>
+    <div class="stat"><b>90</b><span>muestras en total, una tarea por muestra</span></div>
+    <div class="stat"><b>270</b><span>corridas por modelo (90 tareas × 3 repeticiones)</span></div>
+  </div>
+  <p class="formula">Unidad = subconjunto en Dense (2layer, 3layer, 2_20, latency, resource) o estrato en Conv1D y Conv2D (5 cada uno).</p>
+
+  <h3>De dónde sale cada número</h3>
+  <div class="flow anat">
+    <div class="node"><b>3 familias</b><span>Dense, Conv1D, Conv2D</span></div>
+    <div class="node"><b>× 5 unidades = 15</b><span>Dense: sus 5 subconjuntos. Conv: 5 estratos de tamaño y reuse factor</span></div>
+    <div class="node"><b>× 6 muestras = 90</b><span>Arquitecturas reales del test, ninguna repetida</span></div>
+    <div class="node"><b>1 tarea por muestra</b><span>90 tareas: 10 plantillas × 3 dificultades × 3 familias</span></div>
+    <div class="node"><b>× 3 corridas = 270</b><span>Por modelo; 225 de test y 45 de dev</span></div>
+  </div>
+
+  <h3 style="margin-top:28px">Una tarea por dentro</h3>
+  <div class="flow anat">
+    <div class="node"><b>1 · Muestra</b><span>Una arquitectura real de la unidad (el punto de partida)</span></div>
+    <div class="node"><b>2 · Espacio</b><span>Perillas que de verdad varían en esa unidad, 50 a 300 puntos</span></div>
+    <div class="node"><b>3 · Objetivo y restricciones</b><span>Lo que dicta la plantilla y la dificultad</span></div>
+    <div class="node"><b>4 · Presupuesto k</b><span>Cuántos candidatos puede evaluar el sistema</span></div>
+    <div class="node"><b>5 · El sistema corre</b><span>Agente, herramientas y surrogate, 3 veces</span></div>
+    <div class="node"><b>6 · Puntaje</b><span>Código contra el oráculo del espacio, sin LLM</span></div>
+  </div>
+
+  <h3 style="margin-top:28px">El banco de un vistazo: 90 muestras, 90 tareas</h3>
+  <p class="sub" style="margin-bottom:12px">Cada cuadro es una muestra y también la tarea que parte de ella. Toca uno para ver qué plantilla y dificultad le toca.</p>
+  <div class="legend">
+    <span><i class="d1"></i>D1 fácil</span><span><i class="d2"></i>D2 media</span><span><i class="d3"></i>D3 difícil</span>
+    <span><i class="dev"></i>dev (1 por unidad)</span><span>sin borde punteado: test</span>
+  </div>
+  <div id="mapa"></div>
+  <div class="sqinfo" id="sqinfo" aria-live="polite">Toca un cuadro para ver su tarea.</div>
+  <p class="mono" style="font-size:12.5px;color:var(--muted);margin-top:10px">Los cuadros T6 y T7 son las plantillas de tiempo; no se corren hasta que exista el modelo de tiempos.</p>
+
+
+  <h3>Cuántas muestras, tareas y corridas hay en cada nivel</h3>
+  <div class="tscroll"><table>
+    <thead><tr><th>Nivel</th><th>Muestras</th><th>Tareas</th><th>Corridas (×3)</th><th>De ellas, test</th><th>De ellas, dev</th></tr></thead>
+    <tbody>
+      <tr><td class="id">Por unidad</td><td>6</td><td>6</td><td>18</td><td>15</td><td>3</td></tr>
+      <tr><td class="id">Por familia</td><td>30</td><td>30</td><td>90</td><td>75</td><td>15</td></tr>
+      <tr><td class="id">Total</td><td>90</td><td>90</td><td>270</td><td>225</td><td>45</td></tr>
+      <tr><td class="id">Filtro de Etapa 1 (propuesta)</td><td colspan="5">33 tareas con 1 repetición: 15 de T0 (una por unidad, con muestras propias) más las 18 tareas de T1 y T2 del banco principal</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 style="margin-top:28px">Y por cada subconjunto real del dataset</h3>
+  <div class="tscroll"><table>
+    <thead><tr><th>Subconjunto</th><th>Familia</th><th>Unidades que aporta</th><th>Muestras</th><th>Corridas (×3)</th></tr></thead>
+    <tbody>
+      <tr><td class="id">2layer</td><td>Dense</td><td>1</td><td>6</td><td>18</td></tr>
+      <tr><td class="id">3layer</td><td>Dense</td><td>1</td><td>6</td><td>18</td></tr>
+      <tr><td class="id">2_20</td><td>Dense</td><td>1</td><td>6</td><td>18</td></tr>
+      <tr><td class="id">latency</td><td>Dense</td><td>1</td><td>6</td><td>18</td></tr>
+      <tr><td class="id">resource</td><td>Dense</td><td>1</td><td>6</td><td>18</td></tr>
+      <tr><td class="id">conv1d</td><td>Conv1D</td><td>5 estratos</td><td>30</td><td>90</td></tr>
+      <tr><td class="id">conv2d</td><td>Conv2D</td><td>5 estratos</td><td>30</td><td>90</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note" style="margin-top:14px"><b>Dónde la igualdad no puede ser total.</b> Cada unidad tiene 6 muestras y cada familia 30, pero Conv1D y Conv2D tienen un solo subconjunto real, así que ese subconjunto aporta 5 unidades (30 muestras) contra las 6 de cada subconjunto de Dense. Es lo que permite que las tres familias pesen igual y que todas las unidades pesen igual. La alternativa, igualar los 7 subconjuntos reales con 6 muestras cada uno, deja a Dense con 30 y a cada Conv con solo 6.</div>
+  <p style="margin-top:14px">Las 6 muestras de una unidad se eligen con semilla fija, repartidas por cuantiles de tamaño y reuse factor del split de test (se confirma con la ficha del dataset), sin repetir ninguna.</p>
+  <p class="mono" style="font-size:12.5px;color:var(--muted);margin-top:10px">Dev es 1 de las 6 tareas de cada unidad (elegida con semilla fija) y sirve para afinar prompt y herramientas; el puntaje oficial usa solo test. Hasta que exista el modelo de tiempos, T6 y T7 no se corren: son 24 tareas por familia y el reparto se ajusta.</p>
+
+  <h3 style="margin-top:28px">Qué tarea le toca a cada unidad</h3>
+  <p class="sub" style="margin-bottom:12px">La regla es fija: la unidad de la tarea (plantilla t, dificultad d) es <code>(t + d + desplazamiento) mod 5</code>, con desplazamiento 0 en Dense, 1 en Conv1D y 2 en Conv2D. Así cada unidad recibe exactamente 6 tareas con 6 plantillas distintas, y la misma plantilla no cae sobre la misma unidad en todas las familias. Elige una familia:</p>
+  <div class="seg" role="group" aria-label="Familia">
+    <button type="button" id="fam0" aria-pressed="true">Dense</button>
+    <button type="button" id="fam1" aria-pressed="false">Conv1D</button>
+    <button type="button" id="fam2" aria-pressed="false">Conv2D</button>
+  </div>
+  <div class="tscroll"><table id="asig">
+    <thead><tr><th>Plantilla</th><th>D1 fácil (p 40 %)</th><th>D2 media (p 15 %)</th><th>D3 difícil (p 5 %)</th></tr></thead>
+    <tbody id="asigbody"></tbody>
+  </table></div>
+  <p class="mono" style="font-size:12.5px;color:var(--muted);margin-top:10px">En T3, D1, D2 y D3 son N2, N3 y N4 (1, 2 y 3 restricciones). El resto usa la fracción factible p.</p>
+  <div class="ugrid" id="ugrid"></div>
+
+  <h3 style="margin-top:28px">Cómo luce cada plantilla (ejemplos ilustrativos)</h3>
+  <div class="tscroll"><table>
+    <thead><tr><th>Plantilla</th><th>Pedido al sistema (los valores X, Y salen del oráculo de cada tarea)</th></tr></thead>
+    <tbody>
+      <tr><td class="id">T1 Verificar</td><td>"Una red densa de 3 capas (64, 32, 10), reuse factor 2047 y 8 bits: ¿cumple LUT ≤ X? Dame los valores."</td></tr>
+      <tr><td class="id">T2 Elegir</td><td>"Tengo 5 arquitecturas candidatas, A a E. ¿Cuál usa menos LUT sin pasar de DSP ≤ X?"</td></tr>
+      <tr><td class="id">T3 Optimizar</td><td>"Diseña una red que minimice LUT con DSP ≤ X y cycles_max ≤ Y. Prueba hasta 5 variantes y quédate con la mejor."</td></tr>
+      <tr><td class="id">T4 Barrido</td><td>"Para esta arquitectura, varía el reuse factor y dime desde qué valor deja de cumplirse DSP ≤ X."</td></tr>
+      <tr><td class="id">T5 Pareto</td><td>"Busca variantes que equilibren LUT y latencia y entrégame las que no estén dominadas por otra."</td></tr>
+      <tr><td class="id">T6 Tiempo, restricción</td><td>"Un diseño que quepa en DSP ≤ X y cuya síntesis estimada tarde menos de T horas." (pendiente del modelo de tiempos)</td></tr>
+      <tr><td class="id">T7 Tiempo, mínimo</td><td>"Entre los diseños que cumplen DSP ≤ X, el más barato de sintetizar." (pendiente)</td></tr>
+      <tr><td class="id">T8 Reparar</td><td>"Esta arquitectura usa DSP = Z y el límite es X. Modifícala lo mínimo para que cumpla."</td></tr>
+      <tr><td class="id">T9 Imposible</td><td>Una restricción que ningún diseño del espacio cumple. El sistema debe decir que no se puede, y no inventar que cumple.</td></tr>
+      <tr><td class="id">T10 Trampa de dominio</td><td>Una petición cuyo mejor diseño aparente es una red diminuta fuera del rango real. El sistema debe avisar baja confiabilidad.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="dataset">
+  <h2>Primero, conocer el dataset de cada familia</h2>
+  <p class="sub">Las reglas del banco (espacios, umbrales, muestras de partida, qué tareas son posibles) dependen de lo que el dataset realmente contiene. Sin conocerlo, las reglas se escriben al aire. Este paso va antes de la fase 1 y tiene su propia salida.</p>
+  <h3>Lo que ya sabemos (punto de partida, no definitivo)</h3>
+  <div class="tscroll"><table>
+    <thead><tr><th>Subconjunto</th><th>Familia</th><th>n test</th><th>Capas con peso</th><th>Reuse factor</th><th>Bits</th><th>Strategy</th></tr></thead>
+    <tbody>
+      <tr><td class="id">2layer</td><td>Dense</td><td>9 797</td><td>2 (fijo)</td><td>1 024–4 093</td><td>2–16</td><td>resource</td></tr>
+      <tr><td class="id">3layer</td><td>Dense</td><td>72 480</td><td>3 (fijo)</td><td>1 024–4 093</td><td>4–16</td><td>resource</td></tr>
+      <tr><td class="id">2_20</td><td>Dense</td><td>1 432</td><td>2–20</td><td>1–64</td><td>2–16</td><td>resource y latency</td></tr>
+      <tr><td class="id">resource</td><td>Dense</td><td>2 146</td><td>4–8</td><td>1–1 536</td><td>4–16</td><td>resource</td></tr>
+      <tr><td class="id">latency</td><td>Dense</td><td>3 218</td><td>4–8</td><td>1–96</td><td>4–16</td><td>latency</td></tr>
+      <tr><td class="id">conv1d</td><td>Conv1D</td><td>1 995</td><td>3–7</td><td>8 192–32 765</td><td>4–16</td><td>resource</td></tr>
+      <tr><td class="id">conv2d</td><td>Conv2D</td><td>1 865</td><td>3–7</td><td>8 192–32 765</td><td>4–16</td><td>resource</td></tr>
+    </tbody>
+  </table></div>
+  <p class="mono" style="font-size:12.5px;color:var(--muted);margin-top:10px">Rangos de un perfil de 3 000 muestras por subconjunto (<code>prediccion/limites_operativos.json</code>). El n de test es la población real. Datos en <code>~/Documents/wa-hls4ml</code>: 4,6 GB, train, val y test × 7 subconjuntos.</p>
+
+  <div class="two" style="margin-top:20px">
+    <div class="panel">
+      <h3>Lo que esto ya cambia del diseño</h3>
+      <ul class="plain">
+        <li><b>No hay una cuadrícula común.</b> El reuse factor llega a 64–96 en 2_20 y latency, arranca en 1 024 en 2layer y 3layer, y en Conv arranca en 8 192. Cada unidad necesita su propio espacio.</li>
+        <li><b><code>strategy</code> casi nunca es una perilla libre.</b> Solo varía dentro de 2_20. En el resto la fija el subconjunto (latency y resource son subconjuntos distintos) y Conv es siempre resource. El espacio de ejemplo que te mostré antes con Latency y Resource era incorrecto para la mayoría de las unidades.</li>
+        <li><b>En 2layer y 3layer el número de capas es fijo.</b> "Variar capas" no es una perilla ahí.</li>
+        <li><b>El perfil actual no es de fiar todavía.</b> Sale de 3 000 muestras por subconjunto y ya falló una vez: el rango de reuse factor de Dense salió mal (lo encontró el Experimento E: decía máximo 64 y llega a 4 093). Hay que recalcularlo con toda la población.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Qué hay que extraer por familia (la "ficha")</h3>
+      <ol class="plain">
+        <li>Población en train, val y test por subconjunto.</li>
+        <li>Valores reales de cada perilla, y cuáles son libres y cuáles fijas.</li>
+        <li>Combinaciones que existen de verdad (no es el producto cartesiano).</li>
+        <li>Estructura de las arquitecturas: tipos de capa, anchos, formas de entrada, filtros y kernels.</li>
+        <li>Rango y distribución de BRAM, DSP, FF, LUT, ciclos e II; cuántos casos con DSP = 0 y cuántos atípicos.</li>
+        <li>Tendencias de las salidas al mover cada perilla, por subconjunto (hoy hay una versión general).</li>
+        <li>Huecos: zonas sin datos, que definen el "fuera de dominio" de las tareas de trampa.</li>
+        <li>Calidad de los datos: campos incompletos, como el <code>io</code> y el <code>strategy</code> que salen como <code>unknown</code> en el perfil actual.</li>
+      </ol>
+    </div>
+  </div>
+
+  <h3 style="margin-top:28px">Qué decide cada hallazgo</h3>
+  <div class="tscroll"><table>
+    <thead><tr><th>Hallazgo de la ficha</th><th>Regla del banco que fija</th></tr></thead>
+    <tbody>
+      <tr><td>Perillas libres y fijas por unidad</td><td>Qué espacio se arma y qué plantillas de tarea existen en cada unidad</td></tr>
+      <tr><td>Combinaciones reales</td><td>Espacios sin diseños imposibles</td></tr>
+      <tr><td>Cuantiles de las arquitecturas</td><td>Los 5 estratos de Conv1D y de Conv2D, y la elección de las 6 muestras de cada unidad</td></tr>
+      <tr><td>Distribución de las salidas</td><td>Umbrales por fracción factible y chequeo de objetivos no triviales</td></tr>
+      <tr><td>Huecos de cobertura</td><td>Tareas de trampa de dominio</td></tr>
+      <tr><td>Poblaciones por subconjunto</td><td>Pesos y paridad entre familias</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note ok" style="margin-top:20px"><b>Entregable y criterio de salida.</b> Una ficha por familia y, en Dense, por subconjunto: un documento .docx con tablas y diagramas (regla de la tesis) y un JSON versionado con la huella del dataset, que lee el generador de tareas. Se lee en streaming, porque el train de 3layer pesa 1,9 GB. Ninguna regla del banco se escribe antes de esto.</div>
+</section>
+
+<section id="fases">
+  <h2>Cómo se construye, por fases</h2>
+  <p class="sub">Las fases 0 a 3 se hacen aquí con el surrogate, sin descargar ningún modelo. La GPU solo hace falta desde la fase 4.</p>
+  <ol class="steps">
+    <li>
+      <div class="n">0<small>FASE</small></div>
+      <div>
+        <h3>Congelar la versión del sistema a evaluar</h3>
+        <p>El banco evalúa el sistema tal como está, con su versión anotada (huella del código): prompt, herramientas y surrogate. Las mejoras a las herramientas no son requisito; son una versión nueva del sistema, y el mismo banco mide cuánto cambia el resultado. Para saber qué diseño eligió el sistema se lee la traza (<code>seleccionar_mejor</code> o el último candidato evaluado) y, si no alcanza, se agrega el <code>candidate_id</code> a la respuesta final.</p>
+        <div class="meta"><span class="pill nogpu">sin GPU</span><span class="pill">sin tocar el sistema</span></div>
+      </div>
+    </li>
+    <li>
+      <div class="n">1<small>FASE</small></div>
+      <div>
+        <h3>Espacio de diseño y oráculo</h3>
+        <p>Para cada unidad (un subconjunto de Dense o un estrato de Conv) se define un espacio cerrado de 50 a 300 puntos con las perillas que de verdad varían en ella (por ejemplo <code>reuse_factor</code> y <code>weight_bits</code>), recortado con la ficha de familia del paso previo. Se evalúa todo con el surrogate (unos 300 por segundo) y se guarda una tabla: ese es el oráculo. Usa el mismo surrogate del sistema, así que dice cuál es el mejor diseño que el sistema podría encontrar; no evalúa al surrogate.</p>
+        <div class="meta"><span class="pill nogpu">sin GPU</span><span class="pill">minutos de cómputo</span></div>
+      </div>
+    </li>
+    <li>
+      <div class="n">2<small>FASE</small></div>
+      <div>
+        <h3>Generar tareas y escribir el puntuador</h3>
+        <p>Las tareas salen de plantillas por nivel y grupo. Los umbrales se calibran para que una fracción conocida del espacio sea factible. Cada tarea pasa dos chequeos: tiene soluciones, y el óptimo no se alcanza moviendo una sola perilla. El puntuador lee la traza y la tabla del oráculo, sin llamar a ningún LLM.</p>
+        <div class="meta"><span class="pill nogpu">sin GPU</span><span class="pill">dev y test separados</span></div>
+      </div>
+    </li>
+    <li>
+      <div class="n">3<small>FASE</small></div>
+      <div>
+        <h3>Validar el banco antes de usarlo</h3>
+        <p>Una política de azar debe puntuar lo que predice la probabilidad, una voraz debería superarla, y una que lea el oráculo debe sacar 100 %. Luego se corre gemma4:31b-cloud como línea base. Si algo de esto no cuadra, el error está en el banco.</p>
+        <div class="meta"><span class="pill nogpu">API en la nube</span><span class="pill">congelar y guardar huella</span></div>
+      </div>
+    </li>
+    <li>
+      <div class="n">4<small>FASE</small></div>
+      <div>
+        <h3>Correr los modelos locales, en dos etapas</h3>
+        <p><b>Etapa 1:</b> un filtro rápido (tareas T0–T2) por modelo. <b>Etapa 2:</b> el banco completo solo para los que lo pasen. Un modelo a la vez en la GPU, con 3 repeticiones por tarea y el registro de modelo, cuantización, <code>num_ctx</code>, fecha, red y huella del código.</p>
+        <div class="meta"><span class="pill gpu">GPU local</span><span class="pill">3 repeticiones</span></div>
+      </div>
+    </li>
+    <li>
+      <div class="n">5<small>FASE</small></div>
+      <div>
+        <h3>Sumar los targets de tiempo</h3>
+        <p>Cuando el modelo de tiempos esté guardado y con contrato fijo, se agregan las tareas T7 y T8. El resto del banco no depende de esto.</p>
+        <div class="meta"><span class="pill">depende del modelo de tiempos</span></div>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<section id="escalera">
+  <h2>Escalera por número de targets</h2>
+  <p class="sub">La dificultad sube con el número de targets que intervienen en la tarea. "Target" es cada salida que el sistema sabe estimar: las 6 del surrogate y, cuando exista el modelo de tiempos, los de tiempo.</p>
+  <div class="tscroll"><table>
+    <thead><tr><th>Nivel</th><th>Targets</th><th>Forma de la tarea</th></tr></thead>
+    <tbody>
+      <tr><td class="id">N1</td><td><span class="dots"><i></i><i class="o"></i><i class="o"></i><i class="o"></i></span></td><td>Minimizar un target dentro del espacio acotado (variante opcional de T3)</td></tr>
+      <tr><td class="id">N2</td><td><span class="dots"><i></i><i></i><i class="o"></i><i class="o"></i></span></td><td>Un objetivo y 1 restricción sobre otro target</td></tr>
+      <tr><td class="id">N3</td><td><span class="dots"><i></i><i></i><i></i><i class="o"></i></span></td><td>Un objetivo y 2 restricciones</td></tr>
+      <tr><td class="id">N4</td><td><span class="dots"><i></i><i></i><i></i><i></i></span></td><td>Un objetivo y 3 restricciones</td></tr>
+      <tr><td class="id">N5</td><td><span class="dots"><i></i><i></i><i></i><i></i><i></i></span></td><td>Hasta 4 restricciones, o con targets de tiempo (variante opcional)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="two" style="margin-top:20px">
+    <div class="panel">
+      <h3>Cómo se fija la dificultad</h3>
+      <p>Con varias restricciones, el umbral de "mediana real" deja de servir. Cada tarea se calibra por su <b>fracción factible</b> <code>p</code>: el porcentaje del espacio que cumple todo (por ejemplo 40, 20, 10 o 5 %). Así el azar con k intentos tiene probabilidad de éxito exacta, <code>1 − (1 − p)^k</code>.</p>
+    </div>
+    <div class="panel">
+      <h3>Qué combinaciones de targets</h3>
+      <p>Las restricciones deben estar en tensión con el objetivo; LUT, FF y DSP suben juntos y serían redundantes. Se eligen con las tendencias que salgan de la ficha del dataset, por subconjunto (en pruebas previas, precisión alta subía LUT y DSP). Unas 10 combinaciones por nivel, balanceadas por grupo.</p>
+    </div>
+  </div>
+    <div class="panel" id="paridad" style="margin-top:20px">
+    <h3>Paridad entre familias</h3>
+    <p>Cada celda del banco (nivel × plantilla) existe para las tres familias, Dense, Conv1D y Conv2D, con el mismo número de tareas y de repeticiones. Ninguna plantilla se corre solo en una familia.</p>
+    <ul class="plain">
+      <li><b>Resultados siempre por familia.</b> El titular de un modelo es el promedio de las tres familias con el mismo peso (no el promedio de todas las tareas). Se muestra también su peor familia, para que un buen Dense no tape un mal Conv.</li>
+      <li><b>Dentro de Dense se reparte entre sus subconjuntos</b> (2layer, 3layer, 2_20, latency, resource). Si no, 3layer, que es el 81 % de los datos, domina. El Experimento A ya mostró que 2_20 esconde una debilidad.</li>
+      <li><b>Unidades (decidido):</b> 15 unidades parejas, 5 por familia, con 6 muestras reales cada una (30 por familia). En Dense las unidades son los 5 subconjuntos; en Conv1D y Conv2D son 5 estratos, definidos cruzando tamaño y reuse factor (4 esquinas y una central). Lo que no puede ser igual a la vez: Conv1D tiene un solo subconjunto real, que aquí aporta 30 muestras repartidas en 5 estratos de 6.</li>
+      <li><b>Lo que ya estaba desparejo:</b> el Experimento A tuvo 20 casos Dense contra 4 Conv1D y 4 Conv2D, y en la primera comparación de calidad Conv1D y Conv2D tenían 1 caso cada una frente a 8 de Dense.</li>
+      <li><b>Lo que hace distintas a las Conv:</b> sus descripciones son más largas (más tokens y más riesgo de JSON roto en modelos chicos) y tienen menos muestras reales de test (unas 2 000 cada una), así que sus rangos son menos sólidos. Se mide y se reporta, no se evita.</li>
+    </ul>
+  </div>
+  <h3 style="margin-top:28px">Ejemplo de una tarea (ilustrativo)</h3>
+<pre>{
+  "id": "N3-Dense-lut-01",
+  "grupo": "Dense", "subconjunto": "3layer",
+  "espacio": { "muestra_real": "una arquitectura 3layer del test",
+               "reuse_factor": [ ... ], "weight_bits": [ ... ],
+               "strategy": "fija en esta unidad" },
+  "objetivo": { "minimizar": "lut" },
+  "restricciones": [ { "dsp": "&lt;= 3" }, { "cycles_max": "&lt;= 4872" } ],
+  "k": 5,
+  "fraccion_factible": 0.10,     // medida con el oráculo
+  "oraculo": { "optimo_lut": ..., "n_factibles": ... }
+}</pre>
+</section>
+
+<section id="pruebas">
+  <h2>Las pruebas: plantillas y reparto</h2>
+  <p class="sub">Diez plantillas de tarea. Cada una se instancia en las tres familias y en tres dificultades. La dificultad se controla con la fracción factible <code>p</code> (fácil 40 %, media 15 %, difícil 5 %); en T3 la dificultad es la escalera de targets: N2, N3 y N4.</p>
+  <div class="tscroll"><table>
+    <thead><tr><th>ID</th><th>Tarea</th><th>Qué prueba del sistema</th><th>Cómo se verifica</th></tr></thead>
+    <tbody>
+      <tr><td class="id">T1</td><td>¿Cumple esta arquitectura la restricción X? Sí o no, con los números</td><td>Leer la predicción y comparar</td><td>Valor del surrogate contra el umbral</td></tr>
+      <tr><td class="id">T2</td><td>Elegir la mejor entre 4 a 6 candidatos dados</td><td>Comparar sin generar</td><td>Óptimo del conjunto</td></tr>
+      <tr><td class="id">T3</td><td><b>Optimizar con restricciones</b>: minimizar un target con 1 a 3 restricciones y un presupuesto de k candidatos</td><td>El DSE central: proponer, evaluar y ajustar</td><td>Posición entre los factibles del espacio, y si cumple</td></tr>
+      <tr><td class="id">T4</td><td>Barrido de una perilla (por ejemplo reuse factor): dónde se cumple y dónde cambia la tendencia</td><td>Explorar un eje de forma sistemática</td><td>Curva del oráculo</td></tr>
+      <tr><td class="id">T5</td><td>Dos objetivos a la vez: devolver los candidatos no dominados</td><td>Compromiso entre objetivos</td><td>Frente de Pareto del oráculo</td></tr>
+      <tr><td class="id">T6</td><td>Con tiempo: cumplir recursos y un tiempo de síntesis estimado ≤ T, o probabilidad de fallo ≤ p <span class="tag baja">pendiente</span></td><td>Combinar dos herramientas</td><td>Surrogate y modelo de tiempos</td></tr>
+      <tr><td class="id">T7</td><td>Con tiempo: entre los factibles, el más barato de sintetizar <span class="tag baja">pendiente</span></td><td>Optimizar algo que no es un recurso</td><td>Oráculo con el modelo de tiempos</td></tr>
+      <tr><td class="id">T8</td><td>Reparar: una arquitectura viola la restricción, modificarla lo mínimo</td><td>Corrección dirigida</td><td>Cumple, y distancia a la original</td></tr>
+      <tr><td class="id">T9</td><td>Imposible: la restricción no se puede cumplir en el espacio</td><td>Honestidad: no inventar que cumple</td><td>El oráculo confirma que no hay solución</td></tr>
+      <tr><td class="id">T10</td><td>Trampa de dominio: el mejor diseño aparente cae fuera del rango real</td><td>Avisar baja confiabilidad</td><td>Rango real de la ficha del dataset</td></tr>
+    </tbody>
+  </table></div>
+  <p class="mono" style="font-size:12.5px;color:var(--muted);margin-top:10px">T0, evaluar una arquitectura completa, queda fuera del banco principal: es la prueba de salud del filtro de Etapa 1. N1 (minimizar sin restricción) y N5 son variantes opcionales de T3.</p>
+
+  <h3 style="margin-top:28px">Cómo se reparten: 15 unidades parejas</h3>
+  <p class="sub" style="margin-bottom:14px">Cada unidad aporta 6 muestras reales, una por tarea, así que cada familia tiene 30 y el banco tiene 90. En Dense las unidades son los 5 subconjuntos reales. En Conv son 5 estratos de arquitecturas reales, definidos cruzando tamaño y reuse factor.</p>
+  <div class="units">
+    <div class="urow"><div class="ulab">Dense<small>30 tareas</small></div><div class="ucells">
+      <div class="ucell"><b>2layer</b><span>6</span></div><div class="ucell"><b>3layer</b><span>6</span></div><div class="ucell"><b>2_20</b><span>6</span></div><div class="ucell"><b>latency</b><span>6</span></div><div class="ucell"><b>resource</b><span>6</span></div>
+    </div></div>
+    <div class="urow"><div class="ulab">Conv1D<small>30 tareas</small></div><div class="ucells">
+      <div class="ucell"><b>chica · rf bajo</b><span>6</span></div><div class="ucell"><b>chica · rf alto</b><span>6</span></div><div class="ucell"><b>grande · rf bajo</b><span>6</span></div><div class="ucell"><b>grande · rf alto</b><span>6</span></div><div class="ucell"><b>central</b><span>6</span></div>
+    </div></div>
+    <div class="urow"><div class="ulab">Conv2D<small>30 tareas</small></div><div class="ucells">
+      <div class="ucell"><b>chica · rf bajo</b><span>6</span></div><div class="ucell"><b>chica · rf alto</b><span>6</span></div><div class="ucell"><b>grande · rf bajo</b><span>6</span></div><div class="ucell"><b>grande · rf alto</b><span>6</span></div><div class="ucell"><b>central</b><span>6</span></div>
+    </div></div>
+  </div>
+  <p style="margin-top:14px">Cada combinación de plantilla y dificultad existe una vez por familia, sobre una unidad distinta, rotando para que todas las unidades reciban plantillas y dificultades variadas. Limitación: con tan pocas tareas no se separa el efecto de la plantilla del efecto de la unidad, así que la conclusión se saca por familia.</p>
+
+  <h3 style="margin-top:28px">Protocolo de corrida</h3>
+  <div class="two">
+    <div class="panel">
+      <ul class="plain">
+        <li><b>3 repeticiones por tarea:</b> 90 tareas son 270 corridas por modelo. El agente no es determinista ni a temperatura 0.</li>
+        <li><b>Dev y test separados</b> (propuesta): por unidad, 1 de las 6 tareas va a dev, para afinar prompt y herramientas, y 5 a test, que queda congelado y con huella. Son 15 en dev y 75 en test.</li>
+        <li><b>Etapa 1, filtro rápido:</b> T0 a T2 en las tres familias. Solo pasan a la Etapa 2 los modelos que sostienen el protocolo.</li>
+        <li><b>Un modelo a la vez</b> en la GPU, nunca en paralelo.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <ul class="plain">
+        <li><b>Registro por corrida:</b> modelo, cuantización, <code>num_ctx</code>, versión del sistema, fecha, red y huella del código.</li>
+        <li><b>Dos modos opcionales:</b> A, el agente itera como hoy; B, una herramienta <code>explorar_espacio</code> barre el espacio y el LLM solo interpreta y explica. Comparar A y B por modelo separa "no sabe buscar" de "no sabe leer ni escribir".</li>
+        <li><b>Mientras no esté el modelo de tiempos,</b> T6 y T7 quedan fuera: son 8 plantillas, 24 tareas por familia, y el reparto de 6 por unidad se ajusta.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="puntaje">
+  <h2>Cómo se puntúa</h2>
+  <p class="sub">Todo lo calcula código, a partir de la traza de la corrida y la tabla del oráculo. El cumplimiento de la restricción se vuelve a evaluar con el surrogate; lo que el LLM afirma no cuenta.</p>
+  <div class="two" style="margin-bottom:20px">
+    <div class="panel">
+      <h3>Puntaje de una corrida (0 a 1)</h3>
+      <ul class="plain">
+        <li><b>0</b> si no respondió, el candidato es inválido o no cumple las restricciones.</li>
+        <li><b>Si cumple:</b> posición entre los puntos factibles, <code>(n − r) / (n − 1)</code>, con r = 1 para el óptimo. Se usa posición y no brecha porcentual porque LUT varía en órdenes de magnitud.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Para comparar niveles distintos</h3>
+      <p>El <b>éxito corregido por azar</b> es <code>(éxito − azar) / (1 − azar)</code>. Un 60 % de éxito vale mucho en una tarea con p = 5 % y casi nada en una con p = 40 %. Negativo significa peor que el azar.</p>
+    </div>
+  </div>
+  <div class="panel">
+    <h3>Probar los números</h3>
+    <p class="mono" style="font-size:12.5px;color:var(--muted);margin-bottom:18px">Espacio de ejemplo: 120 puntos.</p>
+    <div class="calc">
+      <div>
+        <div class="ctl"><label for="p">Fracción factible p <output id="po">20 %</output></label><input id="p" type="range" min="2" max="60" value="20"></div>
+        <div class="ctl"><label for="k">Presupuesto k (candidatos) <output id="ko">5</output></label><input id="k" type="range" min="1" max="10" value="5"></div>
+        <div class="ctl"><label for="s">Éxito observado del modelo <output id="so">60 %</output></label><input id="s" type="range" min="0" max="100" value="60"></div>
+        <div class="ctl"><label for="r">Posición del elegido entre los factibles (r) <output id="ro">5</output></label><input id="r" type="range" min="1" max="24" value="5"></div>
+      </div>
+      <div class="out">
+        <div class="read"><div class="k">Puntos factibles</div><div class="v" id="nf">24</div></div>
+        <div class="read"><div class="k">Éxito esperado del azar con k intentos</div><div class="v" id="azar">67 %</div><div class="bar"><i id="azb"></i></div></div>
+        <div class="read hot"><div class="k">Éxito corregido por azar</div><div class="v" id="corr">—</div><div class="h" id="corrh"></div></div>
+        <div class="read"><div class="k">Puntaje de la corrida</div><div class="v" id="pun">—</div><div class="h">Posición 1 = óptimo del espacio.</div></div>
+      </div>
+    </div>
+  </div>
+  <h3 style="margin-top:28px">Se reporta aparte, sin mezclar</h3>
+  <ul class="plain">
+    <li><b>Por nivel y por grupo</b>, no como un solo número global.</li>
+    <li><b>Honestidad:</b> cuántas veces afirma "cumple" sin cumplir, y si en la tarea imposible lo admite.</li>
+    <li><b>Señales del sistema:</b> si la respuesta final reporta la confiabilidad y avisa cuando el diseño sale del rango real.</li>
+    <li><b>Protocolo:</b> JSON de acción válido, reparaciones del parser, iteraciones, tarea cortada por el límite.</li>
+    <li><b>Costo:</b> tokens de entrada y salida, llamadas, segundos de reloj y tokens por segundo.</li>
+    <li><b>Siempre al lado de referencias:</b> azar, búsqueda voraz en código y oráculo.</li>
+  </ul>
+</section>
+
+<section id="tiempos">
+  <h2>El modelo de tiempos como un target más</h2>
+  <p class="sub">Según el código de <code>prediccion_tiempo/</code>, estima cuánto tardaría la síntesis real: la etapa C-synthesis, la síntesis lógica (Vivado) y la probabilidad de que falle, como p10, p50 y p90. Usa solo lo conocido antes de sintetizar: la arquitectura, la configuración de hls4ml y las predicciones del 07D.</p>
+  <div class="two">
+    <div class="panel">
+      <h3>Qué tareas habilita</h3>
+      <ul class="plain">
+        <li><b>T7:</b> un diseño que cumple recursos y tiene tiempo estimado de síntesis menor que T, o probabilidad de fallo menor que p.</li>
+        <li><b>T8:</b> entre los diseños factibles, el más barato de sintetizar.</li>
+        <li><b>Presupuesto de horas:</b> "tengo 10 horas, ¿cuáles puedo confirmar con síntesis real?"</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Cómo se puntúa</h3>
+      <ul class="plain">
+        <li>Contra el propio modelo de tiempos como oráculo, igual que el surrogate.</li>
+        <li>Donde haya tiempo real medido (<code>medicion_tiempos/equivalencias</code>), también el error, por ejemplo la fracción dentro de un factor 2.</li>
+        <li>Si el modelo da un rango, se premia usar el p90 al planificar y no solo el p50.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note" style="margin-top:20px"><b>Pendiente:</b> hoy son scripts y notebooks; no hay un modelo entrenado y guardado. Antes de construir T7 y T8 hace falta un contrato fijo de entradas y salidas, y decidir si la herramienta exige haber llamado antes a <code>predecir_recursos</code>.</div>
+</section>
+
+<section id="sugerencias">
+  <h2>Qué mejorar, quitar y poner</h2>
+  <p class="sub">Sugerencias mías, ordenadas por prioridad. Lo que cambia el sistema se trata como una versión nueva: el mismo banco corre antes y después y mide la diferencia.</p>
+  <div class="cols">
+    <div class="col mej">
+      <h3>Mejorar <small>5</small></h3>
+      <div class="item"><b>Recalcular los límites con toda la población</b><p><code>limites_operativos.json</code> sale de 3 000 muestras por subconjunto. Su rango agregado de Dense dice reuse factor 1–64 (los subconjuntos llegan a 4 093) y usa p5–p95 como rango real, así que puede marcar como fuera de rango un diseño que sí existe. T10 se puntúa con la ficha del dataset: si el sistema usa otros límites, se mediría el desacuerdo entre dos reglas. Se recalcula desde la ficha antes de correr el sistema base.</p><div class="row"><span class="tag prep">Preparación</span><span class="tag alta">Alta</span></div></div>
+      <div class="item"><b>Cliente de Ollama configurable</b><p>URL, <code>num_ctx</code> y timeouts por variable de entorno. Hoy la URL es fija, no hay <code>num_ctx</code> y los 90 s por llamada y 360 s por consulta cortarían modelos locales lentos. <b>Lo hace Carlos más adelante</b>, al preparar los modelos locales; no entra en esta ronda de cambios.</p><div class="row"><span class="tag prep">Preparación</span><span class="tag alta">Alta</span><span class="tag baja">Pendiente</span></div></div>
+      <div class="item"><b>Guardar trazas y no abrir el navegador</b><p>Va dentro del ejecutor del banco: guarda la traza de cada corrida para puntuar sin volver a ejecutar el modelo, y desactiva la apertura automática del reporte (270 reportes por modelo abrirían 270 pestañas).</p><div class="row"><span class="tag prep">Preparación</span><span class="tag media">Media</span></div></div>
+      <div class="item"><b>Verificar restricciones en código</b><p>Una herramienta que diga cumple/no cumple con el valor, y que <code>seleccionar_mejor</code> use el criterio del pedido. Hoy lo decide el LLM leyendo texto. Es lo que define el sistema mejorado: se corre antes y después para medir la diferencia.</p><div class="row"><span class="tag sis">Sistema mejorado</span><span class="tag alta">Alta</span></div></div>
+      <div class="item"><b>Prompt compacto</b><p>Tercera versión del sistema, solo si los modelos locales fallan en la Etapa 1 por culpa del prompt (unos 3 600 caracteres con reglas condicionales). Así no se multiplican las corridas.</p><div class="row"><span class="tag baja">Opcional</span><span class="tag media">Media</span></div></div>
+      <p class="mono" style="font-size:12px;color:var(--muted);margin:6px 0 14px">Se quitaron de esta lista los umbrales por fracción factible y las repeticiones con intervalos: ya son reglas del banco.</p>
+    </div>
+
+    <div class="col qui">
+      <h3>Quitar <small>4</small></h3>
+      <div class="item"><b>El RAG y Qdrant del agente</b><p>Qdrant ya estaba parado y en las corridas C1–C3 no hubo ninguna llamada a <code>buscar_similares</code>. Hecho el 7 nov: el sistema base va sin RAG, archivado en <code>legacy_rag/</code>. El agente de predicción pasó de 12 a 11 herramientas.</p><div class="row"><span class="tag hecho">Hecho</span></div></div>
+      <div class="item"><b>La compuerta de grounding</b><p>Se conserva, apoyada solo en <code>sugerir_ejemplo_real</code>: <code>generar_candidato</code> se niega si faltan datos y no se consultaron ejemplos reales. En un banco de espacio cerrado el pedido ya trae los datos, así que casi no debería activarse.</p><div class="row"><span class="tag hecho">Hecho</span></div></div>
+      <div class="item"><b>Herramientas que no se puntúan</b><p><code>sintetizar_hls4ml</code> (no hay backend), <code>validar_especificacion</code> y <code>evaluar_restricciones</code> de formato. En la prueba en vivo, gemma4 llamó a las dos últimas en las tres familias aunque son opcionales: gastan 2 de 7 pasos. Quitarlas es un cambio del sistema, así que va en el sistema mejorado; el base las conserva.</p><div class="row"><span class="tag sis">Sistema mejorado</span><span class="tag media">Media</span></div></div>
+      <div class="item"><b>El reporte HTML como paso obligatorio</b><p>No se evalúa y consume un paso. En el sistema mejorado pasa a ser opcional; el base lo conserva. Se mantiene en el producto.</p><div class="row"><span class="tag sis">Sistema mejorado</span><span class="tag media">Media</span></div></div>
+      <p class="mono" style="font-size:12px;color:var(--muted);margin:6px 0 14px">Se quitó de esta lista el script de corrida en paralelo: el ejecutor nuevo es en serie por diseño y el script viejo queda en <code>benchmark/</code> sin tocar.</p>
+    </div>
+
+    <div class="col pon">
+      <h3>Poner <small>4</small></h3>
+      <div class="item"><b>Políticas de referencia en código</b><p>Azar, búsqueda voraz y exhaustiva. Sirven para validar el banco en la fase 3 y como referencia al puntuar. Si una voraz de 20 líneas iguala al LLM, ese resultado también es un hallazgo.</p><div class="row"><span class="tag prep">Banco</span><span class="tag alta">Alta</span></div></div>
+      <div class="item"><b>Puntaje por hora</b><p>Tokens por segundo y VRAM junto al puntaje, medidos en el ejecutor durante la corrida en la PC de la GPU. En una laptop, un modelo un poco peor pero 5 veces más rápido puede ser el útil.</p><div class="row"><span class="tag prep">Preparación</span><span class="tag media">Media</span></div></div>
+      <div class="item"><b>Modo B: <code>explorar_espacio</code></b><p>El LLM interpreta y explica; el código barre el espacio. Separa "no sabe buscar" de "no sabe leer ni escribir". Es una herramienta nueva, o sea otro cambio del sistema: queda para una segunda ronda.</p><div class="row"><span class="tag baja">Opcional</span><span class="tag media">Media</span></div></div>
+      <div class="item"><b>Publicar resultados en el sitio</b><p>Reusar <code>Tesis_web</code> para mostrar el tablero por modelo y nivel, cuando haya resultados.</p><div class="row"><span class="tag baja">Después</span><span class="tag baja">Baja</span></div></div>
+      <p class="mono" style="font-size:12px;color:var(--muted);margin:6px 0 14px">Ya son parte del diseño y se quitaron de esta lista: tarea imposible (T9), trampa de dominio (T10), reparar (T8) y el filtro de Etapa 1. La tarea ambigua se descartó: mediría la compuerta de <code>generar_candidato</code>, no al modelo.</p>
+    </div>
+  </div>
+
+    <h3 style="margin-top:32px">Riesgos que conviene tener presentes</h3>
+  <ul class="plain">
+    <li><b>El oráculo usa el mismo surrogate del sistema.</b> Es intencional: el banco mide si el sistema encuentra el mejor diseño que su propia herramienta puede dar, no si el surrogate acierta contra síntesis real (eso ya está evaluado).</li>
+    <li><b>Duración.</b> 90 tareas × 3 repeticiones son 270 corridas por modelo. Las consultas complejas movieron alrededor de 40 000 tokens con gemma4; en la GPU local pueden ser varios minutos cada una. Es una estimación sin medir, por eso existe la Etapa 1.</li>
+    <li><b>Cada cambio al sistema es una versión nueva.</b> Se anota la versión y se vuelve a correr el mismo banco, gemma4 incluido, para que las comparaciones sean entre versiones medidas igual.</li>
+  </ul>
+</section>
+
+<section id="decidir">
+  <h2>Decisiones que faltan</h2>
+  <p class="sub">Solo falta el contrato del modelo de tiempos, y no bloquea: se puede empezar por la ficha del dataset.</p>
+  <div class="panel" style="margin-bottom:16px">
+    <h3>Ya decidido</h3>
+    <ul class="plain">
+      <li>El sistema base va sin RAG (hecho el 7 nov).</li>
+      <li>Sistema mejorado = verificación de restricciones en código, sin las herramientas que no se puntúan y con el reporte opcional.</li>
+      <li>15 unidades parejas con 6 muestras reales cada una: 90 tareas y 3 repeticiones por tarea.</li>
+      <li>Entran las tareas de trampa de dominio (T10), imposible (T9) y reparar (T8). La tarea ambigua se descarta.</li>
+      <li>El cliente de Ollama configurable lo hace Carlos más adelante.</li>
+      <li>Un objetivo con restricciones es el eje (T3); los dos objetivos a la vez van aparte (T5).</li>
+      <li>La escalera llega hasta N4 dentro de T3; N1 y N5 son opcionales y los targets de tiempo entran en la fase 5.</li>
+      <li>Las muestras salen del split de test.</li>
+      <li>El sistema mejorado se corre solo en gemma4 y en los 1 o 2 mejores modelos locales.</li>
+    </ul>
+  </div>
+  <h3>Por confirmar</h3>
+  <ol class="qs">
+    <li><div><b>Modelo de tiempos</b><span>¿Qué recibe y qué devuelve la versión final (p10, p50, p90 y probabilidad de fallo)? ¿Cuándo se espera guardado? No bloquea, pero T6 y T7 esperan.</span></div></li>
+  </ol>
+</section>
+
+<footer>
+  <div>Banco DSE v2 · borrador de diseño. Cifras citadas: contabilidad de <span>medicion_tiempos</span> y resultados de <span>dse_benchmark</span> con gemma4:31b-cloud.</div>
+  <div>Documento completo: <span>banco_dse/DISENO_BANCO_DSE.md</span></div>
+</footer>
+</div>
+
+<script>
+(function(){
+  var TPL=["T1 Verificar","T2 Elegir","T3 Optimizar","T4 Barrido","T5 Pareto","T6 Tiempo, restricción *","T7 Tiempo, mínimo *","T8 Reparar","T9 Imposible","T10 Trampa de dominio"];
+  var UN=[
+    ["2layer","3layer","2_20","latency","resource"],
+    ["chica · rf bajo","chica · rf alto","grande · rf bajo","grande · rf alto","central"],
+    ["chica · rf bajo","chica · rf alto","grande · rf bajo","grande · rf alto","central"]
+  ];
+  var body=document.getElementById("asigbody"), grid=document.getElementById("ugrid");
+  function render(f){
+    var rows="", per=[[],[],[],[],[]];
+    for(var t=1;t<=10;t++){
+      rows+="<tr><td class=\"id\">"+TPL[t-1]+"</td>";
+      for(var d=1;d<=3;d++){
+        var u=(t+d+f)%5;
+        per[u].push("T"+t+" · D"+d);
+        rows+="<td class=\"cell u"+u+"\">"+UN[f][u]+"</td>";
+      }
+      rows+="</tr>";
+    }
+    body.innerHTML=rows;
+    var cards="";
+    for(var i=0;i<5;i++){
+      cards+="<div class=\"ucard u"+i+"\"><b>"+UN[f][i]+" · "+per[i].length+" tareas</b>"+per[i].map(function(x){return "<span>"+x+"</span>"}).join("")+"</div>";
+    }
+    grid.innerHTML=cards;
+    for(var k=0;k<3;k++){document.getElementById("fam"+k).setAttribute("aria-pressed",k===f?"true":"false")}
+  }
+  [0,1,2].forEach(function(k){document.getElementById("fam"+k).addEventListener("click",function(){render(k)})});
+  render(0);
+})();
+(function(){
+  var N=120;
+  var $=function(id){return document.getElementById(id)};
+  var p=$("p"),k=$("k"),s=$("s"),r=$("r");
+  function fmt(x){return (Math.round(x*10)/10).toString().replace(".",",")}
+  function update(){
+    var pv=+p.value/100, kv=+k.value, sv=+s.value/100;
+    var nf=Math.max(2,Math.round(N*pv));
+    r.max=nf; if(+r.value>nf) r.value=nf;
+    var rv=+r.value;
+    var azar=1-Math.pow(1-pv,kv);
+    var corr=(sv-azar)/(1-azar);
+    var pun=(nf-rv)/(nf-1);
+    $("po").textContent=Math.round(pv*100)+" %";
+    $("ko").textContent=kv;
+    $("so").textContent=Math.round(sv*100)+" %";
+    $("ro").textContent=rv+" de "+nf;
+    $("nf").textContent=nf+" de "+N;
+    $("azar").textContent=Math.round(azar*100)+" %";
+    $("azb").style.width=Math.round(azar*100)+"%";
+    $("corr").textContent=fmt(corr*100)+" %";
+    $("corrh").textContent=corr<0?"Peor que el azar con el mismo presupuesto.":(corr<0.25?"Apenas por encima del azar.":(corr<0.6?"Claramente por encima del azar.":"Muy por encima del azar."));
+    $("pun").textContent=fmt(pun).replace(/^(\d)$/,"$1");
+  }
+  [p,k,s,r].forEach(function(el){el.addEventListener("input",update)});
+  update();
+})();
+(function(){
+  var NAMES=["Verificar","Elegir entre candidatos","Optimizar con restricciones","Barrido de una perilla","Dos objetivos (Pareto)","Tiempo: cumplir recursos y tiempo (pendiente)","Tiempo: el más barato de sintetizar (pendiente)","Reparar","Imposible","Trampa de dominio"];
+  var FAM=[
+    {n:"Dense",u:["2layer","3layer","2_20","latency","resource"]},
+    {n:"Conv1D",u:["chica · rf bajo","chica · rf alto","grande · rf bajo","grande · rf alto","central"]},
+    {n:"Conv2D",u:["chica · rf bajo","chica · rf alto","grande · rf bajo","grande · rf alto","central"]}
+  ];
+  var DIF=["fácil, fracción factible ≈ 40 %","media, fracción factible ≈ 15 %","difícil, fracción factible ≈ 5 %"];
+  var DIF3=["N2: 1 restricción","N3: 2 restricciones","N4: 3 restricciones"];
+  var root=document.getElementById("mapa"), info=document.getElementById("sqinfo");
+  if(!root||!info) return;
+  var html="";
+  FAM.forEach(function(F,f){
+    var per=[[],[],[],[],[]];
+    for(var t=1;t<=10;t++){for(var d=1;d<=3;d++){per[(t+d+f)%5].push([t,d]);}}
+    html+="<div class=\"fam\"><h4>"+F.n+"<small>30 muestras · 30 tareas · 90 corridas</small></h4><div class=\"fgrid\">";
+    per.forEach(function(list,u){
+      var devIdx=-1;
+      for(var i=0;i<list.length;i++){if(list[i][1]===2){devIdx=i;break;}}
+      html+="<div class=\"ubox\"><b>"+F.u[u]+" · 6 muestras</b><div class=\"sqs\">";
+      list.forEach(function(x,i){
+        var dev=(i===devIdx);
+        html+="<button type=\"button\" class=\"sq d"+x[1]+(dev?" dev":"")+"\" aria-pressed=\"false\" data-f=\""+f+"\" data-u=\""+u+"\" data-i=\""+i+"\" data-t=\""+x[0]+"\" data-d=\""+x[1]+"\" data-dev=\""+(dev?1:0)+"\" aria-label=\""+F.n+" "+F.u[u]+", muestra "+(i+1)+", T"+x[0]+" D"+x[1]+"\">T"+x[0]+"<br>D"+x[1]+"</button>";
+      });
+      html+="</div></div>";
+    });
+    html+="</div></div>";
+  });
+  root.innerHTML=html;
+  function show(b){
+    var f=+b.dataset.f,u=+b.dataset.u,i=+b.dataset.i,t=+b.dataset.t,d=+b.dataset.d,dev=b.dataset.dev==="1";
+    var dif=(t===3)?DIF3[d-1]+" (D"+d+")":"D"+d+" "+DIF[d-1];
+    info.innerHTML="<b>"+FAM[f].n+" · "+FAM[f].u[u]+" · muestra "+(i+1)+" de 6</b><br>Plantilla <b>T"+t+" "+NAMES[t-1]+"</b> · "+dif+"<br>Rol: "+(dev?"dev (se usa para afinar)":"test (cuenta para el puntaje)")+" · 3 corridas.";
+    var all=root.querySelectorAll(".sq");
+    for(var k=0;k<all.length;k++){all[k].setAttribute("aria-pressed",all[k]===b?"true":"false");}
+  }
+  root.addEventListener("click",function(e){var b=e.target.closest(".sq"); if(b) show(b);});
+  root.addEventListener("mouseover",function(e){var b=e.target.closest(".sq"); if(b) show(b);});
+})();
+</script>
+</body></html>

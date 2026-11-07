@@ -10,7 +10,7 @@ No necesita build ni dependencias: es HTML, CSS y JavaScript plano.
 |---|---|---|
 | **Surrogate 07D** | Datos · Modelos · Referencia: Purdue | Notebooks 01 a 06 y la auditoría de los datos; 07 a 07F, el bundle y la comparación que explica por qué ganó el 07D; el modelo de Purdue |
 | **Modelo de tiempos** | Estudio de tiempos · Modelo de costo | Rondas 400, 800 y 2,000, síntesis frente a surrogate y agente, modelo de costo y bitácora de iteraciones; notebooks T1 a T5 |
-| **Agente y DSE** | Evaluación | Informe de evaluación del agente e Informe Capa 4 |
+| **Agente y DSE** | Evaluación · Banco de pruebas DSE | Informe de evaluación del agente e Informe Capa 4; diseño del banco nuevo para evaluar el sistema completo |
 
 Cada portada de sección sigue el mismo orden: qué es, cómo se hizo (notebooks), qué salió (resultados) y qué sigue.
 

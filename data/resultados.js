@@ -185,5 +185,21 @@ window.RESULTADOS = {
         ["0.915", "AUC del fallo"],
       ],
     },
+    {
+      grupo: "agente",
+      archivo: "paginas/10-banco-pruebas-dse.html",
+      seccion: "agente",
+      sub: "banco",
+      titulo: "Banco de pruebas DSE · Diseño",
+      resumen:
+        "Diseño del banco nuevo para evaluar el sistema completo (agente ReAct, herramientas y surrogate) en tareas de exploración de diseño: 10 plantillas, 15 unidades parejas con 6 muestras reales cada una, escalera de targets y puntaje contra un oráculo.",
+      fecha: "2026-11-07",
+      etiqueta: "Diseño",
+      cifras: [
+        ["90", "tareas del banco"],
+        ["270", "corridas por modelo"],
+        ["15", "unidades parejas"],
+      ],
+    },
   ],
 };

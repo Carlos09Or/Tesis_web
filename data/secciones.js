@@ -114,7 +114,15 @@ window.SECCIONES = [
         titulo: "Evaluación",
         desc: "Dos informes: las pruebas funcionales con el benchmark de fidelidad, y los cinco experimentos de la Capa 4.",
       },
+      {
+        id: "banco",
+        titulo: "Banco de pruebas DSE",
+        desc: "El banco nuevo, desde cero, para evaluar el sistema completo en tareas de exploración de diseño con modelos de lenguaje open source. Hoy es un diseño: todavía no se ha ejecutado.",
+      },
     ],
-    sigue: ["Incorporar el extended abstract de CSTIC 2027, que existe como documento pero aún no como página."],
+    sigue: [
+      "Incorporar el extended abstract de CSTIC 2027, que existe como documento pero aún no como página.",
+      "Banco de pruebas DSE: ficha del dataset por familia, espacios y oráculo, y luego correr los modelos.",
+    ],
   },
 ];
