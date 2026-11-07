@@ -14,6 +14,15 @@ window.SECCIONES = [
       ["4.88 %", "SMAPE medio"],
       ["433,676", "diseños de entrenamiento"],
     ],
+    // Diagrama de la portada (lo pinta assets/seccion.js)
+    visual: {
+      tipo: "surrogate",
+      embudo: [["683,171", "diseños crudos en wa-hls4ml", 683171], ["619,601", "con síntesis utilizable", 619601]],
+      descartados: "63,570 descartados (9.3 %): síntesis fallidas",
+      splits: [["train", 433676], ["val", 92992], ["test", 92933]],
+      modelos: [["07 · B", 0.898], ["07B", 0.886], ["07C", 0.886], ["07D", 0.907, true], ["07E", 0.889], ["07F", 0.85]],
+      referencia: ["Purdue", 0.9585, "referencia histórica, 2.3 M parámetros"],
+    },
     subs: [
       {
         id: "datos",
@@ -50,6 +59,15 @@ window.SECCIONES = [
       ["199,000×", "speedup del 07D"],
       ["91.8 %", "tiempo predicho dentro de ×2"],
     ],
+    visual: {
+      tipo: "tiempos",
+      sintesis: ["7.5 min", "mediana de una síntesis real (C-synth + Vivado)"],
+      surrogate: ["3.1 ms", "mediana del surrogate 07D, en CPU"],
+      speedup: ["199,000×", "más rápido que sintetizar (mediana de la razón, diseño por diseño)"],
+      equivale: "En los 7.5 min de una síntesis típica, el 07D predice unos 145,000 diseños.",
+      rondas: [["Ronda 400", "2,830", 2830, "20 oct"], ["Ronda 800", "5,645", 5645, "21 oct"], ["Ronda 2,000", "13,276", 13276, "22 oct"]],
+      modelo: [["91.8 %", "del tiempo de C-synth predicho dentro de ×2"], ["0.912", "AUC al predecir si la síntesis falla"]],
+    },
     subs: [
       {
         id: "estudio",
@@ -109,6 +127,18 @@ window.SECCIONES = [
       ["3/3", "tareas de búsqueda ganadas al azar"],
       ["6/7", "subsets con confianza honesta"],
     ],
+    visual: {
+      tipo: "agente",
+      pasos: [
+        ["Pedido", "lenguaje natural", ""],
+        ["Clasificador", "LLM: ¿predicción?", "llm"],
+        ["Agente ReAct", "decide qué herramienta usar", "llm"],
+        ["11 herramientas", "9 en código, 2 con LLM", "codigo"],
+        ["Surrogate 07D", "6 salidas en ms", "modelo"],
+        ["Respuesta + reporte", "con su confiabilidad", ""],
+      ],
+      enlace: ["proyecto.html#funcionamiento", "Ver el diagrama completo de funcionamiento →"],
+    },
     subs: [
       {
         id: "funciona",

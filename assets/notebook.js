@@ -52,6 +52,26 @@
   estado.appendChild(document.createTextNode(n.estado));
   cab.appendChild(estado);
   cab.appendChild(el("p", "archivo", n.archivo));
+
+  // Posición del notebook dentro de su subsección (los demás, enlazados)
+  var hermanos = lis.filter(function (x) { return x.seccion === n.seccion && x.sub === n.sub; });
+  if (hermanos.length > 1) {
+    var pos = hermanos.indexOf(n);
+    var ruta = el("nav", "nb-ruta");
+    ruta.setAttribute("aria-label", "Notebooks de " + (sub ? sub.titulo : "esta subsección"));
+    ruta.appendChild(el("span", "nb-ruta-t", "Notebook " + (pos + 1) + " de " + hermanos.length + (sub ? " en " + sub.titulo : "")));
+    var ol = el("ol");
+    hermanos.forEach(function (h, k) {
+      var li = el("li");
+      var a = el("a", k === pos ? "on" : (k < pos ? "antes" : ""), h.id);
+      a.href = "notebook.html?id=" + encodeURIComponent(h.id);
+      a.title = h.titulo;
+      if (k === pos) a.setAttribute("aria-current", "page");
+      li.appendChild(a); ol.appendChild(li);
+    });
+    ruta.appendChild(ol);
+    cab.appendChild(ruta);
+  }
   raiz.appendChild(cab);
 
   // Cifras
@@ -67,15 +87,21 @@
   // Entra / sale
   var io = el("div", "io");
   var e1 = el("div", "io-caja"); e1.appendChild(el("span", "io-et", "Entra")); e1.appendChild(el("p", null, n.entra));
-  var fl = el("span", "io-flecha", "→"); fl.setAttribute("aria-hidden", "true");
+  var fl = el("span", "io-flecha"); fl.setAttribute("aria-hidden", "true");
+  fl.appendChild(el("span", "io-nb", n.id));
   var e2 = el("div", "io-caja"); e2.appendChild(el("span", "io-et", "Sale")); e2.appendChild(el("p", null, n.sale));
   io.appendChild(e1); io.appendChild(fl); io.appendChild(e2);
   raiz.appendChild(io);
 
-  raiz.appendChild(seccion("Qué hice", lista(n.hice)));
-  if (n.hallazgos.length) raiz.appendChild(seccion("Qué encontré", lista(n.hallazgos)));
-  raiz.appendChild(seccion("Qué verifiqué", lista(n.verificado, "plain ok")));
-  if (n.avisos.length) raiz.appendChild(seccion("Avisos", lista(n.avisos, "plain aviso")));
+  function bloque(titulo, items, clase, claseLista) {
+    var s = seccion(titulo, lista(items, claseLista));
+    s.className = "bloque " + clase;
+    return s;
+  }
+  raiz.appendChild(bloque("Qué hice", n.hice, "b-hice"));
+  if (n.hallazgos.length) raiz.appendChild(bloque("Qué encontré", n.hallazgos, "b-hallazgo"));
+  raiz.appendChild(bloque("Qué verifiqué", n.verificado, "b-ok", "plain ok"));
+  if (n.avisos.length) raiz.appendChild(bloque("Avisos", n.avisos, "b-aviso", "plain aviso"));
 
   // Páginas relacionadas
   var rel = (n.relacionados || []).map(function (arch) {

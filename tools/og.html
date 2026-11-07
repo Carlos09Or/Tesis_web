@@ -1,0 +1,50 @@
+<!doctype html>
+<!-- Fuente de assets/og.png (vista previa al compartir el enlace). Para regenerarla:
+     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --hide-scrollbars \
+       --window-size=1200,630 --screenshot=assets/og.png tools/og.html -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Vista previa</title>
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: #E6EAF1; padding: 64px 72px;
+    background:
+      radial-gradient(700px 420px at 100% 0%, rgba(110,147,255,.35), transparent 60%),
+      radial-gradient(600px 380px at 0% 100%, rgba(60,201,160,.25), transparent 60%),
+      radial-gradient(500px 300px at 70% 110%, rgba(240,167,58,.22), transparent 60%),
+      #0F141C;
+    display: flex; flex-direction: column; gap: 26px; position: relative;
+  }
+  body::after {
+    content: ""; position: absolute; inset: 0; opacity: .18;
+    background-image: linear-gradient(#2A3444 1px, transparent 1px), linear-gradient(90deg, #2A3444 1px, transparent 1px);
+    background-size: 40px 40px;
+    -webkit-mask-image: linear-gradient(120deg, transparent 35%, #000 100%);
+  }
+  .top { display: flex; align-items: center; gap: 16px; font: 600 22px/1 Menlo, monospace; color: #9AA6B7; letter-spacing: .04em; }
+  .top img { width: 52px; height: 52px; }
+  h1 { font-size: 66px; line-height: 1.04; font-weight: 800; letter-spacing: -.02em; max-width: 980px; }
+  h1 span { background: linear-gradient(90deg, #6E93FF, #3CC9A0 55%, #F0A73A); -webkit-background-clip: text; color: transparent; }
+  p { font-size: 26px; color: #B8C2D0; max-width: 940px; line-height: 1.35; }
+  .kpis { display: flex; gap: 16px; margin-top: auto; }
+  .k { flex: 1; padding: 18px 20px; border-radius: 16px; background: rgba(22,29,40,.85); border: 1px solid #2A3444; }
+  .k b { display: block; font-size: 40px; font-weight: 800; line-height: 1; }
+  .k span { font-size: 18px; color: #9AA6B7; }
+  .k:nth-child(1) b { color: #3CC9A0; } .k:nth-child(2) b { color: #F0A73A; } .k:nth-child(3) b { color: #A78BFA; } .k:nth-child(4) b { color: #6E93FF; }
+</style>
+</head>
+<body>
+  <div class="top"><img src="../assets/favicon.svg" alt="">TESIS · WA-HLS4ML · SURROGATE 07D Y AGENTE</div>
+  <h1>Predecir el hardware de una red neuronal <span>antes de sintetizarla</span></h1>
+  <p>Surrogate de recursos y latencia para FPGA, modelo de costo de síntesis y un agente ReAct que explora diseños.</p>
+  <div class="kpis">
+    <div class="k"><b>R² 0.907</b><span>surrogate 07D en test</span></div>
+    <div class="k"><b>199,000×</b><span>más rápido que sintetizar</span></div>
+    <div class="k"><b>11</b><span>herramientas del agente</span></div>
+    <div class="k"><b>91.8 %</b><span>tiempo predicho dentro de ×2</span></div>
+  </div>
+</body>
+</html>

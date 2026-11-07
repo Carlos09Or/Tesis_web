@@ -79,7 +79,119 @@
     "#tr-nav .tr-migas li:last-child{color:#E6EAF1}" +
     "#tr-nav .tr-sp{flex:1}" +
     "#tr-nav .tr-pn{display:flex;gap:14px;white-space:nowrap}" +
-    "#tr-nav .tr-pn a:hover{color:#fff;text-decoration:underline}";
+    "#tr-nav .tr-pn a:hover{color:#fff;text-decoration:underline}" +
+    "#tr-nav .tr-tema{margin-left:auto;align-self:center;display:flex;align-items:center;gap:6px;font:inherit;font-size:12px;" +
+    "color:#C9D2DE;background:#222C3B;border:1px solid #2F3B4E;border-radius:999px;padding:5px 12px;cursor:pointer}" +
+    "#tr-nav .tr-tema:hover{color:#fff;border-color:#6E93FF}" +
+    "#tr-nav .tr-tema:focus-visible{outline:2px solid #6E93FF;outline-offset:2px}" +
+    "#tr-nav .tr-tema i{font-style:normal;font-size:14px;line-height:1}" +
+    "#tr-progreso{position:fixed;top:0;left:0;right:0;height:3px;z-index:1000;pointer-events:none;transform-origin:left;transform:scaleX(0);" +
+    "background:linear-gradient(90deg,#6E93FF,#3CC9A0,#F0A73A);transition:opacity .2s ease}" +
+    "#tr-arriba{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:999;" +
+    "width:44px;height:44px;border-radius:50%;border:1px solid #2F3B4E;background:#17202E;color:#E6EAF1;font:600 18px/1 ui-monospace,Menlo,monospace;" +
+    "cursor:pointer;box-shadow:0 8px 24px -8px rgba(0,0,0,.45);opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .2s ease,transform .2s ease}" +
+    "#tr-arriba.ver{opacity:1;transform:none;pointer-events:auto}" +
+    "#tr-arriba:hover{background:#2E5BDB}" +
+    "#tr-arriba:focus-visible{outline:2px solid #6E93FF;outline-offset:3px}" +
+    "@media (prefers-reduced-motion:reduce){#tr-arriba,#tr-progreso{transition:none}}";
+
+  // ── Tema claro / oscuro ──
+  // El sitio (y cada página de paginas/, que trae su propio CSS) define el modo oscuro con
+  // @media (prefers-color-scheme: dark). Para forzar un tema sin tocar ese CSS, se reescriben esas
+  // reglas @media en el navegador: siempre verdaderas para «oscuro», siempre falsas para «claro».
+  var CLAVE_TEMA = "tesis-tema";
+  var TEMAS = { auto: ["◐", "Auto"], light: ["☀", "Claro"], dark: ["☾", "Oscuro"] };
+  var SIGUIENTE = { auto: "light", light: "dark", dark: "auto" };
+  var originales = new WeakMap();
+  var SIEMPRE = "(min-width: 0px)", NUNCA = "(max-width: 0.01px)";
+  function leerTema() { try { return localStorage.getItem(CLAVE_TEMA) || "auto"; } catch (e) { return "auto"; } }
+  function guardarTema(t) {
+    try { if (t === "auto") localStorage.removeItem(CLAVE_TEMA); else localStorage.setItem(CLAVE_TEMA, t); } catch (e) { /* sin almacenamiento */ }
+  }
+  function reescribir(reglas, t) {
+    for (var i = 0; i < reglas.length; i++) {
+      var r = reglas[i];
+      if (r.media && typeof r.media.mediaText === "string") {
+        if (!originales.has(r)) originales.set(r, r.media.mediaText);
+        var orig = originales.get(r);
+        if (/prefers-color-scheme/.test(orig)) {
+          var txt = orig;
+          if (t !== "auto") {
+            txt = orig
+              .replace(/\(\s*prefers-color-scheme\s*:\s*dark\s*\)/g, t === "dark" ? SIEMPRE : NUNCA)
+              .replace(/\(\s*prefers-color-scheme\s*:\s*light\s*\)/g, t === "light" ? SIEMPRE : NUNCA);
+          }
+          if (r.media.mediaText !== txt) r.media.mediaText = txt;
+        }
+      }
+      if (r.cssRules) reescribir(r.cssRules, t);
+    }
+  }
+  function aplicarTema(t) {
+    [].forEach.call(document.styleSheets, function (s) {
+      try { reescribir(s.cssRules, t); } catch (e) { /* hoja de otro origen (Google Fonts) */ }
+    });
+    document.documentElement.setAttribute("data-tema", t);
+    document.documentElement.style.colorScheme = t === "auto" ? "" : t;
+  }
+  var temaActual = leerTema();
+  if (temaActual !== "auto") {
+    aplicarTema(temaActual);
+    document.addEventListener("DOMContentLoaded", function () { aplicarTema(temaActual); });
+    window.addEventListener("load", function () { aplicarTema(temaActual); });
+  }
+  function botonTema() {
+    var b = el("button", "tr-tema"); b.type = "button";
+    function pintar() {
+      var d = TEMAS[temaActual];
+      b.textContent = "";
+      b.appendChild(el("i", null, d[0]));
+      b.appendChild(el("span", null, d[1]));
+      b.setAttribute("aria-label", "Tema: " + d[1] + ". Cambiar a " + TEMAS[SIGUIENTE[temaActual]][1]);
+      b.title = "Tema: " + d[1] + " (clic para cambiar)";
+    }
+    b.addEventListener("click", function () {
+      temaActual = SIGUIENTE[temaActual];
+      guardarTema(temaActual);
+      aplicarTema(temaActual);
+      pintar();
+    });
+    pintar();
+    return b;
+  }
+
+  // ── Barra de progreso de lectura y botón «volver arriba» ──
+  function lectura() {
+    if (document.getElementById("tr-progreso")) return;
+    var barra = el("div"); barra.id = "tr-progreso"; barra.setAttribute("aria-hidden", "true");
+    var btn = el("button", null, "↑"); btn.id = "tr-arriba"; btn.type = "button";
+    btn.setAttribute("aria-label", "Volver arriba"); btn.title = "Volver arriba";
+    var quieto = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    btn.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: quieto ? "auto" : "smooth" }); });
+    document.body.appendChild(barra);
+    document.body.appendChild(btn);
+    var pendiente = false;
+    function actualizar() {
+      pendiente = false;
+      var alto = document.documentElement.scrollHeight - window.innerHeight;
+      var y = window.scrollY || window.pageYOffset;
+      barra.style.transform = "scaleX(" + (alto > 0 ? Math.min(1, y / alto) : 0) + ")";
+      barra.style.opacity = alto > window.innerHeight ? "1" : "0";
+      btn.classList.toggle("ver", y > window.innerHeight * 1.2);
+    }
+    window.addEventListener("scroll", function () { if (!pendiente) { pendiente = true; requestAnimationFrame(actualizar); } }, { passive: true });
+    window.addEventListener("resize", actualizar);
+    window.addEventListener("load", actualizar);
+    actualizar();
+  }
+
+  // Ícono de la pestaña (las páginas de paginas/ no lo traen en su HTML)
+  function icono() {
+    if (document.querySelector("link[rel~='icon']")) return;
+    var l = document.createElement("link");
+    l.rel = "icon"; l.type = "image/svg+xml"; l.href = base + "assets/favicon.svg";
+    document.head.appendChild(l);
+  }
 
   function montar() {
     if (document.getElementById("tr-nav")) return;
@@ -106,6 +218,7 @@
       menu.appendChild(a);
     });
     top.appendChild(menu);
+    top.appendChild(botonTema());
     nav.appendChild(top);
 
     // Migas y anterior/siguiente (no en el inicio)
@@ -136,6 +249,9 @@
     document.body.insertBefore(nav, document.body.firstChild);
     if (cx.titulo && cx.tipo === "notebook") document.title = cx.titulo + " · Resultados de la tesis";
     if (enPaginas) arreglarMovil();
+    icono();
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", lectura);
+    else lectura();
   }
 
   // Páginas de resultados: se conservan tal como se publicaron, pero en el teléfono algunas desbordaban

@@ -35,11 +35,25 @@ notebook.html              resumen de un notebook, con ?id=
 data/secciones.js          secciones y subsecciones: título, resumen, cifras, tarjeta destacada y qué sigue
 data/notebooks.js          un resumen por notebook: qué hice, entra/sale, cifras, verificación y avisos
 data/resultados.js         catálogo de páginas de resultados
-assets/shell.js            barra compartida: menú, migas, anterior/siguiente y arreglos de móvil de paginas/
+assets/shell.js            barra compartida: menú, migas, anterior/siguiente, tema, progreso y arreglos de móvil
 assets/                    estilos y scripts de cada vista
 paginas/                   una página HTML autocontenida por resultado
 tools/agregar_pagina.py    inyecta la barra compartida en las páginas de paginas/
 ```
+
+La barra compartida también trae, en todas las páginas (incluidas las de `paginas/`):
+
+- **Botón de tema** (Auto, Claro, Oscuro), guardado en el navegador. Fuerza el tema reescribiendo en el navegador las
+  reglas `@media (prefers-color-scheme: …)` de cada hoja de estilos, así que funciona también con el CSS propio de
+  cada página de resultados sin tocarlo.
+- **Barra de progreso de lectura** arriba y botón **volver arriba** en las páginas largas.
+- **Ícono** de la pestaña (`assets/favicon.svg`).
+
+Las páginas principales llevan además etiquetas Open Graph para la **vista previa al compartir** el enlace, con la
+imagen `assets/og.png`. Su fuente es `tools/og.html`; el comando para regenerarla está en ese archivo.
+
+Las portadas de sección pintan un diagrama propio desde `visual` en `data/secciones.js` (tipos `surrogate`,
+`tiempos` y `agente`, dibujados en `assets/seccion.js`).
 
 En el teléfono, la barra compartida corrige sin tocar el HTML de `paginas/` los desbordes a lo ancho: parte las
 rutas largas en `<code>` y mete en un contenedor con scroll las tablas que no lo tenían.

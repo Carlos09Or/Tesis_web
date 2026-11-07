@@ -21,6 +21,98 @@
     return parseInt(p[2], 10) + " " + m[parseInt(p[1], 10) - 1] + " " + p[0];
   }
 
+  // ── Diagramas de portada, uno por sección (datos en data/secciones.js → visual) ──
+  function num(n) { return n.toLocaleString("en-US"); }
+  function panel(titulo, nota) {
+    var p = el("figure", "vis-panel");
+    p.appendChild(el("figcaption", "vis-t", titulo));
+    p._nota = nota;
+    return p;
+  }
+  function cerrar(p) { if (p._nota) p.appendChild(el("p", "vis-nota", p._nota)); return p; }
+  function barra(clase, frac, etiqueta, valor, detalle) {
+    var f = el("div", "vis-fila " + (clase || ""));
+    var cab = el("div", "vis-fila-cab");
+    cab.appendChild(el("span", "vis-et", etiqueta));
+    cab.appendChild(el("b", "vis-val", valor));
+    f.appendChild(cab);
+    var b = el("span", "vis-barra"); var i = el("i"); i.style.setProperty("--f", frac); b.appendChild(i); f.appendChild(b);
+    if (detalle) f.appendChild(el("span", "vis-det", detalle));
+    return f;
+  }
+  var VISUAL = {
+    surrogate: function (v) {
+      var w = el("div", "vis");
+      var p1 = panel("De los datos crudos al dataset de entrenamiento", "Seis notebooks en cadena (01 a 06). Los conteos se reprodujeron desde los JSON crudos con la misma regla de limpieza.");
+      var max = v.embudo[0][2];
+      v.embudo.forEach(function (e, k) { p1.appendChild(barra(k ? "fuerte" : "", e[2] / max, e[1], e[0], k ? v.descartados : "")); });
+      var tot = v.splits.reduce(function (a, s) { return a + s[1]; }, 0);
+      var sp = el("div", "vis-split");
+      v.splits.forEach(function (s, k) {
+        var seg = el("span", "vis-seg s" + k); seg.style.flexGrow = s[1];
+        seg.title = s[0] + ": " + num(s[1]);
+        sp.appendChild(seg);
+      });
+      p1.appendChild(el("span", "vis-sub", "Particiones, sin diseños repetidos entre ellas"));
+      p1.appendChild(sp);
+      var ley = el("div", "vis-ley");
+      v.splits.forEach(function (s, k) {
+        var x = el("span", "vis-ley-i s" + k);
+        x.appendChild(el("b", null, s[0]));
+        x.appendChild(document.createTextNode(" " + num(s[1]) + " · " + Math.round(s[1] / tot * 100) + " %"));
+        ley.appendChild(x);
+      });
+      p1.appendChild(ley);
+      w.appendChild(cerrar(p1));
+
+      var p2 = panel("Seis series de modelos, un elegido", "R² medio en test sobre las seis salidas; el eje empieza en 0.80.");
+      var lo = 0.8, hi = 1.0;
+      v.modelos.forEach(function (m) {
+        p2.appendChild(barra(m[2] ? "gana" : "", (m[1] - lo) / (hi - lo), m[0], m[1].toFixed(3), m[2] ? "elegido: el mejor en validación y en test" : ""));
+      });
+      if (v.referencia) p2.appendChild(barra("ref", (v.referencia[1] - lo) / (hi - lo), v.referencia[0], v.referencia[1].toFixed(4), v.referencia[2]));
+      w.appendChild(cerrar(p2));
+      return w;
+    },
+    tiempos: function (v) {
+      var w = el("div", "vis");
+      var p1 = panel("Sintetizar frente a predecir", v.equivale);
+      p1.appendChild(barra("lenta", 1, v.sintesis[1], v.sintesis[0]));
+      p1.appendChild(barra("rapida", 0.004, v.surrogate[1], v.surrogate[0]));
+      var g = el("div", "vis-grande");
+      g.appendChild(el("b", null, v.speedup[0]));
+      g.appendChild(el("span", null, v.speedup[1]));
+      p1.appendChild(g);
+      w.appendChild(cerrar(p1));
+
+      var p2 = panel("Tres rondas de medición, y el modelo de costo");
+      var max = v.rondas[v.rondas.length - 1][2];
+      v.rondas.forEach(function (r) { p2.appendChild(barra("", r[2] / max, r[0] + " · " + r[3], r[1], "")); });
+      p2.appendChild(el("span", "vis-sub", "configuraciones con tiempo real recuperado de los logs"));
+      var ch = el("div", "vis-chips");
+      v.modelo.forEach(function (m) { var c = el("div", "vis-chip"); c.appendChild(el("b", null, m[0])); c.appendChild(el("span", null, m[1])); ch.appendChild(c); });
+      p2.appendChild(ch);
+      w.appendChild(cerrar(p2));
+      return w;
+    },
+    agente: function (v) {
+      var w = el("div", "vis vis-una");
+      var p = panel("Cómo responde a un pedido");
+      var ol = el("ol", "vis-flujo");
+      v.pasos.forEach(function (s, k) {
+        var li = el("li", "vis-paso " + s[2]);
+        li.appendChild(el("span", "vis-paso-n", String(k + 1)));
+        li.appendChild(el("b", null, s[0]));
+        li.appendChild(el("span", null, s[1]));
+        ol.appendChild(li);
+      });
+      p.appendChild(ol);
+      if (v.enlace) { var a = el("a", "vis-enlace", v.enlace[1]); a.href = v.enlace[0]; p.appendChild(a); }
+      w.appendChild(p);
+      return w;
+    },
+  };
+
   if (!sec) { raiz.textContent = "Sección no encontrada."; return; }
   document.title = sec.titulo + " · Resultados de la tesis";
   Shell.montar();
@@ -45,6 +137,7 @@
     hero.appendChild(toc);
   }
   raiz.appendChild(hero);
+  if (sec.visual && VISUAL[sec.visual.tipo]) raiz.appendChild(VISUAL[sec.visual.tipo](sec.visual));
 
   // Flujo de datos (solo la subsección que lo pide)
   var PASOS = [
