@@ -201,15 +201,17 @@ ul.plain li{margin-bottom:6px}
 footer{padding-top:40px;font:400 12.5px/1.6 var(--f-mono);color:var(--muted)}
 a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-/* Primer piloto local */
+/* Pilotos con modelos locales */
 .pl-note{font-size:12.5px;color:var(--muted);margin-top:10px}
+h2.blk{padding-top:8px;border-top:1px solid var(--line)}
 .tbars{display:grid;gap:8px}
 .trow{display:grid;grid-template-columns:96px 1fr 52px;gap:10px;align-items:center}
 .tl{font:500 12.5px/1.2 var(--f-mono);color:var(--ink)}
 .tv{font:500 12.5px/1.2 var(--f-mono);color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
-.tt{display:block;position:relative;height:22px;border-radius:3px;background-color:var(--bg);
+.tt{--m1:30%;--m2:43.9%;--m3:90%;display:block;position:relative;height:22px;border-radius:3px;background-color:var(--bg);
   background-image:linear-gradient(var(--warn),var(--warn)),linear-gradient(var(--ink),var(--ink)),linear-gradient(var(--bad),var(--bad));
-  background-size:1px 100%,1px 100%,1px 100%;background-position:30% 0,43.9% 0,90% 0;background-repeat:no-repeat}
+  background-size:1px 100%,1px 100%,1px 100%;background-position:var(--m1) 0,var(--m2) 0,var(--m3) 0;background-repeat:no-repeat}
+.tt.m2{--m1:75%;--m2:38%;--m3:-10%}
 .tt i{display:block;height:100%;background:var(--accent);border-radius:3px;opacity:.85}
 .tt i.cut{background:var(--bad)}
 .blegend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:14px;font:400 12.5px/1.3 var(--f-mono);color:var(--muted)}
@@ -217,6 +219,8 @@ a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offs
 .blegend i{display:inline-block;width:12px;height:12px;border-radius:2px}
 .blegend i.l300{background:var(--warn)} .blegend i.l439{background:var(--ink)} .blegend i.l900{background:var(--bad)}
 .blegend i.cutsw{background:var(--bad);opacity:.85}
+table.reg{min-width:900px}
+table.reg td{font-size:14px}
 .finds{display:grid;grid-template-columns:1fr;gap:12px}
 @media(min-width:900px){.finds{grid-template-columns:1fr 1fr}}
 .find{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px 18px;min-width:0}
@@ -244,7 +248,7 @@ a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offs
     <li><a href="#pruebas">Las pruebas</a></li>
     <li><a href="#puntaje">Cómo se puntúa</a></li>
     <li><a href="#tiempos">Modelo de tiempos</a></li>
-    <li><a href="#piloto">Primer piloto</a></li>
+    <li><a href="#piloto">Pilotos locales</a></li>
     <li><a href="#sugerencias">Mejorar · Quitar · Poner</a></li>
     <li><a href="#decidir">Por decidir</a></li>
   </ul>
@@ -690,8 +694,39 @@ a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offs
 </section>
 
 <section id="piloto">
-  <h2>Primer piloto local: qué encontramos</h2>
-  <p class="sub">El 8 de noviembre de 2026 se corrió el piloto de 8 tareas (una por plantilla, repartidas entre Dense, Conv1D y Conv2D) con qwen3:4b en la RTX 3060 Laptop. Condiciones: Ollama local, <code>num_ctx</code> 8192, JSON de arquitectura en el enunciado, una repetición y razonamiento por defecto del modelo (encendido). El modelo quedó descartado por tiempo. Lo importante son los hallazgos, porque cambiaron cómo se mide.</p>
+  <h2>Pilotos con modelos locales: fallos, hallazgos y correcciones</h2>
+  <p class="sub">Registro vivo de las pruebas piloto (8 tareas, una por plantilla) que se corren antes de la medición grande, un modelo a la vez en la RTX 3060 Laptop. Cada piloto añade un bloque. La tabla de hallazgos dice qué falló, cómo se detectó, qué se corrigió y qué sigue abierto. Las cifras salen de los resultados guardados del proyecto y de su bitácora.</p>
+
+  <h3>Resumen de pilotos</h3>
+  <div class="tscroll"><table>
+    <thead><tr><th>Piloto</th><th>Modelo</th><th>Ajustes</th><th>Correctas</th><th>Fallos de protocolo</th><th>Tiempo por tarea</th><th>Veredicto</th></tr></thead>
+    <tbody>
+      <tr><td class="id">1 · 8 nov</td><td>qwen3:4b</td><td><code>num_ctx</code> 8192, razonamiento por defecto</td><td>0 de 8</td><td>25 % (2 de 8)</td><td>439 s</td><td><span class="tag alta">Descartado</span> por tiempo: pasa del límite de 300 s</td></tr>
+      <tr><td class="id">2 · 8 nov</td><td>qwen3.5:2b</td><td><code>num_ctx</code> 8192, razonamiento apagado</td><td>1 de 8</td><td>88 % (7 de 8)</td><td>152 s</td><td><span class="tag alta">Descartado</span> por fallos de protocolo, pero confundido con el truncamiento del contexto</td></tr>
+      <tr><td class="id">3</td><td>por definir</td><td><code>num_ctx</code> 16384, razonamiento apagado</td><td>—</td><td>—</td><td>—</td><td><span class="tag baja">Pendiente</span> modelos grandes primero</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 style="margin-top:28px">Hallazgos y correcciones</h3>
+  <p class="sub" style="margin-bottom:12px">Una fila por hallazgo, en orden de aparición. El estado se actualiza a medida que se corrige o se verifica.</p>
+  <div class="tscroll"><table class="reg">
+    <thead><tr><th>ID</th><th>Hallazgo</th><th>Cómo se detectó</th><th>Corrección</th><th>Estado</th><th>Piloto</th></tr></thead>
+    <tbody>
+      <tr><td class="id">H1</td><td>El razonamiento del modelo llena el contexto y consume el tiempo.</td><td>El log de Ollama registró «slot context shift» en 34 de unas 55 llamadas, y 439 s por tarea.</td><td>Apagar el razonamiento (<code>think=false</code>) para todos los modelos.</td><td><span class="tag hecho">Hecho</span> verificado en el piloto 2: 152 s por tarea</td><td>1</td></tr>
+      <tr><td class="id">H2</td><td>qwen3:4b y lfm2.5:8b no acatan <code>think=false</code>: escriben el razonamiento en la respuesta.</td><td>Una pregunta de prueba a los 9 modelos.</td><td>Medirlos igual, anotarlo y leer sus resultados aparte.</td><td><span class="tag baja">Documentado</span></td><td>1</td></tr>
+      <tr><td class="id">H3</td><td>Ollama trunca en silencio los prompts más largos que <code>num_ctx</code> y los deja en <code>num_ctx</code>/2 + 2 tokens, conservando solo los 4 primeros.</td><td>«truncating input prompt» 56 veces en el log; reproducido fuera del banco con el mismo cliente.</td><td><code>num_ctx</code> común de 16384 y contador de llamadas sospechosas.</td><td><span class="tag prep">Hecho</span> se verifica en el piloto 3</td><td>2</td></tr>
+      <tr><td class="id">H4</td><td>El contador de tokens de entrada no delata ni el desbordamiento al generar ni el truncamiento: informa el valor ya recortado.</td><td>Comparar el contador del ejecutor con el log del servidor.</td><td>Campo de truncamiento sospechoso (entrada = <code>num_ctx</code>/2 + 2) en el resultado, el resumen, la bitácora y la compuerta.</td><td><span class="tag hecho">Hecho</span> es una heurística; se confirma con el log</td><td>1 y 2</td></tr>
+      <tr><td class="id">H5</td><td>El modelo repite la misma llamada inválida hasta agotar los 22 pasos, y el contexto crece con cada intento.</td><td>T1, T2, T4 y T8 del piloto 2: 22 veces <code>generar_candidato</code> con el esquema de la herramienta como argumento.</td><td>Cortar el bucle cuando se repite la misma llamada inválida y recortar las observaciones largas. Es un cambio del sistema.</td><td><span class="tag alta">Pendiente</span> de decisión</td><td>2</td></tr>
+      <tr><td class="id">H6</td><td>Cada respuesta con formato roto gasta un paso del límite de 22.</td><td>Piloto 1: T9 10 de 10 pasos y T5 10 de 14. Piloto 2: T3 18 de 22.</td><td>Un parser ReAct más tolerante (sistema mejorado).</td><td><span class="tag alta">Pendiente</span> de decisión</td><td>1 y 2</td></tr>
+      <tr><td class="id">H7</td><td>T9 (imposible) se aprueba contestando siempre «imposible», sin evaluar nada.</td><td>La única tarea correcta del piloto 2 salió con un argumento inválido y una respuesta rota.</td><td>Una tarea de control con solución real, para que decir «imposible» siempre no alcance.</td><td><span class="tag media">Propuesto</span> en el banco</td><td>2</td></tr>
+      <tr><td class="id">H8</td><td>Empezar por los modelos más pequeños gasta horas en los que más probablemente fallen por capacidad.</td><td>Pilotos 1 y 2.</td><td>Probar primero los cuatro modelos grandes (qwen3.5:9b, gemma4:e4b, llama3.1:8b y lfm2.5:8b).</td><td><span class="tag hecho">Hecho</span> orden nuevo</td><td>2</td></tr>
+      <tr><td class="id">H9</td><td>El tope por tarea corta entre pasos: T9 tardó 974 s con un tope de 900 s.</td><td>Piloto 1.</td><td>Ninguna; se tiene en cuenta al leer los tiempos.</td><td><span class="tag baja">Documentado</span></td><td>1</td></tr>
+      <tr><td class="id">H10</td><td>Entorno: faltaban paquetes, la consola muestra cada tarea al terminar y el piloto toma 6 de sus 8 tareas del conjunto test.</td><td>Puesta en marcha.</td><td>Paquetes instalados; el resto solo se anota (las tareas del test se ejecutan, no se afina contra ellas).</td><td><span class="tag baja">Documentado</span></td><td>1</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 class="blk" style="margin-top:44px">Piloto 1: qwen3:4b</h2>
+  <p class="sub">8 de noviembre de 2026. Ollama local, <code>num_ctx</code> 8192, JSON de arquitectura en el enunciado, una repetición y razonamiento por defecto del modelo (encendido). Quedó descartado por tiempo.</p>
 
   <div class="stats">
     <div class="stat"><b>0 de 8</b><span>tareas correctas</span></div>
@@ -701,7 +736,7 @@ a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offs
   </div>
   <p class="mono pl-note">Un solo modelo de 4 000 millones de parámetros, 8 tareas y 1 repetición. No dice cómo rinde el sistema con otros modelos; dice qué hubo que corregir en la medición.</p>
 
-  <h3 style="margin-top:28px">Compuertas del piloto</h3>
+  <h3 style="margin-top:28px">Compuertas del piloto 1</h3>
   <div class="tscroll"><table>
     <thead><tr><th>Compuerta</th><th>Resultado</th><th>Estado</th></tr></thead>
     <tbody>
@@ -714,9 +749,9 @@ a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offs
   </table></div>
 
   <h3 style="margin-top:28px">Cuánto tardó cada tarea</h3>
-  <p class="sub" style="margin-bottom:12px">Las barras muestran segundos de reloj por tarea. Las líneas marcan el límite de 300 s para la media, la media medida y el tope de 900 s por tarea.</p>
+  <p class="sub" style="margin-bottom:12px">Segundos de reloj por tarea. Las líneas marcan el límite de 300 s para la media, la media medida y el tope de 900 s por tarea.</p>
   <div class="panel">
-    <div class="tbars" role="img" aria-label="Segundos por tarea: T1 182, T2 86, T3 376, T4 120, T5 905, T8 475, T9 974, T10 390">
+    <div class="tbars" role="img" aria-label="Segundos por tarea en el piloto 1: T1 182, T2 86, T3 376, T4 120, T5 905, T8 475, T9 974, T10 390">
       <div class="trow"><span class="tl">T1 · Dense</span><span class="tt"><i style="width:18.2%"></i></span><span class="tv">182 s</span></div>
       <div class="trow"><span class="tl">T2 · Conv1D</span><span class="tt"><i style="width:8.6%"></i></span><span class="tv">86 s</span></div>
       <div class="trow"><span class="tl">T3 · Conv2D</span><span class="tt"><i style="width:37.6%"></i></span><span class="tv">376 s</span></div>
@@ -750,22 +785,22 @@ a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offs
     </tbody>
   </table></div>
 
-  <h3 style="margin-top:28px">Problemas y hallazgos</h3>
+  <h3 style="margin-top:28px">Hallazgos del piloto 1 en detalle</h3>
   <div class="finds">
     <div class="find">
-      <div class="row"><span class="tag alta">Medición</span><span class="tag cmp">Modelo</span></div>
+      <div class="row"><span class="tag alta">H1</span><span class="tag cmp">Modelo</span></div>
       <h4>El razonamiento del modelo llenó el contexto</h4>
       <p>qwen3 razona por defecto y genera de 4 000 a 66 000 tokens por tarea. El log del servidor de Ollama registró "slot context shift, n_keep = 4, n_discard = 4093" en 34 de unas 55 llamadas: al llenarse los 8 192 tokens, Ollama descartó la mitad del contexto en mitad de la respuesta y conservó solo los 4 primeros tokens. El modelo pudo perder el enunciado y el formato. Es la explicación más probable de tantas respuestas inválidas, aunque no se probó aislándola.</p>
     </div>
     <div class="find">
-      <div class="row"><span class="tag media">Medición</span></div>
+      <div class="row"><span class="tag media">H4</span><span class="tag baja">Medición</span></div>
       <h4>El contador de entrada no ve ese problema</h4>
-      <p>La mayor entrada en una sola llamada fue 7 506 tokens (92 % de <code>num_ctx</code>, en T5), y el resumen marca las corridas que pasan del 90 %. Pero el desbordamiento ocurrió al generar, no al leer el prompt. La señal fiable es el log del servidor. Ollama no mostró "truncating input prompt".</p>
+      <p>La mayor entrada en una sola llamada fue 7 506 tokens (92 % de <code>num_ctx</code>, en T5). Pero el desbordamiento ocurrió al generar, no al leer el prompt. La señal fiable es el log del servidor.</p>
     </div>
     <div class="find">
-      <div class="row"><span class="tag alta">Sistema</span></div>
+      <div class="row"><span class="tag alta">H6</span><span class="tag cmp">Sistema</span></div>
       <h4>Cada respuesta con formato roto gasta un paso</h4>
-      <p>El agente pide JSON de acción. Cuando el modelo escribe "RESPUESTA: 1", "Thought: Action:" o un JSON roto, el paso se pierde con "Invalid or incomplete response" y cuenta contra el límite de 22 pasos y contra el tiempo. En T9 se perdieron 10 de 10 pasos y en T5, 10 de 14. Queda por ver si un parser más tolerante, que sería un cambio del sistema mejorado, recuperaría esas tareas.</p>
+      <p>El agente pide JSON de acción. Cuando el modelo escribe "RESPUESTA: 1", "Thought: Action:" o un JSON roto, el paso se pierde con "Invalid or incomplete response" y cuenta contra el límite de 22 pasos y contra el tiempo. En T9 se perdieron 10 de 10 pasos y en T5, 10 de 14. Queda por ver si un parser más tolerante recuperaría esas tareas.</p>
     </div>
     <div class="find">
       <div class="row"><span class="tag media">Modelo</span></div>
@@ -778,28 +813,24 @@ a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offs
       <p>T9 (imposible) terminó sin respuesta y T10 (trampa de dominio) afirmó confiabilidad. Con un solo modelo no se puede separar si es debilidad del modelo o falta de ayuda del sistema; para eso sirven los modos A y B de esta página.</p>
     </div>
     <div class="find">
-      <div class="row"><span class="tag baja">Ejecutor</span></div>
-      <h4>El tope por tarea se aplica entre pasos</h4>
-      <p>T9 tardó 974 s con un tope de 900 s: el corte se hace al terminar el paso en curso, no a mitad de una llamada al modelo. Conviene tenerlo presente al leer los tiempos.</p>
-    </div>
-    <div class="find">
-      <div class="row"><span class="tag baja">Entorno</span></div>
+      <div class="row"><span class="tag baja">H9 y H10</span><span class="tag baja">Entorno</span></div>
       <h4>Detalles de la puesta en marcha</h4>
       <ul class="plain">
+        <li>El tope por tarea corta entre pasos: T9 tardó 974 s con un tope de 900 s.</li>
         <li>Faltaban los paquetes <code>wikipedia</code> y <code>rich</code> aunque estaban en <code>requirements.txt</code>.</li>
         <li>La primera llamada en frío de un modelo tarda 103 s (59 s de carga). La primera tarea de cada modelo incluye ese arranque.</li>
         <li>La consola muestra la traza de una tarea solo cuando termina, por el buffer de salida. No es una caída.</li>
-        <li>Brave y VS Code ocupaban unos 474 MiB de los 6 GiB de VRAM. Con 8 192 tokens, qwen3:4b quedó 100 % en GPU (3,8 GB).</li>
+        <li>Brave y VS Code ocupaban unos 474 MiB de los 6 GiB de VRAM. qwen3:4b quedó 100 % en GPU (3,8 GB).</li>
         <li>El piloto del diseño elige 6 de sus 8 tareas del conjunto test. Solo se ejecutan, no se afina nada contra ellas.</li>
       </ul>
     </div>
   </div>
 
-  <h3 style="margin-top:28px">Decisión: apagar el razonamiento</h3>
+  <h3 style="margin-top:28px">Corrección 1: apagar el razonamiento</h3>
   <div class="two">
     <div class="panel">
       <p>La prueba quiere medir si el harness (ReAct, herramientas y surrogate) alcanza para que un modelo pequeño resuelva la tarea. El ReAct ya razona paso a paso con datos reales del surrogate; el razonamiento interno del modelo repite ese trabajo sin esos datos, gasta tokens y llena el contexto.</p>
-      <p>Por eso <code>llms/clients.py</code> ahora envía <code>think=false</code> (variable <code>OLLAMA_THINK</code>) y <code>correr_modelos.py</code> lo usa por defecto. Se aplica igual a todos los modelos y cada resultado guarda el ajuste. Cambia la huella del sistema: los resultados con razonamiento no se comparan con los nuevos. El cambio se hizo con permiso explícito y su diff está en <code>CAMBIOS_SISTEMA_razonamiento.diff</code>.</p>
+      <p>Por eso <code>llms/clients.py</code> envía <code>think=false</code> (variable <code>OLLAMA_THINK</code>) y <code>correr_modelos.py</code> lo usa por defecto. Se aplica igual a todos los modelos y cada resultado guarda el ajuste. Cambia la huella del sistema: los resultados con razonamiento no se comparan con los nuevos. El cambio se hizo con permiso explícito y su diff está en <code>CAMBIOS_SISTEMA_razonamiento.diff</code>.</p>
       <p>La desventaja es que penaliza a los modelos hechos para razonar. Queda como decisión de método para la tesis.</p>
     </div>
     <div class="panel">
@@ -823,15 +854,125 @@ a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offs
     </div>
   </div>
 
+  <h2 class="blk" style="margin-top:44px">Piloto 2: qwen3.5:2b</h2>
+  <p class="sub">8 de noviembre de 2026. Ollama local, <code>num_ctx</code> 8192, JSON de arquitectura en el enunciado, una repetición y razonamiento apagado. El criterio automático lo descartó por fallos de protocolo, pero la corrida quedó confundida con el truncamiento del contexto (hallazgo H3).</p>
+
+  <div class="stats">
+    <div class="stat"><b>1 de 8</b><span>tareas correctas, y esa sin ninguna evaluación</span></div>
+    <div class="stat"><b>152 s</b><span>de media por tarea, con el razonamiento apagado (el límite es 300 s)</span></div>
+    <div class="stat"><b>7 de 8</b><span>tareas que llegaron al límite de 22 pasos sin respuesta</span></div>
+    <div class="stat"><b>56 de 158</b><span>llamadas recortadas por Ollama a 4 098 tokens (35 %)</span></div>
+  </div>
+  <p class="mono pl-note">qwen3.5:2b, 1 900 millones de parámetros en Q8_0, 2,5 GB, 100 % en GPU, unos 98 tokens por segundo. 734 688 tokens de entrada y 77 385 de salida en total.</p>
+
+  <h3 style="margin-top:28px">Compuertas del piloto 2</h3>
+  <div class="tscroll"><table>
+    <thead><tr><th>Compuerta</th><th>Resultado</th><th>Estado</th></tr></thead>
+    <tbody>
+      <tr><td>Al menos 6 de 8 corridas terminan sin excepción</td><td>8 de 8</td><td><span class="tag hecho">Pasa</span></td></tr>
+      <tr><td>Fallos de protocolo de 50 % o menos</td><td>88 % (7 de 8)</td><td><span class="tag alta">Falla</span></td></tr>
+      <tr><td>Los campos de tokens traen valores reales</td><td>Sí, en las 8 corridas</td><td><span class="tag hecho">Pasa</span></td></tr>
+      <tr><td>Existen el <code>.log</code>, <code>_ollama_ps.txt</code>, <code>_ollama_show.txt</code> y la entrada en la bitácora</td><td>Los cuatro</td><td><span class="tag hecho">Pasa</span></td></tr>
+      <tr><td>Tiempo medio por tarea de 5 minutos o menos</td><td>152 s (2,5 min)</td><td><span class="tag hecho">Pasa</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 style="margin-top:28px">Cuánto tardó cada tarea</h3>
+  <p class="sub" style="margin-bottom:12px">La escala llega a 400 s. Con el razonamiento apagado ninguna tarea pasa de 5 minutos, y la media queda por debajo del límite.</p>
+  <div class="panel">
+    <div class="tbars" role="img" aria-label="Segundos por tarea en el piloto 2: T1 102, T2 78, T3 319, T4 85, T5 284, T8 133, T9 28, T10 188">
+      <div class="trow"><span class="tl">T1 · Dense</span><span class="tt m2"><i style="width:25.5%"></i></span><span class="tv">102 s</span></div>
+      <div class="trow"><span class="tl">T2 · Conv1D</span><span class="tt m2"><i style="width:19.6%"></i></span><span class="tv">78 s</span></div>
+      <div class="trow"><span class="tl">T3 · Conv2D</span><span class="tt m2"><i style="width:79.7%"></i></span><span class="tv">319 s</span></div>
+      <div class="trow"><span class="tl">T4 · Dense</span><span class="tt m2"><i style="width:21.3%"></i></span><span class="tv">85 s</span></div>
+      <div class="trow"><span class="tl">T5 · Conv1D</span><span class="tt m2"><i style="width:71%"></i></span><span class="tv">284 s</span></div>
+      <div class="trow"><span class="tl">T8 · Conv2D</span><span class="tt m2"><i style="width:33.3%"></i></span><span class="tv">133 s</span></div>
+      <div class="trow"><span class="tl">T9 · Dense</span><span class="tt m2"><i style="width:7%"></i></span><span class="tv">28 s</span></div>
+      <div class="trow"><span class="tl">T10 · Conv1D</span><span class="tt m2"><i style="width:47%"></i></span><span class="tv">188 s</span></div>
+    </div>
+    <div class="blegend">
+      <span><i class="l300"></i>300 s: límite de la media</span>
+      <span><i class="l439"></i>152 s: media medida</span>
+    </div>
+  </div>
+
+  <h3 style="margin-top:28px">Qué pasó en cada tarea</h3>
+  <div class="tscroll"><table>
+    <thead><tr><th>Tarea</th><th>Pasos / llamadas</th><th>Tokens entrada / salida</th><th>Qué pasó</th></tr></thead>
+    <tbody>
+      <tr><td class="id">T1 Verificar<br>Dense</td><td>22 / 22</td><td>110 877 / 3 718</td><td>22 veces <code>generar_candidato</code> con el esquema de la herramienta como argumento. Respuesta: "Argumentos invalidos". Nunca usó <code>predecir_recursos</code> con el JSON del enunciado. Cortada por el límite de pasos.</td></tr>
+      <tr><td class="id">T2 Elegir<br>Conv1D</td><td>22 / 22</td><td>113 047 / 2 457</td><td>El mismo bucle de 22 llamadas inválidas a <code>generar_candidato</code>. Sin respuesta.</td></tr>
+      <tr><td class="id">T3 Optimizar<br>Conv2D</td><td>22 / 22</td><td>87 420 / 24 111</td><td>Tres llamadas a <code>generar_candidato</code> y una a <code>sugerir_ejemplo_real</code>; después 18 pasos seguidos de "respuesta inválida o incompleta". Sin respuesta.</td></tr>
+      <tr><td class="id">T4 Barrido<br>Dense</td><td>22 / 22</td><td>118 903 / 3 047</td><td>El mismo bucle de llamadas inválidas. Sin respuesta.</td></tr>
+      <tr><td class="id">T5 Pareto<br>Conv1D</td><td>22 / 22</td><td>93 376 / 22 324</td><td>Casi todo <code>generar_candidato</code>, con 2 respuestas inválidas. Sin respuesta.</td></tr>
+      <tr><td class="id">T8 Reparar<br>Conv2D</td><td>22 / 22</td><td>107 904 / 7 381</td><td>El mismo bucle, con 1 respuesta inválida. Sin candidato entregado.</td></tr>
+      <tr><td class="id">T9 Imposible<br>Dense</td><td>2 / 3</td><td>10 908 / 2 010</td><td>Un argumento inválido, una respuesta rota y luego "RESPUESTA: IMPOSIBLE". Es la única correcta y salió sin evaluar nada.</td></tr>
+      <tr><td class="id">T10 Trampa<br>Conv1D</td><td>22 / 23</td><td>92 253 / 12 337</td><td>Llegó a evaluar con <code>predecir_recursos</code> y repitió esa llamada 9 veces, con 8 respuestas inválidas en medio. No cerró con respuesta ni con aviso de dominio.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 style="margin-top:28px">Hallazgos del piloto 2 en detalle</h3>
+  <div class="finds">
+    <div class="find">
+      <div class="row"><span class="tag alta">H3</span><span class="tag baja">Medición</span></div>
+      <h4>Ollama recortó en silencio el 35 % de las llamadas</h4>
+      <p>El log del servidor registra 56 veces "truncating input prompt limit=4098 prompt=8239…31444 keep=4 new=4098". Con <code>num_ctx</code> 8192, un prompt más largo que 8192 no se recorta a 8192 sino a <b>4 098 tokens</b>, y conserva solo los 4 primeros tokens y la cola. El modelo pierde el enunciado y las instrucciones. Ollama informa además el conteo ya recortado, por eso la columna "mayor entrada" (8 106) no lo delataba.</p>
+      <p style="margin-top:8px">Se reprodujo fuera del banco con el mismo cliente: un prompt de 6 319 tokens pasó entero y uno de 9 919 se recortó a 4 098. Las 158 llamadas del servidor coinciden con las 158 del resultado, así que no hay otro cliente.</p>
+    </div>
+    <div class="find">
+      <div class="row"><span class="tag alta">H5</span><span class="tag cmp">Sistema</span></div>
+      <h4>Bucle de llamadas inválidas hasta el límite</h4>
+      <p>En T1, T2, T4 y T8 el modelo repitió 22 veces <code>generar_candidato</code> con <code>pedido_usuario</code> igual al esquema de la herramienta, en vez de un texto. La herramienta contestaba "Argumentos invalidos" y el modelo no cambiaba. Nada en el sistema corta una llamada inválida repetida: se gastan los 22 pasos y el contexto crece con cada intento, que es lo que empuja los prompts por encima del límite.</p>
+    </div>
+    <div class="find">
+      <div class="row"><span class="tag media">Modelo</span></div>
+      <h4>Capacidad y truncamiento aún no se separan</h4>
+      <p>Un modelo de 2 000 millones de parámetros no llenó bien los argumentos de la herramienta ni siguió la instrucción de usar <code>predecir_recursos</code> con el JSON dado. Pero parte de esas llamadas se hicieron con el enunciado ya recortado. Por eso el 88 % de fallos de protocolo no se atribuye todavía al modelo. El piloto 3 con más contexto y modelos más capaces lo aclara.</p>
+    </div>
+    <div class="find">
+      <div class="row"><span class="tag media">H7</span><span class="tag baja">Banco</span></div>
+      <h4>T9 se aprueba diciendo siempre "imposible"</h4>
+      <p>La única tarea correcta fue T9 y salió sin evaluar nada. Como se puntúa solo con responder "imposible", un modelo que siempre conteste eso saca T9 completa. Se propone una tarea de control con solución real en cada familia.</p>
+    </div>
+    <div class="find">
+      <div class="row"><span class="tag hecho">H1 verificado</span><span class="tag cmp">Modelo</span></div>
+      <h4>Apagar el razonamiento funcionó</h4>
+      <p>Con <code>think=false</code> el modelo genera unos 98 tokens por segundo y tarda 152 s por tarea, contra los 439 s del piloto 1. Tampoco aparecieron nuevos desplazamientos de contexto durante la generación: los 34 del log son todos del piloto 1.</p>
+    </div>
+  </div>
+
+  <h3 style="margin-top:28px">Corrección 2: contexto, orden y contador</h3>
+  <div class="two">
+    <div class="panel">
+      <h3>Hecho</h3>
+      <ul class="plain">
+        <li><b><code>num_ctx</code> común de 16384</b>, en lugar de 8192, para todos los modelos. Los resultados con 8192 se conservan como registro y no se reutilizan. Cuesta memoria: los modelos de 8 y 9 mil millones pasarán más trabajo a CPU y serán más lentos.</li>
+        <li><b>Orden nuevo:</b> primero los cuatro modelos grandes (qwen3.5:9b, gemma4:e4b, llama3.1:8b y lfm2.5:8b) y después los pequeños. Si un modelo capaz funciona, el harness sirve y que los pequeños fallen es un resultado válido. Si ni los de 8 y 9 mil millones funcionan, el problema está en el harness.</li>
+        <li><b>Contador de truncamiento sospechoso:</b> el ejecutor marca las llamadas cuya entrada es exactamente <code>num_ctx</code>/2 + 2. Aparece en el resultado, el resumen, la bitácora y la compuerta del piloto, que avisa si el resultado puede estar confundido con el contexto. Es una heurística; se confirma con el log.</li>
+        <li><b>Orquestador:</b> acepta varios modelos separados por coma, en ese orden, con <code>--num-ctx</code> y <code>--dry-run</code> para ver el plan sin correr nada.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Pendiente de decisión</h3>
+      <p style="font-size:14.5px;color:var(--muted)">Son cambios del sistema, no de la medición, así que no se hacen sin permiso. Se medirían antes y después, como ya prevé esta página para el sistema mejorado.</p>
+      <ul class="plain">
+        <li>Cortar el bucle cuando se repite la misma llamada inválida (H5).</li>
+        <li>Recortar las observaciones largas de las herramientas para que el contexto no crezca.</li>
+        <li>Un parser ReAct más tolerante con el formato (H6).</li>
+        <li>En el banco: una tarea de control para T9 (H7).</li>
+      </ul>
+    </div>
+  </div>
+
   <h3 style="margin-top:28px">Lo que cambió en las herramientas de medición</h3>
   <ul class="plain">
     <li><b>Tokens y tiempos por corrida:</b> llamadas al modelo, tokens de entrada y salida, tokens por segundo y la mayor entrada en una llamada. Si Ollama no da un campo, queda vacío; no se estima.</li>
     <li><b>Reanudar:</b> una medición interrumpida continúa sin repetir tareas ni perder las anteriores, y nunca se sobrescribe un resultado.</li>
-    <li><b>Bitácora:</b> cada modelo y etapa añade una entrada con fecha, máquina, ajustes, resultados, tiempos y observaciones. Solo se agrega al final.</li>
+    <li><b>Bitácora:</b> cada modelo y etapa añade una entrada con fecha, máquina, ajustes, resultados, tiempos, truncamiento y observaciones. Solo se agrega al final.</li>
     <li><b>Orquestador:</b> corre un modelo por piloto, Etapa 1, dev y test, aplica las compuertas y anota cada descarte con su motivo.</li>
     <li><b>Registro de cambios:</b> <code>CAMBIOS_EJECUTOR.diff</code> y <code>CAMBIOS_SISTEMA_razonamiento.diff</code>. La huella del ejecutor cambió, como era de esperar.</li>
   </ul>
-  <div class="note" style="margin-top:20px"><b>Estado.</b> La segunda prueba, con el razonamiento apagado, ya está corriendo. Sus resultados se analizan aparte y se añadirán aquí.</div>
+  <div class="note" style="margin-top:20px"><b>Estado.</b> El piloto 3 está pendiente: <code>num_ctx</code> 16384, razonamiento apagado y los cuatro modelos grandes primero. Sus resultados, y lo que se corrija después, se añaden en este mismo registro.</div>
 </section>
 
 <section id="sugerencias">
