@@ -212,6 +212,12 @@ h2.blk{padding-top:8px;border-top:1px solid var(--line)}
   background-image:linear-gradient(var(--warn),var(--warn)),linear-gradient(var(--ink),var(--ink)),linear-gradient(var(--bad),var(--bad));
   background-size:1px 100%,1px 100%,1px 100%;background-position:var(--m1) 0,var(--m2) 0,var(--m3) 0;background-repeat:no-repeat}
 .tt.m2{--m1:75%;--m2:38%;--m3:-10%}
+.tt.nom{background-image:none}
+.tbars.w .trow{grid-template-columns:96px 1fr 64px}
+.tbars.w .tl{font-size:12px}
+.cmpm{min-width:980px}
+.cmpm td{font-size:13.5px;vertical-align:top}
+.cmpm td .tag{display:inline-block;margin-bottom:4px}
 .tt i{display:block;height:100%;background:var(--accent);border-radius:3px;opacity:.85}
 .tt i.cut{background:var(--bad)}
 .blegend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:14px;font:400 12.5px/1.3 var(--f-mono);color:var(--muted)}
@@ -249,6 +255,7 @@ table.reg td{font-size:14px}
     <li><a href="#puntaje">Cómo se puntúa</a></li>
     <li><a href="#tiempos">Modelo de tiempos</a></li>
     <li><a href="#piloto">Pilotos locales</a></li>
+    <li><a href="#comparacion">Comparación v1 · v2 · v3</a></li>
     <li><a href="#sugerencias">Mejorar · Quitar · Poner</a></li>
     <li><a href="#decidir">Por decidir</a></li>
   </ul>
@@ -703,7 +710,11 @@ table.reg td{font-size:14px}
     <tbody>
       <tr><td class="id">1 · 8 nov</td><td>qwen3:4b</td><td><code>num_ctx</code> 8192, razonamiento por defecto</td><td>0 de 8</td><td>25 % (2 de 8)</td><td>439 s</td><td><span class="tag alta">Descartado</span> por tiempo: pasa del límite de 300 s</td></tr>
       <tr><td class="id">2 · 8 nov</td><td>qwen3.5:2b</td><td><code>num_ctx</code> 8192, razonamiento apagado</td><td>1 de 8</td><td>88 % (7 de 8)</td><td>152 s</td><td><span class="tag alta">Descartado</span> por fallos de protocolo, pero confundido con el truncamiento del contexto</td></tr>
-      <tr><td class="id">3</td><td>por definir</td><td><code>num_ctx</code> 16384, razonamiento apagado</td><td>—</td><td>—</td><td>—</td><td><span class="tag baja">Pendiente</span> modelos grandes primero</td></tr>
+      <tr><td class="id">3 · 8 nov</td><td>qwen3.5:2b</td><td>Sistema <b>v1</b>, <code>num_ctx</code> 16384, razonamiento apagado</td><td>0 de 8</td><td>100 % (8 de 8)</td><td>170 s</td><td><span class="tag alta">Descartado</span> y 28 de 188 llamadas siguen truncadas: el bucle llena el contexto</td></tr>
+      <tr><td class="id">4 · 8 nov</td><td>qwen3.5:2b</td><td>Sistema <b>v2</b> (robustez), mismos ajustes</td><td>0 de 8</td><td>62 % (5 de 8)</td><td>76 s</td><td><span class="tag alta">Descartado</span> por la compuerta, que contaba el corte por bucle como excepción (ya corregido)</td></tr>
+      <tr><td class="id">5 · 8 nov</td><td>qwen3.5:2b</td><td>Sistema <b>v3</b> (herramientas deterministas), mismos ajustes</td><td>3 de 8</td><td>38 % (3 de 8)</td><td>43 s</td><td><span class="tag hecho">Superado</span>. Se corrió con el código previo a las correcciones del 9 nov; se repite</td></tr>
+      <tr><td class="id">6 · 9 nov</td><td>qwen3.5:9b</td><td>Sistema <b>v3</b> con las correcciones, mismos ajustes</td><td>5 de 8</td><td>38 % (3 de 8)</td><td>204 s</td><td><span class="tag hecho">Superado</span>. La comparación completa está en <a href="#comparacion">la sección siguiente</a></td></tr>
+      <tr><td class="id">7</td><td>por definir</td><td>v3 con el 2B repetido, con RAG y con los otros modelos grandes</td><td>—</td><td>—</td><td>—</td><td><span class="tag baja">Pendiente</span></td></tr>
     </tbody>
   </table></div>
 
@@ -714,14 +725,23 @@ table.reg td{font-size:14px}
     <tbody>
       <tr><td class="id">H1</td><td>El razonamiento del modelo llena el contexto y consume el tiempo.</td><td>El log de Ollama registró «slot context shift» en 34 de unas 55 llamadas, y 439 s por tarea.</td><td>Apagar el razonamiento (<code>think=false</code>) para todos los modelos.</td><td><span class="tag hecho">Hecho</span> verificado en el piloto 2: 152 s por tarea</td><td>1</td></tr>
       <tr><td class="id">H2</td><td>qwen3:4b y lfm2.5:8b no acatan <code>think=false</code>: escriben el razonamiento en la respuesta.</td><td>Una pregunta de prueba a los 9 modelos.</td><td>Medirlos igual, anotarlo y leer sus resultados aparte.</td><td><span class="tag baja">Documentado</span></td><td>1</td></tr>
-      <tr><td class="id">H3</td><td>Ollama trunca en silencio los prompts más largos que <code>num_ctx</code> y los deja en <code>num_ctx</code>/2 + 2 tokens, conservando solo los 4 primeros.</td><td>«truncating input prompt» 56 veces en el log; reproducido fuera del banco con el mismo cliente.</td><td><code>num_ctx</code> común de 16384 y contador de llamadas sospechosas.</td><td><span class="tag prep">Hecho</span> se verifica en el piloto 3</td><td>2</td></tr>
+      <tr><td class="id">H3</td><td>Ollama trunca en silencio los prompts más largos que <code>num_ctx</code> y los deja en <code>num_ctx</code>/2 + 2 tokens, conservando solo los 4 primeros.</td><td>«truncating input prompt» 56 veces en el log; reproducido fuera del banco con el mismo cliente.</td><td><code>num_ctx</code> común de 16384 y contador de llamadas sospechosas.</td><td><span class="tag hecho">Hecho</span> verificado: con 16384 la v1 aún trunca 28 de 188 llamadas (el bucle hace crecer el prompt); la v3 trunca 0 de 66 y 0 de 87</td><td>2 y 3</td></tr>
       <tr><td class="id">H4</td><td>El contador de tokens de entrada no delata ni el desbordamiento al generar ni el truncamiento: informa el valor ya recortado.</td><td>Comparar el contador del ejecutor con el log del servidor.</td><td>Campo de truncamiento sospechoso (entrada = <code>num_ctx</code>/2 + 2) en el resultado, el resumen, la bitácora y la compuerta.</td><td><span class="tag hecho">Hecho</span> es una heurística; se confirma con el log</td><td>1 y 2</td></tr>
-      <tr><td class="id">H5</td><td>El modelo repite la misma llamada inválida hasta agotar los 22 pasos, y el contexto crece con cada intento.</td><td>T1, T2, T4 y T8 del piloto 2: 22 veces <code>generar_candidato</code> con el esquema de la herramienta como argumento.</td><td>Cortar el bucle cuando se repite la misma llamada inválida y recortar las observaciones largas. Es un cambio del sistema.</td><td><span class="tag alta">Pendiente</span> de decisión</td><td>2</td></tr>
-      <tr><td class="id">H6</td><td>Cada respuesta con formato roto gasta un paso del límite de 22.</td><td>Piloto 1: T9 10 de 10 pasos y T5 10 de 14. Piloto 2: T3 18 de 22.</td><td>Un parser ReAct más tolerante (sistema mejorado).</td><td><span class="tag alta">Pendiente</span> de decisión</td><td>1 y 2</td></tr>
+      <tr><td class="id">H5</td><td>El modelo repite la misma llamada inválida hasta agotar los 22 pasos, y el contexto crece con cada intento.</td><td>T1, T2, T4 y T8 del piloto 2: 22 veces <code>generar_candidato</code> con el esquema de la herramienta como argumento.</td><td>Cortar el bucle cuando se repite la misma llamada inválida y recortar las observaciones largas. Es un cambio del sistema.</td><td><span class="tag hecho">Hecho</span> en las versiones v2 y v3 (la v1 queda intacta). Tareas al límite de 22 pasos: 8 en v1, 1 en v2, 1 en v3</td><td>2</td></tr>
+      <tr><td class="id">H6</td><td>Cada respuesta con formato roto gasta un paso del límite de 22.</td><td>Piloto 1: T9 10 de 10 pasos y T5 10 de 14. Piloto 2: T3 18 de 22.</td><td>Un parser ReAct más tolerante (sistema mejorado).</td><td><span class="tag hecho">Hecho</span> en v2 y v3: mensaje corto y formato exacto en vez de la respuesta inválida entera; corte tras 4 seguidas</td><td>1 y 2</td></tr>
       <tr><td class="id">H7</td><td>T9 (imposible) se aprueba contestando siempre «imposible», sin evaluar nada.</td><td>La única tarea correcta del piloto 2 salió con un argumento inválido y una respuesta rota.</td><td>Una tarea de control con solución real, para que decir «imposible» siempre no alcance.</td><td><span class="tag media">Propuesto</span> en el banco</td><td>2</td></tr>
       <tr><td class="id">H8</td><td>Empezar por los modelos más pequeños gasta horas en los que más probablemente fallen por capacidad.</td><td>Pilotos 1 y 2.</td><td>Probar primero los cuatro modelos grandes (qwen3.5:9b, gemma4:e4b, llama3.1:8b y lfm2.5:8b).</td><td><span class="tag hecho">Hecho</span> orden nuevo</td><td>2</td></tr>
       <tr><td class="id">H9</td><td>El tope por tarea corta entre pasos: T9 tardó 974 s con un tope de 900 s.</td><td>Piloto 1.</td><td>Ninguna; se tiene en cuenta al leer los tiempos.</td><td><span class="tag baja">Documentado</span></td><td>1</td></tr>
       <tr><td class="id">H10</td><td>Entorno: faltaban paquetes, la consola muestra cada tarea al terminar y el piloto toma 6 de sus 8 tareas del conjunto test.</td><td>Puesta en marcha.</td><td>Paquetes instalados; el resto solo se anota (las tareas del test se ejecutan, no se afina contra ellas).</td><td><span class="tag baja">Documentado</span></td><td>1</td></tr>
+      <tr><td class="id">H11</td><td>El prompt de sistema del agente nunca llegó al modelo. El agente de LangChain que se usa ignora <code>system_message</code> y lee <code>prefix</code>.</td><td>Al imprimir la plantilla real del agente: solo traía el texto genérico en inglés, las herramientas y el formato de acciones.</td><td>La v3 pasa su prompt con <code>prefix</code>. La v1 y la v2 no se tocan, como base histórica.</td><td><span class="tag hecho">Hecho</span> en v3. Toda medición anterior del agente se hizo sin ese prompt</td><td>4 y 5</td></tr>
+      <tr><td class="id">H12</td><td>Para evaluar otra configuración, el modelo tenía que escribir el JSON completo de la red. Un modelo pequeño no lo logra.</td><td>El 2B repitió 22 veces <code>generar_candidato</code> con el esquema como argumento; en v2 los JSON salían rotos o con <code>null</code>.</td><td>Herramienta <code>variar</code> (cuatro argumentos cortos) que reconstruye la red y evalúa con el mismo camino del oráculo. Más <code>barrer</code>, <code>verificar_restricciones</code>, <code>seleccionar_mejor</code> y <code>frente_pareto</code>.</td><td><span class="tag hecho">Hecho</span> verificado sin modelo contra el oráculo y con modelo: 3 y 5 correctas de 8</td><td>3, 4, 5 y 6</td></tr>
+      <tr><td class="id">H13</td><td>La guardia de bucles solo veía repeticiones seguidas: el modelo alternaba A, B, A, B quince veces.</td><td>T8 del 2B en v3: 21 llamadas a <code>variar</code> alternando la estrategia.</td><td>La guardia cuenta también repeticiones no seguidas: aviso a la 3.ª y corte a la 4.ª.</td><td><span class="tag hecho">Hecho</span> probado sin modelo; sin repetir con modelo</td><td>5</td></tr>
+      <tr><td class="id">H14</td><td>Las herramientas rechazaban sin guiar: <code>null</code> en argumentos opcionales, etiquetas C1…Cn del enunciado usadas como id, valores fuera del espacio de diseño.</td><td>Trazas de T2, T3 y T8 en v2 y v3.</td><td>Argumentos opcionales, etiquetas aceptadas como id, espacio cerrado que rechaza lo que no es de la lista diciendo qué valores sí valen, mensajes con ejemplos.</td><td><span class="tag hecho">Hecho</span> probado sin modelo; el 9B resolvió T2 y T3</td><td>4 y 5</td></tr>
+      <tr><td class="id">H15</td><td>El modelo escribió el id como <code>candidate_id=cnd_29d13dff</code>, con el nombre del argumento dentro del valor. La herramienta no lo reconocía.</td><td>T8 del 9B: cuatro llamadas iguales con «No existe el candidato» y corte por bucle.</td><td><code>normalizar_id</code> extrae el <code>cnd_…</code> aunque venga con ruido, comillas o mayúsculas.</td><td><span class="tag prep">Hecho</span> probado sin modelo; falta repetir T8 con el 9B</td><td>6</td></tr>
+      <tr><td class="id">H16</td><td>El texto de formato pedía «valor=número» y el modelo copió la palabra «valor» en la curva de T4.</td><td>T4 del 2B en v2: «CURVA: valor=0,00, valor=7,58…».</td><td>Formato con ejemplos reales en la v3. La v1 y la v2 conservan el texto ambiguo.</td><td><span class="tag hecho">Hecho</span> en v3: T4 correcta con 2B y 9B</td><td>4 y 5</td></tr>
+      <tr><td class="id">H17</td><td>T10: el 9B respondió bien, «AVISO_DOMINIO: SI» al final de una frase, y el ejecutor solo leía la marca al inicio de línea.</td><td>El resultado guardado no tenía respuesta, pero el texto final sí decía SI y mencionaba el valor.</td><td>Parseo tolerante solo para T10 (autorizado). Cambia la huella del ejecutor. Los resultados guardados no se tocaron: con el parseo nuevo el 9B pasaría de 5 a 6 de 8.</td><td><span class="tag hecho">Hecho</span> 72 de 72 en la autoprueba y 8 casos de parseo</td><td>6</td></tr>
+      <tr><td class="id">H18</td><td>El orquestador reutilizó un piloto viejo del 2B y terminó al instante, aunque el código del sistema había cambiado.</td><td>El comando acabó en un segundo con las mismas cifras que el piloto de la noche anterior.</td><td>Un resultado solo se reutiliza si coincide también la huella del código del sistema.</td><td><span class="tag hecho">Hecho</span> comprobado: el piloto viejo se ignora con el código actual</td><td>5 y 6</td></tr>
+      <tr><td class="id">H19</td><td>El 9B no cabe entero en la GPU de 6 GB: 16 de 33 capas en GPU, unos 10 tokens por segundo. Una respuesta larga llega a ~3 minutos.</td><td><code>ollama ps</code> y el visor en vivo.</td><td>Tope de respuesta de 2048 tokens (<code>num_predict</code>) y visor <code>ver_ollama_en_vivo.py</code> para seguir la corrida.</td><td><span class="tag baja">Documentado</span> el tiempo por tarea sube a 204 s</td><td>6</td></tr>
     </tbody>
   </table></div>
 
@@ -972,7 +992,147 @@ table.reg td{font-size:14px}
     <li><b>Orquestador:</b> corre un modelo por piloto, Etapa 1, dev y test, aplica las compuertas y anota cada descarte con su motivo.</li>
     <li><b>Registro de cambios:</b> <code>CAMBIOS_EJECUTOR.diff</code> y <code>CAMBIOS_SISTEMA_razonamiento.diff</code>. La huella del ejecutor cambió, como era de esperar.</li>
   </ul>
-  <div class="note" style="margin-top:20px"><b>Estado.</b> El piloto 3 está pendiente: <code>num_ctx</code> 16384, razonamiento apagado y los cuatro modelos grandes primero. Sus resultados, y lo que se corrija después, se añaden en este mismo registro.</div>
+  <div class="note" style="margin-top:20px"><b>Estado.</b> Los pilotos 3 a 6 (v1, v2, v3 con el 2B y v3 con el 9B) están resumidos en la tabla de arriba y comparados a fondo en la sección siguiente. Falta repetir el piloto v3 con el 2B con el código corregido, probar el RAG y correr los otros tres modelos grandes. Lo que salga se añade en este mismo registro.</div>
+</section>
+
+<section id="comparacion">
+  <h2>Comparación de sistemas: por qué la v3 funcionó y la v1 y la v2 no</h2>
+  <p class="sub">Mismo banco, mismas 8 tareas del piloto, mismo <code>num_ctx</code> (16384) y razonamiento apagado. Con <b>qwen3.5:2b</b> se midieron las tres versiones del sistema; la v3 se midió además con <b>qwen3.5:9b</b>. Una repetición por celda: sirve para ver qué se rompe y por qué, no para estimar porcentajes.</p>
+
+  <h3>Qué es cada versión</h3>
+  <div class="tscroll"><table class="reg">
+    <thead><tr><th>Qué cambia</th><th>v1 (base)</th><th>v2 (robustez)</th><th>v3 (herramientas deterministas)</th></tr></thead>
+    <tbody>
+      <tr><td class="id">Prompt de sistema</td><td>El propio no llega al agente (H11): solo el texto genérico de LangChain</td><td>Igual que v1</td><td>Prompt propio en español, pasado con <code>prefix</code></td></tr>
+      <tr><td class="id">Cómo evalúa otra configuración</td><td>El modelo escribe el JSON completo de la red en <code>generar_candidato</code></td><td>Igual; con ids con etiqueta y argumentos opcionales</td><td><code>variar(rf, weight_bits, strategy, ancho_capa)</code> reconstruye la red y evalúa; <code>barrer</code> recorre una perilla</td></tr>
+      <tr><td class="id">Restricciones y elección</td><td>El modelo compara los números a mano</td><td>Igual</td><td><code>verificar_restricciones</code>, <code>seleccionar_mejor</code> y <code>frente_pareto</code> hechas por código</td></tr>
+      <tr><td class="id">Bucles</td><td>Sin guardia: repite hasta los 22 pasos</td><td>Corta a la 4.ª llamada igual seguida</td><td>También corta las repeticiones no seguidas (A, B, A, B)</td></tr>
+      <tr><td class="id">Respuesta con formato roto</td><td>Entra entera al contexto en cada intento (~4 500 caracteres)</td><td>Mensaje corto con el formato exacto (~800); corte tras 4 seguidas</td><td>Igual que v2</td></tr>
+      <tr><td class="id">Espacio de diseño</td><td>Abierto</td><td>Abierto</td><td>Cerrado: lo que no está en la lista se rechaza diciendo qué valores valen</td></tr>
+      <tr><td class="id">Enunciado de la tarea</td><td>Lleva el JSON de la arquitectura (1 475 caracteres en T1)</td><td>Igual</td><td>Sin JSON: el candidato base ya está registrado (996 caracteres en T1)</td></tr>
+      <tr><td class="id">Texto del formato de respuesta</td><td>«valor=número» (ambiguo)</td><td>Igual</td><td>Con ejemplos reales</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 style="margin-top:28px">El resultado, de un vistazo</h3>
+  <div class="stats">
+    <div class="stat"><b style="white-space:nowrap">0·0·3·5</b><span>tareas correctas de 8: v1 2B, v2 2B, v3 2B, v3 9B</span></div>
+    <div class="stat"><b style="white-space:nowrap">−76 %</b><span>tokens de entrada del 2B de v1 a v3 (1,22 millones a 297 mil)</span></div>
+    <div class="stat"><b style="white-space:nowrap">28·15·0·0</b><span>llamadas truncadas por Ollama, en el mismo orden</span></div>
+    <div class="stat"><b style="white-space:nowrap">8·1·1·1</b><span>tareas que agotaron los 22 pasos, en el mismo orden</span></div>
+  </div>
+
+  <div class="two" style="margin-top:20px">
+    <div class="panel">
+      <h3>Tokens de entrada por piloto</h3>
+      <div class="tbars w" role="img" aria-label="Tokens de entrada: v1 2B 1 216 728, v2 2B 350 395, v3 2B 297 031, v3 9B 369 124">
+        <div class="trow"><span class="tl">v1 · 2B</span><span class="tt nom"><i class="cut" style="width:100%"></i></span><span class="tv">1,22 M</span></div>
+        <div class="trow"><span class="tl">v2 · 2B</span><span class="tt nom"><i style="width:28.8%"></i></span><span class="tv">350 k</span></div>
+        <div class="trow"><span class="tl">v3 · 2B</span><span class="tt nom"><i style="width:24.4%"></i></span><span class="tv">297 k</span></div>
+        <div class="trow"><span class="tl">v3 · 9B</span><span class="tt nom"><i style="width:30.3%"></i></span><span class="tv">369 k</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Segundos por tarea (media)</h3>
+      <div class="tbars w" role="img" aria-label="Segundos por tarea: v1 2B 170, v2 2B 76, v3 2B 43, v3 9B 204">
+        <div class="trow"><span class="tl">v1 · 2B</span><span class="tt nom"><i style="width:83%"></i></span><span class="tv">170 s</span></div>
+        <div class="trow"><span class="tl">v2 · 2B</span><span class="tt nom"><i style="width:37%"></i></span><span class="tv">76 s</span></div>
+        <div class="trow"><span class="tl">v3 · 2B</span><span class="tt nom"><i style="width:21%"></i></span><span class="tv">43 s</span></div>
+        <div class="trow"><span class="tl">v3 · 9B</span><span class="tt nom"><i style="width:100%"></i></span><span class="tv">204 s</span></div>
+      </div>
+      <p class="pl-note">El 9B es más lento porque solo 16 de sus 33 capas caben en la GPU (H19), no porque la v3 piense más.</p>
+    </div>
+  </div>
+
+  <h3 style="margin-top:28px">Tarea por tarea</h3>
+  <p class="sub" style="margin-bottom:12px">Qué hizo cada sistema en cada una de las 8 tareas del piloto. «Pasos» son pasos del agente y «llamadas» son llamadas al modelo.</p>
+  <div class="tscroll"><table class="reg cmpm">
+    <thead><tr><th>Tarea</th><th>v1 · 2B</th><th>v2 · 2B</th><th>v3 · 2B <small>(código previo a las correcciones)</small></th><th>v3 · 9B</th></tr></thead>
+    <tbody>
+      <tr><td class="id">T1 Verificar<br>Dense</td>
+        <td><span class="tag alta">No</span><br>22 veces <code>generar_candidato</code> con el esquema como argumento. Límite de pasos.</td>
+        <td><span class="tag alta">No</span><br>Pasó un JSON roto con el id; la herramienta falló tres veces y el modelo calculó el valor de cabeza.</td>
+        <td><span class="tag hecho">Correcta</span><br><code>predecir_recursos</code> y <code>verificar_restricciones</code>: 3 llamadas, 23 s.</td>
+        <td><span class="tag hecho">Correcta</span><br>Los mismos dos pasos: 3 llamadas, 68 s.</td></tr>
+      <tr><td class="id">T2 Elegir<br>Conv1D</td>
+        <td><span class="tag alta">No</span><br>22 llamadas idénticas a <code>generar_candidato</code>.</td>
+        <td><span class="tag alta">No</span><br>Envió <code>json_text: null</code> y el esquema lo rechazó. Cortada por bucle.</td>
+        <td><span class="tag alta">No</span><br>Usó la etiqueta <code>C1</code> como id («No existe el candidato C1»). Cortada por bucle.</td>
+        <td><span class="tag hecho">Correcta</span><br>Evaluó y verificó los 5 candidatos y eligió con <code>seleccionar_mejor</code>: 12 llamadas.</td></tr>
+      <tr><td class="id">T3 Optimizar<br>Conv2D</td>
+        <td><span class="tag alta">No</span><br>34 llamadas, 16 de ellas truncadas. Límite de pasos.</td>
+        <td><span class="tag alta">No</span><br><code>generar_candidato</code> se negaba («faltan datos»). Cortada por bucle.</td>
+        <td><span class="tag alta">No</span><br>Llamó <code>variar</code> con los argumentos de <code>barrer</code>; la herramienta no guiaba. Cortada.</td>
+        <td><span class="tag hecho">Correcta</span><br>Llegó al óptimo del oráculo con 9 variaciones y 8 verificaciones. 321 s.</td></tr>
+      <tr><td class="id">T4 Barrido<br>Dense</td>
+        <td><span class="tag alta">No</span><br>22 llamadas inválidas a <code>generar_candidato</code>.</td>
+        <td><span class="tag alta">No</span><br>Barrió bien los 4 valores, pero copió la palabra «valor» del formato y la curva quedó vacía.</td>
+        <td><span class="tag hecho">Correcta</span><br><code>barrer</code> y curva con los valores reales: 6 llamadas.</td>
+        <td><span class="tag hecho">Correcta</span><br><code>barrer</code> y respuesta: 4 llamadas, 49 s.</td></tr>
+      <tr><td class="id">T5 Pareto<br>Conv1D</td>
+        <td><span class="tag alta">No</span><br>21 veces <code>generar_candidato</code>. Límite de pasos.</td>
+        <td><span class="tag alta">No</span><br>Llegó a una respuesta con formato, pero con candidatos incorrectos.</td>
+        <td><span class="tag alta">No</span><br>Evaluó 5 variantes, no usó <code>frente_pareto</code> y entregó un candidato fuera del frente.</td>
+        <td><span class="tag alta">No</span><br>Tampoco usó <code>frente_pareto</code>: 6 variaciones, 5 barridos, 7 verificaciones y los 22 pasos. 621 s.</td></tr>
+      <tr><td class="id">T8 Reparar<br>Conv2D</td>
+        <td><span class="tag alta">No</span><br>12 pasos sin acción válida entre llamadas a <code>generar_candidato</code>. Límite de pasos.</td>
+        <td><span class="tag alta">No</span><br>22 respuestas seguidas sin acción válida; 15 de las 22 llamadas se truncaron.</td>
+        <td><span class="tag alta">No</span><br>Salió del espacio de diseño y alternó la estrategia 15 veces. 22 pasos.</td>
+        <td><span class="tag alta">No</span><br>Escribió el id como <code>candidate_id=cnd_…</code> cuatro veces. Cortada por bucle (H15, corregido).</td></tr>
+      <tr><td class="id">T9 Imposible<br>Dense</td>
+        <td><span class="tag alta">No</span><br>18 llamadas seguidas a <code>predecir_recursos</code>. Límite de pasos.</td>
+        <td><span class="tag alta">No</span><br><code>generar_candidato</code> se negaba. Cortada por bucle.</td>
+        <td><span class="tag hecho">Correcta</span><br>«IMPOSIBLE» tras 5 variantes. Prueba débil (H7).</td>
+        <td><span class="tag hecho">Correcta</span><br>«IMPOSIBLE» tras 3 variaciones y 2 barridos. Prueba débil (H7).</td></tr>
+      <tr><td class="id">T10 Trampa<br>Conv1D</td>
+        <td><span class="tag alta">No</span><br>21 veces <code>sugerir_ejemplo_real</code>. Límite de pasos.</td>
+        <td><span class="tag alta">No</span><br>Escribió «AVISO_DOMINIO: NO» dentro de una frase: sin formato.</td>
+        <td><span class="tag alta">No</span><br>No llamó <code>verificar_limites_operativos</code> y contestó «NO».</td>
+        <td><span class="tag media">No leída</span><br>Respondió «AVISO_DOMINIO: SI» pegado a una frase. Con el parseo tolerante (H17) sería correcta.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 style="margin-top:28px">Por qué una versión funcionó y las otras no</h3>
+  <div class="finds">
+    <div class="find">
+      <div class="row"><span class="tag alta">H12</span><span class="tag cmp">Sistema</span></div>
+      <h4>Se le pedía al modelo la parte que no sabe hacer</h4>
+      <p>En la v1 y la v2, probar otra configuración exigía escribir el JSON completo de la red. El 2B no lo hace: repetía el esquema de la herramienta como argumento, mandaba <code>null</code> o dejaba el JSON con una llave sin cerrar. La v3 le pide cuatro valores cortos y el código reconstruye la red. Esa herramienta reproduce el oráculo del banco con una diferencia relativa máxima de 2,3·10⁻⁵ (ruido de float32) en las tres familias. Es la causa más probable del salto de 0 a 3 correctas con el mismo modelo.</p>
+    </div>
+    <div class="find">
+      <div class="row"><span class="tag alta">H11</span><span class="tag cmp">Sistema</span></div>
+      <h4>Las reglas del prompt nunca se aplicaron</h4>
+      <p>El agente usado ignora <code>system_message</code>. En la v1 y la v2 el modelo solo veía el texto genérico en inglés y las descripciones de las herramientas, nunca la «regla estricta» ni el flujo obligatorio. La v3 es la primera que entrega su prompt. Esto pesa también fuera de este banco: lo medido antes con este agente se hizo sin ese prompt.</p>
+    </div>
+    <div class="find">
+      <div class="row"><span class="tag media">H5</span><span class="tag cmp">Sistema</span></div>
+      <h4>Un bucle llena el contexto y provoca el truncamiento</h4>
+      <p>Subir <code>num_ctx</code> a 16384 no bastó: la v1 siguió truncando 28 de 188 llamadas, porque el propio bucle hace crecer el prompt, hasta 34 327 tokens. La v2 cortó los bucles y bajó los tokens de 1,22 millones a 350 mil, pero no mejoró la exactitud. Eliminar el desperdicio hizo la medición limpia, no hizo que el modelo acertara.</p>
+    </div>
+    <div class="find">
+      <div class="row"><span class="tag media">H14</span><span class="tag cmp">Sistema</span></div>
+      <h4>Las herramientas decían «no» sin decir cómo</h4>
+      <p>«Indica al menos una perilla», «No existe el candidato C1» o «faltan datos» no le dicen al modelo qué hacer, y un 2B repite lo mismo. En v3 los errores traen los valores permitidos y un ejemplo, las etiquetas del enunciado valen como id y el espacio es cerrado. En el 9B esto se nota: resolvió T2 y T3, que el 2B no pudo.</p>
+    </div>
+    <div class="find">
+      <div class="row"><span class="tag media">Modelo</span></div>
+      <h4>El tamaño del modelo suma, pero no es lo principal</h4>
+      <p>Con el mismo sistema v3, el 9B saca 5 de 8 frente a 3 de 8 del 2B, y usa las herramientas con más criterio. Pero con el sistema v1 o v2 el mismo 2B sacaba 0. Y el 9B también falla donde las herramientas fallan: T8 por el id con ruido, T5 por no usar <code>frente_pareto</code>, T10 por el formato.</p>
+    </div>
+    <div class="find">
+      <div class="row"><span class="tag baja">Banco</span></div>
+      <h4>Lo que no se puede concluir todavía</h4>
+      <ul class="plain">
+        <li>Las tres versiones cambian varias cosas a la vez. No se sabe cuánto aporta cada una: el prompt propio, <code>variar</code>, el espacio cerrado o los mensajes. Eso pide un experimento aparte, activando un cambio por vez.</li>
+        <li>Es un modelo por celda, una repetición y 8 tareas, 6 de ellas del conjunto test. Una diferencia de una tarea no es una diferencia de sistema.</li>
+        <li>El piloto v3 del 2B se corrió con el código anterior a las correcciones. Hay que repetirlo para compararlo en igualdad con el 9B.</li>
+        <li>T9 se aprueba diciendo «imposible» (H7). Sus 2 correctas del 2B y del 9B valen poco hasta tener la tarea de control.</li>
+        <li>El RAG está montado y probado, pero todavía no se midió con ningún modelo.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note ok" style="margin-top:20px"><b>Lectura.</b> Lo que separa a la v3 de la v1 y la v2 no es un modelo más grande. Es que el sistema deja de pedirle al modelo lo que hace mal (escribir JSON, comparar números, llevar la cuenta de los candidatos) y lo hace por código; el modelo solo decide qué probar. La siguiente medición dirá cuánto de eso resiste con los otros modelos grandes y con el RAG.</div>
 </section>
 
 <section id="sugerencias">
