@@ -717,7 +717,10 @@ table.reg td{font-size:14px}
       <tr><td class="id">7 · 9 nov</td><td>qwen3.5:2b</td><td>Sistema <b>v3</b> con id sucio, parseo de T10 y etiquetas arreglados</td><td>4 de 8</td><td>12 % (1 de 8)</td><td>37 s</td><td><span class="tag hecho">Superado</span>. Las mismas tareas correctas que el piloto 8</td></tr>
       <tr><td class="id">8 · 9 nov</td><td>qwen3.5:2b</td><td>Sistema <b>v3</b> más <code>variar</code> y <code>verificar_restricciones</code> corregidos</td><td>4 de 8</td><td>38 % (3 de 8)</td><td>34 s</td><td><span class="tag hecho">Superado</span>. Mismas correctas, otros fallos: la variación entre corridas es del tamaño del efecto</td></tr>
       <tr><td class="id">9 · 9 nov</td><td>qwen3.5:9b</td><td>Sistema <b>v3</b> más listas y barridos corregidos</td><td>3 de 8</td><td>50 % (4 de 8)</td><td>254 s</td><td><span class="tag hecho">Superado</span> en el límite de la compuerta. Bajó de 5 a 3 por dos defectos de herramienta, uno mío</td></tr>
-      <tr><td class="id">10</td><td>por definir</td><td>v3 con las últimas correcciones, con RAG y con los otros modelos grandes; con tres repeticiones</td><td>—</td><td>—</td><td>—</td><td><span class="tag baja">Pendiente</span></td></tr>
+      <tr><td class="id">10 · 9 nov</td><td>qwen3.5:2b</td><td>Sistema <b>v3</b>, sin RAG, mismas correcciones que el piloto 8</td><td>2 de 8</td><td>50 % (4 de 8)</td><td>33 s</td><td><span class="tag hecho">Superado</span>. Bajó de 4 a 2: cuatro tareas cortadas por listas en argumentos numéricos y llamadas repetidas</td></tr>
+      <tr><td class="id">11 · 9 nov</td><td>qwen3.5:2b</td><td>Sistema <b>v3</b> <b>con RAG</b> (3 vecinos reales), mismos ajustes</td><td>3 de 8</td><td>38 % (3 de 8)</td><td>49 s</td><td><span class="tag baja">Sin efecto medible</span>. El RAG llega al modelo, pero cuesta 2,2 veces más tokens y T10 sigue mal</td></tr>
+      <tr><td class="id">12 · 9 nov</td><td>qwen3.5:2b</td><td>Sistema <b>v3</b> con la <b>capa de protocolo común</b> (argumentos tolerantes, parser ReAct tolerante, prompt con ejemplos)</td><td>—</td><td>—</td><td>—</td><td><span class="tag media">En curso</span> primera medición con un modelo real; el resultado se añade cuando termine</td></tr>
+      <tr><td class="id">13</td><td>por definir</td><td>v3 con protocolo, con los otros modelos grandes y con tres repeticiones</td><td>—</td><td>—</td><td>—</td><td><span class="tag baja">Pendiente</span></td></tr>
     </tbody>
   </table></div>
 
@@ -750,7 +753,9 @@ table.reg td{font-size:14px}
       <tr><td class="id">H22</td><td>El modelo mandó toda la llamada como un solo texto en el primer argumento: <code>candidate_id=cnd_…; restricciones=ff&lt;=45600</code>. La herramienta lo tomó entero como id y las restricciones quedaron vacías.</td><td>T1 del 9B (piloto 9), antes correcta: tres respuestas «No indicaste restricciones» y corte por bucle. Ese mensaje lo había añadido yo en la corrección anterior (H21).</td><td>Las cinco herramientas con argumentos separan los pares <code>clave=valor</code> si el texto los trae, también cuando el valor lleva «;» dentro.</td><td><span class="tag prep">Hecho</span> probado sin modelo (24 comprobaciones)</td><td>9</td></tr>
       <tr><td class="id">H23</td><td>Un alias que añadí (<code>perilla="ancho_capa"</code> igual a «ancho») trataba siempre los valores como anchos. El 9B mandaba números de capa con el ancho fijo y recibía «ancho=2 no está en el espacio» tres veces seguidas.</td><td>T9 del 9B (piloto 9), antes correcta, cortada por bucle; T8 con el mismo error.</td><td>Con <code>ancho</code> fijo, <code>barrer</code> barre capas; sin <code>ancho</code>, los valores son anchos (el caso del 2B). <code>barrer</code> gana el argumento <code>ancho</code>, que antes descartaba en silencio.</td><td><span class="tag prep">Hecho</span> probado sin modelo. Error mío, corregido el mismo día</td><td>9</td></tr>
       <tr><td class="id">H24</td><td>En T5 (minimizar LUT y maximizar el tamaño del modelo) el 2B (pilotos 7 y 8) y el 9B (piloto 9) pidieron <code>frente_pareto("lut, tam_bits")</code>, que minimiza ambos. La precisión fue 0 en los dos que llegaron a entregar una respuesta.</td><td>Trazas de T5. En el piloto 8 la herramienta rechazó la lista antes de responder. La descripción ya decía «max tam_bits»; la respuesta no mostraba qué dirección se había aplicado.</td><td>La respuesta repite «objetivos aplicados: minimizar lut, minimizar tam_bits» y avisa si se minimiza <code>tam_bits</code>; la descripción lleva el ejemplo «lut, max tam_bits».</td><td><span class="tag prep">Hecho</span> probado sin modelo; falta ver si cambia a los modelos</td><td>7 a 9</td></tr>
-      <tr><td class="id">H25</td><td>El mismo modelo con el mismo sistema da resultados distintos en dos corridas: el 2B sacó 3, 4 y 4 de 8 y el 9B sacó 5 y 3 de 8.</td><td>Pilotos 5 a 9.</td><td>No sacar conclusiones de una sola repetición. Las comparaciones entre versiones se harán con tres repeticiones (el banco ya las prevé en dev y test).</td><td><span class="tag media">Propuesto</span> para el piloto 10</td><td>5 a 9</td></tr>
+      <tr><td class="id">H25</td><td>El mismo modelo con el mismo sistema da resultados distintos en dos corridas: el 2B sacó 3, 4, 4 y 2 de 8 (sin RAG) y el 9B sacó 5 y 3 de 8.</td><td>Pilotos 5 a 10.</td><td>No sacar conclusiones de una sola repetición. Las comparaciones entre versiones se harán con tres repeticiones (el banco ya las prevé en dev y test).</td><td><span class="tag media">Propuesto</span> para el piloto 13</td><td>5 a 10</td></tr>
+      <tr><td class="id">H26</td><td>Más de la mitad de los fallos de la v3 eran de formato y no de razonamiento: listas donde va un entero (<code>weight_bits=[4, 8, 16]</code>), el esquema de la herramienta copiado como valor, la llamada entera dentro del primer argumento, ids con ruido, bloques sin acción. Se arreglaba un formato por piloto y aparecía otro.</td><td>Pilotos 5 a 10. En el piloto 10, T5 y T9 se cortaron por tres rechazos seguidos de <code>variar</code> con listas, la misma clase de H21.</td><td>Capa de protocolo común para cualquier modelo (2B, 4B, 9B): <b>1)</b> las 11 herramientas aceptan cualquier tipo de argumento, anuncian el tipo correcto y normalizan por código nulos, números, listas, textos y esquemas copiados; una lista en un argumento numérico de <code>variar</code> es un barrido. <b>2)</b> Un parser ReAct tolerante (claves alternativas, forma de OpenAI, nombres con otra capitalización, <code>Final Answer</code> en varias formas), cuyo error trae un ejemplo exacto con un id real. <b>3)</b> Un prompt con la sección «Protocolo»: cinco ejemplos de bloque y la regla de tipos.</td><td><span class="tag prep">Hecho</span> probado sin modelo: 12 pruebas con 0 fallos (56 comprobaciones de la capa, una de extremo a extremo con el agente real y un LLM falso) y autoprueba 72 de 72. <span class="tag media">Falta medir con un modelo real</span> (piloto 12)</td><td>10</td></tr>
+      <tr><td class="id">H27</td><td>El RAG está bien conectado y llega al modelo, pero no hay evidencia de que ayude, y cuesta más del doble.</td><td>Piloto 11: el bloque «REFERENCIA» con tres vecinos reales aparece en 5 de las 8 tareas (T1, T2, T3, T8 y T10; en las otras tres el modelo no llamó a <code>predecir_recursos</code>). 3 de 8 contra 2 de 8 sin RAG, 385 mil tokens de entrada contra 177 mil, 49 s por tarea contra 33.</td><td>Ninguna todavía. T10, la tarea para la que se pensó, volvió a responder «AVISO_DOMINIO: NO» con los vecinos delante: el texto no compara el valor pedido (20478) con los valores reales (8192, 16383, 24574, 32765).</td><td><span class="tag baja">Documentado</span> una repetición no basta: está dentro de la variación de H25</td><td>11</td></tr>
     </tbody>
   </table></div>
 
@@ -1177,6 +1182,70 @@ table.reg td{font-size:14px}
       <div class="row"><span class="tag media">Banco</span></div>
       <h4>El piloto afina contra tareas del test</h4>
       <p>6 de las 8 tareas del piloto son del conjunto test. Corregir herramientas viendo sus trazas es lo que un piloto sirve para hacer, pero cada ciclo de corregir y repetir se acerca a afinar contra esas tareas. Las correcciones se limitaron a tolerancias generales (formatos, alias, mensajes) y no a una tarea concreta. La medición grande, con dev y test separados y tres repeticiones, es la que cuenta.</p>
+    </div>
+  </div>
+
+  <h3 style="margin-top:28px">Pilotos 10 y 11: el 2B sin RAG y con RAG</h3>
+  <p class="sub" style="margin-bottom:12px">Dos corridas seguidas del mismo 2B con el mismo código v3: una sin el RAG y otra con él. Sirven para dos cosas: ver si el RAG ayuda y ver qué falla cuando el sistema no cambia.</p>
+  <div class="tscroll"><table class="reg cmpm">
+    <thead><tr><th>Tarea</th><th>2B · piloto 10 <small>(sin RAG)</small></th><th>2B · piloto 11 <small>(con RAG)</small></th></tr></thead>
+    <tbody>
+      <tr><td class="id">T1 Verificar</td><td><span class="tag hecho">Correcta</span></td><td><span class="tag hecho">Correcta</span></td></tr>
+      <tr><td class="id">T2 Elegir</td><td><span class="tag hecho">Correcta</span></td><td><span class="tag hecho">Correcta</span></td></tr>
+      <tr><td class="id">T3 Optimizar</td><td><span class="tag alta">No</span> <code>predecir_recursos</code> repetida 4 veces sobre el mismo candidato</td><td><span class="tag alta">No</span> igual: <code>predecir_recursos</code> repetida 4 veces</td></tr>
+      <tr><td class="id">T4 Barrido</td><td><span class="tag alta">No</span> curva y cumplen bien, pero escribió tendencia «decreciente» para una curva creciente</td><td><span class="tag alta">No</span> curva con 0.00 en todos los puntos y lista de cumplen equivocada</td></tr>
+      <tr><td class="id">T5 Pareto</td><td><span class="tag alta">No</span> listas en <code>variar</code> rechazadas 3 veces (H26)</td><td><span class="tag hecho">Correcta</span> con <code>variar</code>, <code>barrer</code> y <code>seleccionar_mejor</code>, sin <code>frente_pareto</code></td></tr>
+      <tr><td class="id">T8 Reparar</td><td><span class="tag alta">No</span> nueve llamadas a <code>variar</code> y corte por bucle</td><td><span class="tag alta">No</span> <code>estimar_baseline</code> repetida 4 veces</td></tr>
+      <tr><td class="id">T9 Imposible</td><td><span class="tag alta">No</span> listas en <code>ancho_capa</code>, <code>rf</code> y <code>weight_bits</code> rechazadas (H26)</td><td><span class="tag alta">No</span> <code>barrer</code> repetida 4 veces con los mismos argumentos</td></tr>
+      <tr><td class="id">T10 Trampa</td><td><span class="tag alta">No</span> «NO» sin consultar <code>verificar_limites_operativos</code></td><td><span class="tag alta">No</span> «NO» con los vecinos reales delante</td></tr>
+      <tr><td class="id">Total</td><td><b>2 de 8</b> · 177 mil tokens de entrada · 33 s por tarea</td><td><b>3 de 8</b> · 385 mil tokens de entrada · 49 s por tarea</td></tr>
+    </tbody>
+  </table></div>
+  <div class="finds" style="margin-top:16px">
+    <div class="find">
+      <div class="row"><span class="tag baja">Veredicto</span><span class="tag cmp">RAG</span></div>
+      <h4>Conectado y sin efecto visible</h4>
+      <p>El bloque con tres diseños reales medidos llega al modelo cuando este consulta <code>predecir_recursos</code>. La diferencia de una tarea (2 contra 3) está dentro de lo que el mismo modelo varía entre corridas (3, 4, 4 y 2 sin RAG). T5 salió correcta sin que el RAG tuviera que ver, y T10, la tarea para la que se pensó, sigue fallando. Con una repetición no se puede decir que ayude ni que no, pero sí que cuesta más del doble en tokens y en tiempo. La decisión queda para la medición con tres repeticiones.</p>
+    </div>
+    <div class="find">
+      <div class="row"><span class="tag alta">H26</span><span class="tag sis">Sistema</span></div>
+      <h4>El formato seguía siendo la mitad de los fallos</h4>
+      <p>Sin RAG, cuatro de las ocho tareas se cortaron por formato o por repetición: dos por listas en argumentos enteros que pydantic rechazaba, una por una llamada repetida y una por nueve llamadas seguidas. En lugar de arreglar el siguiente formato, se construyó la capa de protocolo común del apartado siguiente.</p>
+    </div>
+  </div>
+
+  <h3 style="margin-top:28px">La capa de protocolo común</h3>
+  <p class="sub" style="margin-bottom:12px">Pedido: un estándar que se le comunique al modelo, sea de 2, 4 o 9 mil millones de parámetros, para que el flujo ReAct no entre en bucle porque la respuesta no salió en tal formato. Solo cambia la v3; la v1 y la v2 quedan intactas como base histórica.</p>
+  <div class="finds">
+    <div class="find">
+      <div class="row"><span class="tag prep">1</span><span class="tag sis">Argumentos</span></div>
+      <h4>Aceptar todo y normalizar por código</h4>
+      <p>Las 11 herramientas se reconstruyen con un esquema que acepta cualquier tipo, pero sigue anunciando al modelo el tipo correcto. Antes un tipo equivocado se rechazaba y, tras cuatro rechazos, la guardia cortaba la tarea. Ahora se limpian los nulos («null», «None»), los números escritos como texto («8 bits»), las listas de un solo valor, el texto y la lista intercambiados y el esquema copiado como valor (cuenta como «no indicado»). Una lista de varios valores en un argumento numérico de <code>variar</code> se toma como un barrido, y <code>generar_candidato</code> sin un pedido legible usa el pedido original del usuario.</p>
+    </div>
+    <div class="find">
+      <div class="row"><span class="tag prep">2</span><span class="tag sis">Parser ReAct</span></div>
+      <h4>Entender las variantes del bloque de acción</h4>
+      <p>Acepta otras claves para la acción y sus argumentos (<code>tool</code>, <code>name</code>, <code>args</code>, <code>parameters</code>), la forma de OpenAI, argumentos como texto JSON o sueltos junto a la acción, nombres de herramienta con otra capitalización o una errata corta, y «Final Answer» escrito de otras formas. Si no entiende el bloque, el error es corto y trae un ejemplo exacto con una herramienta y un id reales. La prosa pura sigue cortándose por la guardia.</p>
+    </div>
+    <div class="find">
+      <div class="row"><span class="tag prep">3</span><span class="tag sis">Prompt</span></div>
+      <h4>Una sección «Protocolo» igual para todos</h4>
+      <p>Cinco ejemplos de bloque (<code>predecir_recursos</code>, <code>variar</code>, <code>barrer</code>, <code>verificar_restricciones</code> y la respuesta final) y la regla de tipos: números sin comillas, textos entre comillas y una sola lista, la de <code>valores</code> de <code>barrer</code>.</p>
+    </div>
+    <div class="find">
+      <div class="row"><span class="tag media">Comprobado</span></div>
+      <h4>Qué se probó y qué no</h4>
+      <p>Sin modelo: 12 pruebas con 0 fallos y la autoprueba del banco en 72 de 72. La de extremo a extremo usa el agente v3 real con un LLM falso que escribe cada paso en un formato distinto, y encontró un fallo mío: un <code>action_input</code> en texto suelto llegaba como argumento posicional y la capa nueva lo rechazaba. Se corrigió antes de dar la prueba por buena. <b>Con un modelo real todavía no se midió</b>: el piloto 12 está en curso.</p>
+    </div>
+    <div class="find">
+      <div class="row"><span class="tag alta">Riesgos</span></div>
+      <h4>Lo que esto no arregla y lo que puede costar</h4>
+      <p>Elimina fallos de formato, no de razonamiento (T3, T4 y T10 fallaron sin que el formato tuviera que ver) ni garantiza más tareas correctas. El prompt crece a unos 10 mil caracteres y los esquemas anuncian más campos, así que cada llamada gasta más tokens. Y el parser da por terminada una respuesta en prosa que traiga una línea de formato (<code>RESPUESTA:</code>, <code>VALOR:</code>…), lo que podría cerrar una tarea antes de tiempo.</p>
+    </div>
+    <div class="find">
+      <div class="row"><span class="tag media">Huellas</span></div>
+      <h4>Cambian el sistema y el ejecutor</h4>
+      <p>Los dos módulos nuevos entran en la huella del sistema v3 (pasó de <code>68342d8e</code> a <code>18bd2aba</code>) y en la del ejecutor. Ningún resultado v3 anterior se reutiliza como si fuera de este código, y el informe final debe decirlo.</p>
     </div>
   </div>
 
