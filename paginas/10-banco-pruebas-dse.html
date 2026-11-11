@@ -255,6 +255,7 @@ table.reg td{font-size:14px}
     <li><a href="#puntaje">Cómo se puntúa</a></li>
     <li><a href="#tiempos">Modelo de tiempos</a></li>
     <li><a href="#piloto">Pilotos locales</a></li>
+    <li><a href="#base">Base por niveles</a></li>
     <li><a href="#comparacion">Comparación v1 · v2 · v3</a></li>
     <li><a href="#sugerencias">Mejorar · Quitar · Poner</a></li>
     <li><a href="#decidir">Por decidir</a></li>
@@ -1007,6 +1008,113 @@ table.reg td{font-size:14px}
     <li><b>Registro de cambios:</b> <code>CAMBIOS_EJECUTOR.diff</code> y <code>CAMBIOS_SISTEMA_razonamiento.diff</code>. La huella del ejecutor cambió, como era de esperar.</li>
   </ul>
   <div class="note" style="margin-top:20px"><b>Estado.</b> Los pilotos 3 a 9 (v1, v2 y v3 con el 2B, y v3 con el 9B) están resumidos en la tabla de arriba y comparados en la sección siguiente. Falta verificar con modelo las últimas correcciones de las herramientas (H22 a H24), probar el RAG y correr los otros tres modelos grandes, ahora con tres repeticiones. Lo que salga se añade en este mismo registro.</div>
+</section>
+
+<section id="base">
+  <h2>Base de evaluación por niveles y primer resultado del 9B</h2>
+  <p class="sub">Antes de fiarnos del banco real se construyó una base de cuatro niveles, para saber si un fallo es de las herramientas, del formato o del modelo. Se midió con <b>qwen3.5:9b</b> local (RTX 3060 de 6 GB, <code>num_ctx</code> 16384, razonamiento apagado, 2048 tokens de salida) y el sistema v3. Las cifras salen de <code>banco_dse/resultados/</code> y de la bitácora; cada corrida guarda las huellas del sistema, del ejecutor y del banco.</p>
+
+  <div class="stats">
+    <div class="stat"><b>84,2 %</b><span>test: 48 de 57 tareas nuevas, 1 repetición</span></div>
+    <div class="stat"><b>75,6 %</b><span>dev: 34 de 45 (15 tareas × 3), lectura tolerante</span></div>
+    <div class="stat"><b>100 %</b><span>nivel A: 1914 de 1914 comprobaciones, sin LLM</span></div>
+    <div class="stat"><b>92,6 %</b><span>nivel C: 25 de 27 cadenas de dos herramientas</span></div>
+  </div>
+
+  <h3 style="margin-top:28px">Los cuatro niveles</h3>
+  <div class="tscroll"><table>
+    <thead><tr><th>Nivel</th><th>Qué comprueba</th><th>Tareas</th><th>Umbral</th><th>Resultado del 9B</th><th>Veredicto</th></tr></thead>
+    <tbody>
+      <tr><td class="id">A</td><td>Cada herramienta llamada directamente contra el oráculo del banco, sin LLM. Solo muestras de dev</td><td>1914 comprobaciones</td><td>100 %</td><td>100 % (empezó en 97,4 %)</td><td><span class="tag hecho">Pasa</span></td></tr>
+      <tr><td class="id">B</td><td>Una sola acción con el LLM real: 11 herramientas × 3 familias × 3 redacciones</td><td>99</td><td>90 % en selección, argumentos y fidelidad</td><td>selección 97,0 %, argumentos 99,0 %, fidelidad 99,0 %; correctas 93 de 99</td><td><span class="tag hecho">Pasa</span> (el 2B no pasa)</td></tr>
+      <tr><td class="id">C</td><td>Dos herramientas encadenadas: predecir y verificar, barrer y seleccionar_mejor, variar y verificar</td><td>27</td><td>80 %</td><td>25 de 27 (92,6 %)</td><td><span class="tag hecho">Pasa</span> tras corregir <code>barrer</code></td></tr>
+      <tr><td class="id">D dev</td><td>Las tareas reales del banco (T2, T3, T4, T5, T8, T10), 15 tareas × 3 repeticiones</td><td>45</td><td>sin umbral</td><td>34 de 45 con el sistema anterior; 31 de 45 con el actual (35 y 34 con la lectura tolerante)</td><td><span class="tag baja">Línea base</span></td></tr>
+      <tr><td class="id">D test</td><td>Las mismas tareas del banco, 57 tareas que nunca se usaron para ajustar nada, 1 repetición</td><td>57</td><td>sin umbral</td><td>48 de 57 (84,2 %)</td><td><span class="tag hecho">Primera cifra honesta</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 style="margin-top:28px">Test por plantilla</h3>
+  <p class="sub" style="margin-bottom:12px">Porcentaje de tareas correctas. T1 y T9 no existen en dev, por eso el 84,2 % del test no se compara directo con el 75,6 % del dev: la mezcla de plantillas es distinta.</p>
+  <div class="panel">
+    <div class="tbars w" role="img" aria-label="Correctas en el test por plantilla: T1 9 de 9, T2 5 de 5, T3 8 de 8, T4 5 de 5, T9 9 de 9, T8 5 de 8, T10 5 de 8, T5 2 de 5">
+      <div class="trow"><span class="tl">T1 lectura</span><span class="tt nom"><i style="width:100%"></i></span><span class="tv">9 de 9</span></div>
+      <div class="trow"><span class="tl">T2 elegir</span><span class="tt nom"><i style="width:100%"></i></span><span class="tv">5 de 5</span></div>
+      <div class="trow"><span class="tl">T3 óptimo</span><span class="tt nom"><i style="width:100%"></i></span><span class="tv">8 de 8</span></div>
+      <div class="trow"><span class="tl">T4 curva</span><span class="tt nom"><i style="width:100%"></i></span><span class="tv">5 de 5</span></div>
+      <div class="trow"><span class="tl">T9 imposible</span><span class="tt nom"><i style="width:100%"></i></span><span class="tv">9 de 9</span></div>
+      <div class="trow"><span class="tl">T8 reparar</span><span class="tt nom"><i style="width:62.5%"></i></span><span class="tv">5 de 8</span></div>
+      <div class="trow"><span class="tl">T10 trampa</span><span class="tt nom"><i style="width:62.5%"></i></span><span class="tv">5 de 8</span></div>
+      <div class="trow"><span class="tl">T5 Pareto</span><span class="tt nom"><i class="cut" style="width:40%"></i></span><span class="tv">2 de 5</span></div>
+    </div>
+    <p class="pl-note">En rojo, la plantilla con menor acierto.</p>
+  </div>
+  <p style="margin-top:14px">En las plantillas que están en dev y en test, el test sale igual o peor: T2 100 % y 100 %, T3 100 % y 100 %, T4 92 % y 100 %, T5 25 % y 40 %, <b>T8 100 % y 62,5 %</b>, T10 67 % y 62,5 %. Por familia: Dense 15 de 19, Conv1D 15 de 19, Conv2D 18 de 19. El test tardó 220 minutos (232 s por tarea) y movió 2,95 M de tokens de entrada y 97 mil de salida. Hubo 8 corridas rescatadas por el cierre guiado (4 salieron correctas), 3 bucles cortados y 5 corridas al tope de 22 pasos.</p>
+
+  <h3 style="margin-top:28px">Qué cambió al corregir las herramientas</h3>
+  <div class="tscroll"><table>
+    <thead><tr><th>Medida</th><th>Antes</th><th>Después</th><th>Qué se corrigió</th></tr></thead>
+    <tbody>
+      <tr><td>C: <code>barrer</code> y luego <code>seleccionar_mejor</code></td><td>1 de 9</td><td><b>9 de 9</b></td><td>La tabla de <code>barrer</code> terminaba sin decir el paso siguiente; <code>variar</code> sí lo decía. Ahora ambas lo dicen.</td></tr>
+      <tr><td>C total</td><td>18 de 27 (66,7 %)</td><td><b>25 de 27 (92,6 %)</b></td><td>El mismo cambio.</td></tr>
+      <tr><td>B total</td><td>≈ 92,9 %</td><td>93,9 %</td><td>Tareas de <code>generar_candidato</code> Dense reescritas con la entrada explícita.</td></tr>
+      <tr><td>T5: llamadas a <code>verificar_restricciones</code> sin restricciones (12 corridas)</td><td>26</td><td><b>0</b></td><td>La observación de <code>variar</code> decía siempre «compruébalo con verificar_restricciones».</td></tr>
+      <tr><td>T5: pasos medios</td><td>11,2</td><td>7,6</td><td>El mismo cambio. La nota de T5 no mejoró (5 de 12 y luego 3 de 12): el límite es del modelo.</td></tr>
+      <tr><td>D dev (lectura tolerante)</td><td>35 de 45 (77,8 %)</td><td>34 de 45 (75,6 %)</td><td>Sin diferencia medible: T10 y T2, que el cambio no toca, ya varían tanto entre corridas.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 style="margin-top:28px">Hallazgos y correcciones de la base</h3>
+  <p class="sub" style="margin-bottom:12px">Una fila por hallazgo. La columna «Causa» separa lo que era de la herramienta, del formato, de mi base de pruebas y del modelo.</p>
+  <div class="tscroll"><table class="reg">
+    <thead><tr><th>ID</th><th>Hallazgo</th><th>Causa</th><th>Corrección</th><th>Estado</th></tr></thead>
+    <tbody>
+      <tr><td class="id">N1</td><td>Nivel A en 97,4 %: <code>verificar_limites_operativos</code> daba OK a valores que no existen en el dataset real (bits o reuse factor inexistentes, anchos fuera de la familia). <code>sugerir_ejemplo_real</code> en Dense devolvía una observación demasiado larga.</td><td>Herramienta</td><td>La herramienta comprueba contra <code>valores_reales.json</code>, generado de los límites del dataset, y avisa con «NO EXISTE». Tope de longitud de 6500 caracteres en <code>sugerir_ejemplo_real</code>. Nivel A: 100 %.</td><td><span class="tag hecho">Hecho</span></td></tr>
+      <tr><td class="id">N2</td><td>Tareas mal redactadas por mí: «barrer … entre los valores a, b y c» y «pon en V …» se leían de dos maneras; «red densa 64-32-10» se leía como tres capas densas.</td><td>Base de pruebas</td><td>Redacciones regeneradas con la entrada explícita («entrada de 64 valores, una capa oculta de 32…»). El valor esperado no cambia.</td><td><span class="tag hecho">Hecho</span></td></tr>
+      <tr><td class="id">N3</td><td>El puntuador tomaba como id de la variante el primer id de la observación; cuando <code>variar</code> hacía de barrido ese es el de la base, y daba por mal tres corridas correctas. Era también demasiado estricto con respuestas de una línea, con <code>consultar_estado</code> al inicio y con <code>variar</code> usado como barrido.</td><td>Puntuador</td><td>Corregido y validado con un agente guionista sin modelo: 117 de 117 tareas verificadas y seis modos de prueba, incluidos fallos conocidos.</td><td><span class="tag hecho">Hecho</span></td></tr>
+      <tr><td class="id">N4</td><td>C: tras <code>barrer</code>, el 9B comprobaba los candidatos de uno en uno con <code>verificar_restricciones</code> (de 1 a 8 llamadas) y casi nunca llamaba <code>seleccionar_mejor</code> (1 de 9).</td><td>Herramienta: la observación no decía el paso siguiente</td><td>La tabla de <code>barrer</code> termina con el siguiente paso: <code>seleccionar_mejor</code> para elegir, <code>verificar_restricciones</code> para comprobar uno.</td><td><span class="tag hecho">Hecho</span> 1 de 9 pasa a 9 de 9</td></tr>
+      <tr><td class="id">N5</td><td>En T5, que no tiene restricciones, el 9B alternaba <code>variar</code> y <code>verificar_restricciones</code> de 5 a 10 veces; una corrida llegó al tope de 22 pasos y fue rescatada.</td><td>Herramienta: «compruébalo con verificar_restricciones» incondicional</td><td>La frase de <code>variar</code> ahora es condicional: «si la tarea tiene restricciones, compruébalas…; para elegir entre varios candidatos usa seleccionar_mejor o frente_pareto».</td><td><span class="tag hecho">Hecho</span> 26 llamadas pasan a 0; la nota no cambia</td></tr>
+      <tr><td class="id">N6</td><td>«RESPUESTA: C1» al final de una frase, no en su propia línea: el banco la leía como vacía. Cuatro respuestas correctas sin leer en dev (T2 y T8).</td><td>Formato / lectura del ejecutor</td><td>El ejecutor lee también la última aparición al final de la frase. Re-puntuación sin volver a correr: dev 31 pasa a 34 de 45 con el sistema actual y 34 a 35 con el anterior.</td><td><span class="tag hecho">Hecho</span></td></tr>
+      <tr><td class="id">N7</td><td>El 2B no pasa el nivel B. Hay además tres ayudas que las herramientas no le daban: <code>predecir_recursos</code> ignora en silencio argumentos de perilla, <code>consultar_estado</code> no cuenta los evaluados, <code>sugerir_ejemplo_real</code> sin subgrupo.</td><td>Capacidad del modelo, con tres casos inducidos por herramientas</td><td>Se descarta al 2B para el banco real; las tres ayudas quedan documentadas y sin aplicar.</td><td><span class="tag baja">Documentado</span></td></tr>
+      <tr><td class="id">N8</td><td><code>sugerir_ejemplo_real</code>: el 9B contó mal las capas con peso en 2 de 3 casos Conv («2 capas», eran 3: olvidó la densa final). La observación trae la arquitectura como JSON sin contar las capas.</td><td>Protocolo: falta el recuento (1 repetición)</td><td>Posible línea «capas con peso de este ejemplo: N». No aplicada, porque obligaría a repetir B y C.</td><td><span class="tag baja">Abierto</span></td></tr>
+      <tr><td class="id">N9</td><td>T5 (frente de Pareto con presupuesto de evaluaciones): 5 de 12 y 3 de 12 en dev; 2 de 5 en test. El 9B varía una perilla cada vez, no las combina, y entrega un frente que no está en el real. <code>Conv2D-C-T5</code> falló 6 de 6.</td><td>Capacidad del modelo (búsqueda)</td><td>Ninguna. Se declara capacidad: las herramientas pasan el nivel A, el enunciado es claro y el fallo se repite en 2 o más de 3 repeticiones.</td><td><span class="tag media">Declarado</span></td></tr>
+      <tr><td class="id">N10</td><td>T8 baja de 3 de 3 en dev a 5 de 8 en test. Ver el desglose de abajo.</td><td>Capacidad del modelo (búsqueda), 1 repetición</td><td>Ninguna por ahora. La mejora posible se anota sin aplicar, porque se vio en el test.</td><td><span class="tag media">Hipótesis</span></td></tr>
+      <tr><td class="id">N11</td><td>Ni las herramientas ni el puntaje del banco comprueban el presupuesto de evaluaciones del enunciado: en la primera medición de dev, al menos 7 de las 12 corridas de T5 evaluaron más candidatos que el máximo (hasta 16 frente a 6), y en la segunda 6 de 12.</td><td>Diseño del banco</td><td>Sin cambios; se mide y se reporta aparte.</td><td><span class="tag baja">Abierto</span></td></tr>
+      <tr><td class="id">N12</td><td>El dev no avisó del problema de T8: su única tarea T8 es de las que necesitan un solo cambio, y T1 y T9 no existen en dev.</td><td>Cobertura del conjunto de dev</td><td>Al medir con otro modelo se reportan las dos cifras por separado y por plantilla.</td><td><span class="tag baja">Documentado</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 style="margin-top:28px">T8 por dentro: por qué falló en el test</h3>
+  <p class="sub" style="margin-bottom:12px">T8 pide reparar una configuración que no cumple una restricción cambiando lo mínimo posible, en un espacio cerrado y con un máximo de 6 evaluaciones. El banco guarda cuántos cambios exige como mínimo cada tarea.</p>
+  <div class="tscroll"><table>
+    <thead><tr><th>Cambios mínimos</th><th>Resultado en test</th><th>Tareas</th></tr></thead>
+    <tbody>
+      <tr><td>1 cambio</td><td><b>3 de 3</b></td><td>Conv1D-PA-RB-D3, Conv1D-PB-RB-D1, Conv2D-PB-RA-D1</td></tr>
+      <tr><td>2 o más cambios</td><td><b>2 de 5</b></td><td>Pasan Conv2D-PA-RB-D2 y Conv2D-PA-RA-D3. Fallan Conv1D-PB-RA-D2, Dense-2layer-D2 y Dense-3layer-D3</td></tr>
+    </tbody>
+  </table></div>
+  <div class="two" style="margin-top:16px">
+    <div class="panel">
+      <h3>Conv1D-PB-RA-D2 y Dense-3layer-D3</h3>
+      <ul class="plain">
+        <li>Cambió una perilla cada vez partiendo de la base, y nunca la combinación que hacía falta (en el primer caso nunca tocó los filtros de la capa 1; en el segundo nunca combinó bits con ancho).</li>
+        <li>Superó las 6 evaluaciones permitidas, repitió llamadas y llegó a concluir «no existe configuración válida».</li>
+        <li>Esa conclusión es falsa: el oráculo dice que en el espacio cumplen 4 de 36 y 4 de 80 configuraciones.</li>
+        <li>Las herramientas respondieron bien en cada paso (nivel A 100 %).</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Dense-2layer-D2</h3>
+      <ul class="plain">
+        <li>Llamó cuatro veces idéntico a <code>predecir_recursos</code> sobre el candidato base y el sistema cortó el bucle.</li>
+        <li>La respuesta de rescate fue el texto de ejemplo del formato, <code>RESPUESTA: cnd_xxxxxxxx</code>.</li>
+        <li>No se conoce la causa del bucle: es una sola corrida.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 style="margin-top:28px">Lo que no dice esta cifra</h3>
+  <p class="note">Es un solo modelo local (9B), con <b>una repetición</b> en el test: las diferencias de pocas tareas entran en el ruido entre corridas. El 84,2 % del test sube respecto al dev porque en el test aparecen T1 y T9 (el 9B las resuelve todas); en las plantillas comunes el test sale igual o peor. Nada del sistema se cambió mirando el test. La mejora de <code>verificar_restricciones</code> para combinar perillas está anotada sin aplicar, y si se aplica habrá que validarla con tareas nuevas.</p>
+  <p style="margin-top:14px"><b>Huellas de la corrida de test.</b> Sistema <code>dd9fe84426bd4db2</code> · ejecutor <code>6f6f0f6c526fc785</code> · banco <code>a80b20d62efab9cd</code>. <b>Siguiente.</b> Repetir los mismos niveles con modelos de nube más fuertes (uno barato y uno más fuerte): el 2B queda fuera porque no pasa el nivel B por capacidad, y la hipótesis a contrastar es que T5 y las T8 de dos o más cambios se resuelven con un modelo que combine perillas.</p>
 </section>
 
 <section id="comparacion">
