@@ -310,14 +310,16 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 </section>
 
 <section id="lectura">
-  <h2>Qué se lee de las dos primeras mediciones</h2>
+  <h2>Qué se lee de las tres mediciones</h2>
   <div class="finds">
-    <div class="find"><div class="row"><span class="tag hecho">Resultado</span></div><h4>Un empate en nota, una diferencia enorme en fiabilidad</h4>
-      <p>En el test los dos aciertan casi lo mismo (48 y 49 de 57), y con una repetición esa diferencia es ruido. Lo que sí separa a los modelos: el 9B local tuvo 8 fallos de protocolo y 8 corridas rescatadas en el test, DeepSeek ninguno, y DeepSeek termina el test en 23 minutos frente a 220.</p></div>
-    <div class="find"><div class="row"><span class="tag media">Matiz</span></div><h4>Más parámetros no ganan B</h4>
-      <p>En el nivel B (una sola acción) DeepSeek responde mejor, con el valor correcto en 99 de 99 tareas, pero llama <code>predecir_recursos</code> antes de la herramienta correcta, sobre todo antes de <code>estimar_baseline</code>. Con el criterio estricto del puntuador eso cuenta como fallo de selección (88,9 % frente a 97,0 % del 9B). No es un error de elegir mal; es una preparación de más. Además, el sistema se afinó durante días mirando los fallos del 9B.</p></div>
+    <div class="find"><div class="row"><span class="tag hecho">Resultado</span></div><h4>Tres modelos, casi la misma nota en el test</h4>
+      <p>El 9B local acierta 48 de 57, DeepSeek V4.1 Flash 49 y DeepSeek V4-Pro 48. Con una repetición esas diferencias son ruido. Lo que sí separa a los modelos es la fiabilidad y el tiempo: el 9B tuvo 8 fallos de protocolo y 8 corridas rescatadas en el test (220 min), Flash ninguno (23 min) y V4-Pro 3 y ninguna rescatada (22 min).</p></div>
+    <div class="find"><div class="row"><span class="tag media">Matiz</span></div><h4>Más tamaño no sube la nota</h4>
+      <p>Pasar de 9 mil millones de parámetros a 763 mil millones (Flash) y a 1,65 billones (V4-Pro) no mejora el test. En el nivel B los dos de nube responden bien (valor correcto en casi todas las tareas) pero llaman <code>predecir_recursos</code> antes de <code>estimar_baseline</code> en las 9 tareas, y con el criterio estricto cuenta como fallo de selección: 88,9 % en Flash y 90,9 % en V4-Pro, frente a 97,0 % del 9B. No es elegir mal la herramienta: es una preparación de más. Además, el sistema se afinó durante días mirando los fallos del 9B.</p></div>
     <div class="find"><div class="row"><span class="tag alta">Abierto</span></div><h4>T5 no se resuelve con más tamaño</h4>
-      <p>Las dos plantillas más difíciles de búsqueda son T5 (frente de Pareto) y las T8 que exigen cambiar dos o más perillas. Los dos modelos fallan las mismas tareas de T5: cambian una perilla cada vez, no las combinan, y entregan puntos que no están en el frente real. Un modelo de unos 763 mil millones de parámetros no lo arregla, así que el límite puede estar en cómo el sistema plantea la búsqueda y no solo en el modelo. Hipótesis a contrastar con tareas nuevas de dev, no con el test.</p></div>
+      <p>En el test T5 sale 2 de 5, 2 de 5 y 1 de 5, y en dev 3, 7 y 3 de 12: el modelo más grande es el peor de los tres en T5. Los tres cambian una perilla cada vez, no las combinan y entregan puntos que no están en el frente real. El límite parece estar en cómo el sistema plantea la búsqueda y no solo en el modelo. Hipótesis a contrastar con tareas nuevas de dev, no con el test.</p></div>
+    <div class="find"><div class="row"><span class="tag media">V4-Pro</span></div><h4>Respeta el presupuesto y se rinde</h4>
+      <p>V4-Pro es el único que se detiene al agotar las 6 evaluaciones permitidas. En tres tareas de T3 y T8 que sí tenían solución concluye «no hay candidato» y responde sin id: son sus 3 fallos de protocolo. Los otros modelos ignoran el límite y siguen evaluando. Es el mejor en T8 (7 de 8) y el peor en T5 y en T3 (6 de 8).</p></div>
     <div class="find"><div class="row"><span class="tag baja">Salvedad</span></div><h4>Una repetición en el test</h4>
       <p>El test se corrió una vez por modelo. Las diferencias de pocas tareas no se pueden atribuir al modelo. T1 y T9 no existen en dev, por eso el test y el dev no son comparables entre sí: la mezcla de plantillas es distinta. Nada del sistema se cambió mirando el test.</p></div>
   </div>
@@ -346,7 +348,7 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 <script>
 (function(){
   var D=window.MODELOS_DSE, M=D.modelos;
-  function f1(x){return (Math.round(x*10)/10).toString().replace('.',',');}
+  function f1(x){return (Math.round(x*10)/10).toFixed(1).replace('.',',');}
   function pc(a,b){return b?Math.round(1000*a/b)/10:0;}
   function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;}
   function dot(m){return '<span class="dot" style="background:'+m.color+'"></span>';}
@@ -367,7 +369,7 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
   var th='<thead><tr><th>Modelo</th><th>B</th><th>C</th><th>D dev</th><th>D test</th><th>Test: tiempo</th><th>Test: fallos de protocolo</th><th>Costo</th></tr></thead>';
   var tb='<tbody>'+M.map(function(m){
     var B=m.niveles.B, okB=B.seleccion>=90&&B.argumentos>=90&&B.fidelidad>=90, okC=pc(m.niveles.C.ok,m.niveles.C.n)>=80;
-    var costo=(m.costo_usd===0?'local, 0':'≥ '+String(m.costo_usd).replace('.',',')+' USD');
+    var cu=String(m.costo_usd).replace('.',','), costo=(m.costo_fuente==='local'?'local, 0':(m.costo_fuente==='estimado'?'≈ '+cu+' USD (est.)':cu+' USD (panel)'));
     return '<tr><td>'+dot(m)+'<b>'+m.nombre+'</b><br><span style="color:var(--muted);font-size:12.5px">'+m.donde+'</span></td>'
      +'<td class="num">'+B.ok+'/'+B.n+' · '+f1(pc(B.ok,B.n))+' %<br><span class="tag '+(okB?'hecho':'alta')+'">'+(okB?'pasa':'no pasa')+'</span></td>'
      +'<td class="num">'+m.niveles.C.ok+'/'+m.niveles.C.n+' · '+f1(pc(m.niveles.C.ok,m.niveles.C.n))+' %<br><span class="tag '+(okC?'hecho':'alta')+'">'+(okC?'pasa':'no pasa')+'</span></td>'

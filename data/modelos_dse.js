@@ -1,6 +1,6 @@
 // Generado por banco_dse/base/exportar_web.py. No editar a mano: añade el modelo en modelos_web.json y vuelve a generarlo.
 window.MODELOS_DSE = {
- "generado": "2026-11-11 02:13",
+ "generado": "2026-11-11 09:10",
  "niveles": {
   "A": {
    "n": 1914,
@@ -17,6 +17,7 @@ window.MODELOS_DSE = {
    "color": "#eb6834",
    "nota": "B y C se midieron con el sistema 9f381827617bdb34 (antes del cambio de la frase de variar); las tareas con variar se repitieron con el sistema actual y dieron 9/9 en B y en C. D dev y test, con el sistema actual dd9fe84426bd4db2.",
    "costo_usd": 0,
+   "costo_fuente": "local",
    "costo_nota": "Local: sin costo por token (solo electricidad).",
    "precios_lista_usd_por_millon": null,
    "razonamiento": "apagado (think=false)",
@@ -597,8 +598,9 @@ window.MODELOS_DSE = {
    "donde": "Ollama Cloud (etiqueta :1017) · plan Pro",
    "color": "#2a78d6",
    "nota": "Sistema dd9fe84426bd4db2 en todos los niveles. La nube no informa el tiempo de generación ni de carga. Razonamiento apagado con think=false.",
-   "costo_usd": 0.09,
-   "costo_nota": "Panel de Ollama (Usage), actualizado a 06:46 UTC: 776 peticiones, 3,1 M de entrada, 64,5 K de salida, 0,09 USD. Es parcial: el test seguía en curso; el total esperado es de unas 1 114 peticiones y 4,6 M de tokens de entrada.",
+   "costo_usd": 0.14,
+   "costo_fuente": "panel",
+   "costo_nota": "Panel de Ollama (Usage), 13:10 UTC del 11 nov: 1 114 peticiones, 4,6 M de entrada, 99,4 K de salida, 0,14 USD en total. Las peticiones y los tokens coinciden con nuestro conteo. Corrida fuera de la hora pico.",
    "precios_lista_usd_por_millon": [
     0.14,
     0.28
@@ -1171,6 +1173,591 @@ window.MODELOS_DSE = {
      "rescatadas": 0,
      "excepciones": 0,
      "fallos_protocolo": 1
+    }
+   }
+  },
+  {
+   "id": "deepseek-v4-pro",
+   "nombre": "deepseek-v4-pro",
+   "tipo": "nube",
+   "donde": "Ollama Cloud (etiqueta :0813) · plan Pro",
+   "color": "#6250d6",
+   "nota": "Sistema dd9fe84426bd4db2 en todos los niveles. Razonamiento apagado con think=false. Caché de entrada: 64 % en B, 84 % en C y 90 % en D.",
+   "costo_usd": 1.4,
+   "costo_fuente": "estimado",
+   "costo_nota": "Estimado con los tokens de las 4 corridas y los precios de la ficha de Ollama en hora pico (1,32 de entrada, 0,044 de entrada en caché y 3,96 de salida por millón): B 0,44 + C 0,10 + D dev 0,35 + D test 0,52. A confirmar con el panel de Usage. 1,65 T de parámetros.",
+   "precios_lista_usd_por_millon": [
+    1.32,
+    3.96
+   ],
+   "razonamiento": "apagado (think=false)",
+   "num_ctx": "16384",
+   "num_predict": "2048",
+   "huella_sistema": "dd9fe84426bd4db2",
+   "huella_ejecutor": "6f6f0f6c526fc785",
+   "huella_banco": "a80b20d62efab9cd",
+   "fecha": "2026-11-11",
+   "huellas_sistema_por_nivel": {
+    "B": "dd9fe84426bd4db2",
+    "C": "dd9fe84426bd4db2",
+    "Ddev": "dd9fe84426bd4db2",
+    "Dtest": "dd9fe84426bd4db2"
+   },
+   "niveles": {
+    "B": {
+     "n": 99,
+     "ok": 88,
+     "seleccion": 90.9,
+     "argumentos": 100.0,
+     "fidelidad": 100.0,
+     "valor": 98.0
+    },
+    "C": {
+     "n": 27,
+     "ok": 26
+    },
+    "Ddev": {
+     "n": 45,
+     "ok": 36,
+     "ok_estricto": 36
+    },
+    "Dtest": {
+     "n": 57,
+     "ok": 48,
+     "ok_estricto": 48
+    }
+   },
+   "B_por_herramienta": {
+    "barrer": [
+     9,
+     9
+    ],
+    "variar": [
+     9,
+     9
+    ],
+    "frente_pareto": [
+     9,
+     9
+    ],
+    "consultar_estado": [
+     9,
+     9
+    ],
+    "estimar_baseline": [
+     0,
+     9
+    ],
+    "generar_candidato": [
+     7,
+     9
+    ],
+    "predecir_recursos": [
+     9,
+     9
+    ],
+    "seleccionar_mejor": [
+     9,
+     9
+    ],
+    "sugerir_ejemplo_real": [
+     9,
+     9
+    ],
+    "verificar_restricciones": [
+     9,
+     9
+    ],
+    "verificar_limites_operativos": [
+     9,
+     9
+    ]
+   },
+   "C_por_cadena": {
+    "variar>verificar": [
+     9,
+     9
+    ],
+    "barrer>seleccionar": [
+     8,
+     9
+    ],
+    "predecir>verificar": [
+     9,
+     9
+    ]
+   },
+   "dev_por_plantilla": {
+    "T2": [
+     12,
+     12
+    ],
+    "T3": [
+     3,
+     3
+    ],
+    "T4": [
+     12,
+     12
+    ],
+    "T5": [
+     3,
+     12
+    ],
+    "T8": [
+     3,
+     3
+    ],
+    "T10": [
+     3,
+     3
+    ]
+   },
+   "test_por_plantilla": {
+    "T1": [
+     9,
+     9
+    ],
+    "T2": [
+     5,
+     5
+    ],
+    "T3": [
+     6,
+     8
+    ],
+    "T4": [
+     5,
+     5
+    ],
+    "T5": [
+     1,
+     5
+    ],
+    "T8": [
+     7,
+     8
+    ],
+    "T9": [
+     9,
+     9
+    ],
+    "T10": [
+     6,
+     8
+    ]
+   },
+   "test_tareas": {
+    "Conv1D-conv1d-C-T1-D2": [
+     1,
+     2,
+     8
+    ],
+    "Conv1D-conv1d-C-T2-D1": [
+     1,
+     10,
+     31
+    ],
+    "Conv1D-conv1d-C-T5-D3": [
+     0,
+     5,
+     22
+    ],
+    "Conv1D-conv1d-PA-RA-T1-D1": [
+     1,
+     2,
+     8
+    ],
+    "Conv1D-conv1d-PA-RA-T10-D2": [
+     1,
+     6,
+     23
+    ],
+    "Conv1D-conv1d-PA-RA-T5-D2": [
+     0,
+     5,
+     20
+    ],
+    "Conv1D-conv1d-PA-RA-T9-D3": [
+     1,
+     12,
+     42
+    ],
+    "Conv1D-conv1d-PA-RB-T10-D1": [
+     1,
+     6,
+     26
+    ],
+    "Conv1D-conv1d-PA-RB-T3-D3": [
+     1,
+     9,
+     28
+    ],
+    "Conv1D-conv1d-PA-RB-T5-D1": [
+     1,
+     4,
+     15
+    ],
+    "Conv1D-conv1d-PA-RB-T8-D3": [
+     1,
+     5,
+     16
+    ],
+    "Conv1D-conv1d-PA-RB-T9-D2": [
+     1,
+     12,
+     36
+    ],
+    "Conv1D-conv1d-PB-RA-T2-D3": [
+     1,
+     14,
+     40
+    ],
+    "Conv1D-conv1d-PB-RA-T3-D2": [
+     0,
+     6,
+     27
+    ],
+    "Conv1D-conv1d-PB-RA-T8-D2": [
+     1,
+     10,
+     32
+    ],
+    "Conv1D-conv1d-PB-RA-T9-D1": [
+     1,
+     5,
+     24
+    ],
+    "Conv1D-conv1d-PB-RB-T1-D3": [
+     1,
+     2,
+     9
+    ],
+    "Conv1D-conv1d-PB-RB-T3-D1": [
+     1,
+     5,
+     17
+    ],
+    "Conv1D-conv1d-PB-RB-T8-D1": [
+     1,
+     6,
+     19
+    ],
+    "Conv2D-conv2d-C-T1-D1": [
+     1,
+     2,
+     8
+    ],
+    "Conv2D-conv2d-C-T10-D2": [
+     1,
+     6,
+     25
+    ],
+    "Conv2D-conv2d-C-T4-D3": [
+     1,
+     5,
+     17
+    ],
+    "Conv2D-conv2d-C-T9-D3": [
+     1,
+     9,
+     29
+    ],
+    "Conv2D-conv2d-PA-RA-T10-D1": [
+     1,
+     6,
+     23
+    ],
+    "Conv2D-conv2d-PA-RA-T3-D3": [
+     0,
+     6,
+     28
+    ],
+    "Conv2D-conv2d-PA-RA-T5-D1": [
+     0,
+     3,
+     11
+    ],
+    "Conv2D-conv2d-PA-RA-T8-D3": [
+     0,
+     11,
+     33
+    ],
+    "Conv2D-conv2d-PA-RA-T9-D2": [
+     1,
+     8,
+     24
+    ],
+    "Conv2D-conv2d-PA-RB-T3-D2": [
+     1,
+     6,
+     22
+    ],
+    "Conv2D-conv2d-PA-RB-T4-D1": [
+     1,
+     6,
+     21
+    ],
+    "Conv2D-conv2d-PA-RB-T8-D2": [
+     1,
+     8,
+     25
+    ],
+    "Conv2D-conv2d-PA-RB-T9-D1": [
+     1,
+     4,
+     18
+    ],
+    "Conv2D-conv2d-PB-RA-T1-D3": [
+     1,
+     2,
+     8
+    ],
+    "Conv2D-conv2d-PB-RA-T3-D1": [
+     1,
+     5,
+     16
+    ],
+    "Conv2D-conv2d-PB-RA-T8-D1": [
+     1,
+     5,
+     18
+    ],
+    "Conv2D-conv2d-PB-RB-T1-D2": [
+     1,
+     2,
+     8
+    ],
+    "Conv2D-conv2d-PB-RB-T10-D3": [
+     1,
+     6,
+     23
+    ],
+    "Conv2D-conv2d-PB-RB-T5-D3": [
+     0,
+     3,
+     11
+    ],
+    "Dense-2_20-T1-D1": [
+     1,
+     2,
+     8
+    ],
+    "Dense-2_20-T10-D2": [
+     0,
+     6,
+     26
+    ],
+    "Dense-2_20-T4-D3": [
+     1,
+     7,
+     21
+    ],
+    "Dense-2_20-T9-D3": [
+     1,
+     19,
+     54
+    ],
+    "Dense-2layer-T2-D3": [
+     1,
+     14,
+     39
+    ],
+    "Dense-2layer-T4-D1": [
+     1,
+     6,
+     20
+    ],
+    "Dense-2layer-T8-D2": [
+     1,
+     8,
+     24
+    ],
+    "Dense-2layer-T9-D1": [
+     1,
+     9,
+     32
+    ],
+    "Dense-3layer-T10-D1": [
+     0,
+     6,
+     26
+    ],
+    "Dense-3layer-T3-D3": [
+     1,
+     7,
+     30
+    ],
+    "Dense-3layer-T4-D2": [
+     1,
+     6,
+     20
+    ],
+    "Dense-3layer-T8-D3": [
+     1,
+     10,
+     33
+    ],
+    "Dense-3layer-T9-D2": [
+     1,
+     13,
+     45
+    ],
+    "Dense-latency-T1-D2": [
+     1,
+     2,
+     10
+    ],
+    "Dense-latency-T10-D3": [
+     1,
+     6,
+     25
+    ],
+    "Dense-latency-T2-D1": [
+     1,
+     9,
+     27
+    ],
+    "Dense-resource-T1-D3": [
+     1,
+     2,
+     8
+    ],
+    "Dense-resource-T2-D2": [
+     1,
+     7,
+     23
+    ],
+    "Dense-resource-T3-D1": [
+     1,
+     8,
+     28
+    ]
+   },
+   "test_plantilla_de_tarea": {
+    "Conv1D-conv1d-C-T1-D2": "T1",
+    "Conv1D-conv1d-C-T2-D1": "T2",
+    "Conv1D-conv1d-C-T5-D3": "T5",
+    "Conv1D-conv1d-PA-RA-T1-D1": "T1",
+    "Conv1D-conv1d-PA-RA-T10-D2": "T10",
+    "Conv1D-conv1d-PA-RA-T5-D2": "T5",
+    "Conv1D-conv1d-PA-RA-T9-D3": "T9",
+    "Conv1D-conv1d-PA-RB-T10-D1": "T10",
+    "Conv1D-conv1d-PA-RB-T3-D3": "T3",
+    "Conv1D-conv1d-PA-RB-T5-D1": "T5",
+    "Conv1D-conv1d-PA-RB-T8-D3": "T8",
+    "Conv1D-conv1d-PA-RB-T9-D2": "T9",
+    "Conv1D-conv1d-PB-RA-T2-D3": "T2",
+    "Conv1D-conv1d-PB-RA-T3-D2": "T3",
+    "Conv1D-conv1d-PB-RA-T8-D2": "T8",
+    "Conv1D-conv1d-PB-RA-T9-D1": "T9",
+    "Conv1D-conv1d-PB-RB-T1-D3": "T1",
+    "Conv1D-conv1d-PB-RB-T3-D1": "T3",
+    "Conv1D-conv1d-PB-RB-T8-D1": "T8",
+    "Conv2D-conv2d-C-T1-D1": "T1",
+    "Conv2D-conv2d-C-T10-D2": "T10",
+    "Conv2D-conv2d-C-T4-D3": "T4",
+    "Conv2D-conv2d-C-T9-D3": "T9",
+    "Conv2D-conv2d-PA-RA-T10-D1": "T10",
+    "Conv2D-conv2d-PA-RA-T3-D3": "T3",
+    "Conv2D-conv2d-PA-RA-T5-D1": "T5",
+    "Conv2D-conv2d-PA-RA-T8-D3": "T8",
+    "Conv2D-conv2d-PA-RA-T9-D2": "T9",
+    "Conv2D-conv2d-PA-RB-T3-D2": "T3",
+    "Conv2D-conv2d-PA-RB-T4-D1": "T4",
+    "Conv2D-conv2d-PA-RB-T8-D2": "T8",
+    "Conv2D-conv2d-PA-RB-T9-D1": "T9",
+    "Conv2D-conv2d-PB-RA-T1-D3": "T1",
+    "Conv2D-conv2d-PB-RA-T3-D1": "T3",
+    "Conv2D-conv2d-PB-RA-T8-D1": "T8",
+    "Conv2D-conv2d-PB-RB-T1-D2": "T1",
+    "Conv2D-conv2d-PB-RB-T10-D3": "T10",
+    "Conv2D-conv2d-PB-RB-T5-D3": "T5",
+    "Dense-2_20-T1-D1": "T1",
+    "Dense-2_20-T10-D2": "T10",
+    "Dense-2_20-T4-D3": "T4",
+    "Dense-2_20-T9-D3": "T9",
+    "Dense-2layer-T2-D3": "T2",
+    "Dense-2layer-T4-D1": "T4",
+    "Dense-2layer-T8-D2": "T8",
+    "Dense-2layer-T9-D1": "T9",
+    "Dense-3layer-T10-D1": "T10",
+    "Dense-3layer-T3-D3": "T3",
+    "Dense-3layer-T4-D2": "T4",
+    "Dense-3layer-T8-D3": "T8",
+    "Dense-3layer-T9-D2": "T9",
+    "Dense-latency-T1-D2": "T1",
+    "Dense-latency-T10-D3": "T10",
+    "Dense-latency-T2-D1": "T2",
+    "Dense-resource-T1-D3": "T1",
+    "Dense-resource-T2-D2": "T2",
+    "Dense-resource-T3-D1": "T3"
+   },
+   "consumo": {
+    "B": {
+     "corridas": 99,
+     "tokens_entrada": 742161,
+     "tokens_salida": 15482,
+     "tokens_cacheados": 472803,
+     "llamadas": 223,
+     "minutos": 10.6,
+     "segundos_medios": 6.4,
+     "pasos_medios": 1.2,
+     "rescatadas": 0,
+     "excepciones": 0,
+     "fallos_protocolo": 0
+    },
+    "C": {
+     "corridas": 27,
+     "tokens_entrada": 297278,
+     "tokens_salida": 5460,
+     "tokens_cacheados": 248984,
+     "llamadas": 86,
+     "minutos": 4.3,
+     "segundos_medios": 9.7,
+     "pasos_medios": 2.2,
+     "rescatadas": 0,
+     "excepciones": 0,
+     "fallos_protocolo": 0
+    },
+    "Ddev": {
+     "corridas": 45,
+     "tokens_entrada": 1527429,
+     "tokens_salida": 28167,
+     "tokens_cacheados": 1395304,
+     "llamadas": 350,
+     "minutos": 17.5,
+     "segundos_medios": 23.4,
+     "pasos_medios": 6.7,
+     "rescatadas": 0,
+     "excepciones": 0,
+     "fallos_protocolo": 0
+    },
+    "Dtest": {
+     "corridas": 57,
+     "tokens_entrada": 1964602,
+     "tokens_salida": 45139,
+     "tokens_cacheados": 1765825,
+     "llamadas": 441,
+     "minutos": 21.9,
+     "segundos_medios": 23.0,
+     "pasos_medios": 6.6,
+     "rescatadas": 0,
+     "excepciones": 0,
+     "fallos_protocolo": 3
+    },
+    "total": {
+     "corridas": 228,
+     "tokens_entrada": 4531470,
+     "tokens_salida": 94248,
+     "tokens_cacheados": 3882916,
+     "llamadas": 1100,
+     "minutos": 54.3,
+     "segundos_medios": 14.3,
+     "pasos_medios": 3.7,
+     "rescatadas": 0,
+     "excepciones": 0,
+     "fallos_protocolo": 3
     }
    }
   }
