@@ -201,5 +201,21 @@ window.RESULTADOS = {
         ["15", "unidades parejas"],
       ],
     },
+    {
+      grupo: "agente",
+      archivo: "paginas/11-comparacion-modelos-dse.html",
+      seccion: "agente",
+      sub: "banco",
+      titulo: "Banco de pruebas DSE · Comparación de modelos",
+      resumen:
+        "El mismo sistema y el mismo banco con un modelo distinto cada vez: qwen3.5:9b local y DeepSeek V4.1 Flash en la nube, nivel por nivel (B, C, D dev y D test), por plantilla y tarea por tarea, con tokens, tiempo y costo. La página se dibuja sola desde data/modelos_dse.js.",
+      fecha: "2026-11-11",
+      etiqueta: "Comparación",
+      cifras: [
+        ["86,0 %", "test del mejor modelo (57 tareas)"],
+        ["2", "modelos medidos"],
+        ["0", "fallos de protocolo de DeepSeek en el test"],
+      ],
+    },
   ],
 };

@@ -1,0 +1,415 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}</style></head><body><!-- tr-nav --><script src="../data/secciones.js"></script><script src="../data/notebooks.js"></script><script src="../data/resultados.js"></script><script src="../assets/shell.js"></script><script src="../assets/nav.js"></script><title>Comparación de modelos · Banco DSE</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: artículo técnico de una columna ancha, con bloques de plano (rejilla fina, etiquetas en mono) y una calculadora de puntaje en el centro. */
+:root{
+  --bg:#F2F5F7; --surface:#FFFFFF; --ink:#12202B; --muted:#52636E; --line:#D3DCE2;
+  --accent:#0B6E8E; --accent-soft:#DCEEF4;
+  --good:#2B7A4B; --good-soft:#E0F0E6;
+  --bad:#B03E2D; --bad-soft:#F6E3DF;
+  --warn:#8F6200; --warn-soft:#F7ECCB;
+  --grid:rgba(18,32,43,.045);
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D161C; --surface:#15212A; --ink:#E5EDF2; --muted:#9BAEB9; --line:#2A3A45;
+    --accent:#5DC1DF; --accent-soft:#12313D;
+    --good:#6FCB91; --good-soft:#14301F;
+    --bad:#F18C7A; --bad-soft:#3A1F1A;
+    --warn:#E2B545; --warn-soft:#33290F;
+    --grid:rgba(229,237,242,.05);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D161C; --surface:#15212A; --ink:#E5EDF2; --muted:#9BAEB9; --line:#2A3A45;
+  --accent:#5DC1DF; --accent-soft:#12313D;
+  --good:#6FCB91; --good-soft:#14301F;
+  --bad:#F18C7A; --bad-soft:#3A1F1A;
+  --warn:#E2B545; --warn-soft:#33290F;
+  --grid:rgba(229,237,242,.05);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:16px/1.6 var(--f-body);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:32px 32px;
+  padding-block:0 64px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.wrap{max-width:1040px;margin:0 auto}
+header.top{padding-block:40px 24px}
+.kicker{font:500 12px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font:800 clamp(34px,6vw,60px)/1.02 var(--f-display);letter-spacing:-.02em;margin:0 0 16px;text-wrap:balance}
+.lede{font-size:18px;max-width:62ch;color:var(--muted);margin:0 0 18px}
+.stamp{display:inline-flex;flex-wrap:wrap;gap:8px;font:400 12px/1.3 var(--f-mono);color:var(--muted)}
+.stamp span{border:1px solid var(--line);background:var(--surface);padding:4px 8px;border-radius:4px}
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-block:1px solid var(--line);margin-bottom:8px}
+nav.toc ul{list-style:none;margin:0;padding:0;display:flex;gap:4px;overflow-x:auto}
+nav.toc a{display:block;padding:11px 12px;font:500 13px/1 var(--f-mono);color:var(--muted);text-decoration:none;white-space:nowrap;border-bottom:2px solid transparent}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--accent);border-bottom-color:var(--accent);outline:none}
+section{padding-block:44px 8px}
+h2{font:700 clamp(24px,3.4vw,34px)/1.1 var(--f-display);letter-spacing:-.01em;margin:0 0 8px;text-wrap:balance}
+.sub{color:var(--muted);max-width:68ch;margin:0 0 24px}
+h3{font:700 18px/1.25 var(--f-display);margin:0 0 6px}
+p{margin:0 0 12px;max-width:70ch}
+code,.mono{font-family:var(--f-mono);font-size:.88em}
+code{background:var(--accent-soft);padding:1px 5px;border-radius:3px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px}
+.tag{display:inline-block;font:500 11px/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;padding:4px 7px;border-radius:3px;border:1px solid currentColor}
+.tag.alta{color:var(--bad)} .tag.media{color:var(--warn)} .tag.baja{color:var(--muted)} .tag.hecho{color:var(--good)} .tag.prep{color:var(--accent)} .tag.sis{color:var(--warn)}
+.tag.cmp{color:var(--accent)}
+
+/* Fases */
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:0;counter-reset:s}
+.steps li{display:grid;grid-template-columns:56px 1fr;gap:16px;padding:18px 0;border-top:1px solid var(--line);position:relative}
+.steps li:last-child{border-bottom:1px solid var(--line)}
+.steps .n{font:700 28px/1 var(--f-display);color:var(--accent)}
+.steps .n small{display:block;font:400 11px/1.2 var(--f-mono);color:var(--muted);margin-top:6px;letter-spacing:.04em}
+.steps p{margin:0 0 6px}
+.steps .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pill{font:400 12px/1 var(--f-mono);padding:5px 8px;border-radius:3px;background:var(--accent-soft);color:var(--ink)}
+.pill.gpu{background:var(--warn-soft)}
+.pill.nogpu{background:var(--good-soft)}
+
+/* Flujo de herramientas */
+.flow{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin:6px 0 0}
+.node{flex:1 1 150px;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:12px 14px;position:relative}
+.node b{display:block;font:500 13px/1.2 var(--f-mono);color:var(--accent);margin-bottom:4px}
+.node span{font-size:14px;color:var(--muted);display:block}
+.node.new{border-style:dashed;border-color:var(--warn)}
+.node.new b{color:var(--warn)}
+.node .arrow{display:none}
+@media(min-width:900px){
+  .node:not(:last-child)::after{content:"→";position:absolute;right:-17px;top:50%;transform:translateY(-50%);font:500 18px var(--f-mono);color:var(--muted);z-index:2}
+  .flow{gap:20px}
+}
+
+/* Tablas */
+.tscroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:14.5px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 11.5px/1.2 var(--f-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+td.id{font:500 13px var(--f-mono);color:var(--accent);white-space:nowrap}
+.dots{display:inline-flex;gap:4px;vertical-align:middle}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.dots i.o{background:transparent;border:1.5px solid var(--line)}
+
+/* Dos columnas */
+.two{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:820px){.two{grid-template-columns:1fr 1fr}}
+pre{margin:0;padding:16px;background:var(--bg);border:1px solid var(--line);border-radius:6px;overflow-x:auto;font:400 13px/1.55 var(--f-mono);color:var(--ink)}
+
+/* Calculadora */
+.calc{display:grid;grid-template-columns:1fr;gap:20px}
+@media(min-width:860px){.calc{grid-template-columns:1.05fr .95fr;gap:28px}}
+.ctl{margin-bottom:16px}
+.ctl label{display:flex;justify-content:space-between;gap:12px;font:500 13px/1.3 var(--f-mono);margin-bottom:6px}
+.ctl label output{color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.out{display:grid;gap:12px;align-content:start}
+.read{border:1px solid var(--line);border-radius:6px;padding:14px 16px;background:var(--bg)}
+.read .k{font:400 11.5px/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.read .v{font:800 34px/1.1 var(--f-display);margin-top:4px;font-variant-numeric:tabular-nums}
+.read .h{font-size:13.5px;color:var(--muted);margin-top:4px}
+.read.hot{border-color:var(--accent);background:var(--accent-soft)}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:8px}
+.bar>i{display:block;height:100%;background:var(--accent);width:0;transition:width .2s}
+@media(prefers-reduced-motion:reduce){.bar>i{transition:none}html{scroll-behavior:auto}}
+
+/* En concreto */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px}
+.stat b{display:block;font:800 40px/1 var(--f-display);color:var(--accent);font-variant-numeric:tabular-nums}
+.stat span{display:block;margin-top:6px;font-size:14px;color:var(--muted)}
+.formula{font:500 14px/1.6 var(--f-mono);margin:0 0 20px;max-width:none}
+.seg{display:inline-flex;flex-wrap:wrap;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:14px}
+.seg button{font:500 13px/1 var(--f-mono);padding:10px 16px;border:0;background:var(--surface);color:var(--ink);cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--bg)}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.u0{background:var(--accent-soft)} .u1{background:var(--good-soft)} .u2{background:var(--warn-soft)} .u3{background:var(--bad-soft)} .u4{background:var(--bg);box-shadow:inset 0 0 0 1px var(--line)}
+td.cell{font:500 12.5px/1.3 var(--f-mono);text-align:center;white-space:nowrap}
+.ugrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:14px}
+.ucard{border-radius:6px;padding:10px 12px;min-width:0}
+.ucard b{display:block;font:500 13px/1.3 var(--f-mono);margin-bottom:6px}
+.ucard span{display:inline-block;font:400 11.5px/1 var(--f-mono);background:var(--surface);border-radius:3px;padding:4px 6px;margin:0 4px 4px 0}
+
+/* Mapa de muestras */
+.legend{display:flex;flex-wrap:wrap;gap:14px;font:400 12.5px/1.3 var(--f-mono);color:var(--muted);margin:0 0 14px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:6px;border:1px solid var(--line)}
+.legend i.d1,.sq.d1{background:var(--good-soft)} .legend i.d2,.sq.d2{background:var(--warn-soft)} .legend i.d3,.sq.d3{background:var(--bad-soft)}
+.legend i.dev{background:transparent;border:2px dashed var(--ink)}
+.fam{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px;margin-bottom:12px}
+.fam h4{font:700 18px/1.2 var(--f-display);margin:0 0 12px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.fam h4 small{font:400 12px var(--f-mono);color:var(--muted)}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(262px,1fr));gap:10px}
+.ubox{border:1px solid var(--line);border-radius:6px;padding:10px;min-width:0}
+.ubox b{display:block;font:500 12.5px/1.3 var(--f-mono);margin-bottom:8px}
+.sqs{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
+.sq{font:500 12px/1.1 var(--f-mono);color:var(--ink);padding:8px 0;border:1px solid var(--line);border-radius:4px;cursor:pointer;text-align:center;min-width:0}
+.sq.dev{border:2px dashed var(--ink)}
+.sq:hover,.sq:focus-visible,.sq[aria-pressed="true"]{outline:2px solid var(--accent);outline-offset:1px}
+.sqinfo{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;border-radius:0 6px 6px 0;font-size:15px;min-height:70px}
+.sqinfo b{font-weight:600}
+.anat .node span{font-size:13.5px}
+
+/* Reparto por unidades */
+.units{display:grid;gap:10px}
+.urow{display:grid;grid-template-columns:1fr;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px}
+@media(min-width:820px){.urow{grid-template-columns:130px 1fr;align-items:center}}
+.ulab{font:700 17px/1.2 var(--f-display)}
+.ulab small{display:block;font:400 11.5px var(--f-mono);color:var(--muted);margin-top:2px}
+.ucells{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px}
+.ucell{background:var(--accent-soft);border-radius:4px;padding:8px 10px;min-width:0}
+.ucell b{display:block;font:500 12px/1.3 var(--f-mono);overflow-wrap:anywhere}
+.ucell span{font:800 22px/1.2 var(--f-display);font-variant-numeric:tabular-nums}
+
+/* Sugerencias */
+.cols{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:960px){.cols{grid-template-columns:repeat(3,1fr)}}
+.col{background:var(--surface);border:1px solid var(--line);border-radius:6px;border-top-width:4px;padding:18px 18px 6px;min-width:0}
+.col.mej{border-top-color:var(--accent)} .col.qui{border-top-color:var(--bad)} .col.pon{border-top-color:var(--good)}
+.col h3{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.col h3 small{font:400 12px var(--f-mono);color:var(--muted)}
+.item{padding:14px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0}
+.item b{display:block;font-weight:600;margin-bottom:4px}
+.item p{font-size:14.5px;color:var(--muted);margin:0 0 8px}
+.item .row{display:flex;flex-wrap:wrap;gap:6px}
+
+.note{border-left:4px solid var(--warn);background:var(--warn-soft);padding:12px 16px;border-radius:0 6px 6px 0;max-width:78ch;font-size:15px}
+.note.ok{border-left-color:var(--good);background:var(--good-soft)}
+ul.plain{margin:0;padding-left:20px;max-width:70ch}
+ul.plain li{margin-bottom:6px}
+.qs{counter-reset:q;list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.qs li{counter-increment:q;display:grid;grid-template-columns:34px 1fr;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px}
+.qs li::before{content:"Q" counter(q);font:500 13px/1.6 var(--f-mono);color:var(--accent)}
+.qs b{font-weight:600}
+.qs span{display:block;color:var(--muted);font-size:14.5px}
+footer{padding-top:40px;font:400 12.5px/1.6 var(--f-mono);color:var(--muted)}
+a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Pilotos con modelos locales */
+.pl-note{font-size:12.5px;color:var(--muted);margin-top:10px}
+h2.blk{padding-top:8px;border-top:1px solid var(--line)}
+.tbars{display:grid;gap:8px}
+.trow{display:grid;grid-template-columns:96px 1fr 52px;gap:10px;align-items:center}
+.tl{font:500 12.5px/1.2 var(--f-mono);color:var(--ink)}
+.tv{font:500 12.5px/1.2 var(--f-mono);color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.tt{--m1:30%;--m2:43.9%;--m3:90%;display:block;position:relative;height:22px;border-radius:3px;background-color:var(--bg);
+  background-image:linear-gradient(var(--warn),var(--warn)),linear-gradient(var(--ink),var(--ink)),linear-gradient(var(--bad),var(--bad));
+  background-size:1px 100%,1px 100%,1px 100%;background-position:var(--m1) 0,var(--m2) 0,var(--m3) 0;background-repeat:no-repeat}
+.tt.m2{--m1:75%;--m2:38%;--m3:-10%}
+.tt.nom{background-image:none}
+.tbars.w .trow{grid-template-columns:96px 1fr 64px}
+.tbars.w .tl{font-size:12px}
+.cmpm{min-width:980px}
+.cmpm td{font-size:13.5px;vertical-align:top}
+.cmpm td .tag{display:inline-block;margin-bottom:4px}
+.tt i{display:block;height:100%;background:var(--accent);border-radius:3px;opacity:.85}
+.tt i.cut{background:var(--bad)}
+.blegend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:14px;font:400 12.5px/1.3 var(--f-mono);color:var(--muted)}
+.blegend span{display:inline-flex;align-items:center;gap:6px}
+.blegend i{display:inline-block;width:12px;height:12px;border-radius:2px}
+.blegend i.l300{background:var(--warn)} .blegend i.l439{background:var(--ink)} .blegend i.l900{background:var(--bad)}
+.blegend i.cutsw{background:var(--bad);opacity:.85}
+table.reg{min-width:900px}
+table.reg td{font-size:14px}
+.finds{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:900px){.finds{grid-template-columns:1fr 1fr}}
+.find{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px 18px;min-width:0}
+.find .row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.find h4{font:700 17px/1.25 var(--f-display);margin:0 0 6px}
+.find p{font-size:14.5px;color:var(--muted);margin:0}
+.find ul.plain{font-size:14.5px;color:var(--muted)}
+</style>
+<style>
+.mrow{display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:start;padding:7px 0;border-bottom:1px solid var(--line)}
+.mrow:last-child{border-bottom:0}
+.mrow .tl{padding-top:3px}
+.mbars{display:grid;gap:5px}
+.mb{display:grid;grid-template-columns:1fr 128px;gap:10px;align-items:center}
+.mb .track{height:16px;background:var(--bg);border-radius:3px;overflow:hidden;border:1px solid var(--line)}
+.mb .track i{display:block;height:100%;border-radius:2px;opacity:.9}
+.mb .val{font:500 12.5px/1.2 var(--f-mono);color:var(--muted);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.dot{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+.leyenda{display:flex;flex-wrap:wrap;gap:8px 18px;font:400 12.5px/1.3 var(--f-mono);color:var(--muted);margin:0 0 12px}
+.tgrid{display:flex;flex-wrap:wrap;gap:16px 12px}
+.tgrid .gp .gt{font:500 12px/1 var(--f-mono);color:var(--muted);margin-bottom:5px}
+.tgrid .gp .gf{display:flex;gap:3px}
+.tgrid .tk{display:flex;flex-direction:column;gap:3px}
+.tgrid .sq{display:block;width:14px;height:14px;border-radius:3px;box-sizing:border-box;border:1.5px solid}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <p class="kicker">Tesis · Capa 4 · Evaluación del sistema completo</p>
+  <h1>Comparación de modelos en el banco DSE</h1>
+  <p class="lede">El mismo sistema, el mismo banco y la misma configuración, con un modelo distinto cada vez. Esta página se dibuja sola a partir de <code>data/modelos_dse.js</code>: cada modelo medido añade una fila y una barra, y todo lo que se ve sale de los archivos de resultados, con las huellas del sistema, del ejecutor y del banco.</p>
+  <div class="stamp" id="sello"></div>
+</header>
+
+<nav class="toc" aria-label="Secciones">
+  <ul>
+    <li><a href="#resumen">Resumen</a></li>
+    <li><a href="#niveles">Por nivel</a></li>
+    <li><a href="#plantillas">Por plantilla</a></li>
+    <li><a href="#tareas">Tarea por tarea</a></li>
+    <li><a href="#consumo">Consumo y costo</a></li>
+    <li><a href="#lectura">Qué se lee</a></li>
+    <li><a href="#agregar">Añadir un modelo</a></li>
+  </ul>
+</nav>
+
+<section id="resumen">
+  <h2>Resumen</h2>
+  <p class="sub">Un nivel por columna: B es una sola acción con el LLM (99 tareas), C son dos herramientas encadenadas (27), D son las tareas reales del banco, con 15 tareas de dev (3 repeticiones) y 57 de test (1 repetición). El nivel A, que son las herramientas solas contra el oráculo sin LLM, da 1914 de 1914 y no depende del modelo.</p>
+  <div class="stats" id="stats"></div>
+  <div class="tscroll" style="margin-top:16px"><table id="tabla-resumen"></table></div>
+</section>
+
+<section id="niveles">
+  <h2>Por nivel</h2>
+  <p class="sub">Porcentaje de tareas correctas. Los umbrales del banco son 90 % en selección, argumentos y fidelidad para B y 80 % de correctas para C; D no tiene umbral.</p>
+  <div class="panel"><div class="leyenda" id="ley1"></div><div id="g-niveles"></div></div>
+</section>
+
+<section id="plantillas">
+  <h2>Por plantilla</h2>
+  <p class="sub">Qué mide cada plantilla: T1 leer un valor, T2 elegir entre candidatos, T3 el mejor que cumple, T4 una curva, T5 un frente de Pareto, T8 reparar una configuración, T9 un caso imposible, T10 una trampa de dominio. T1 y T9 no están en dev.</p>
+  <h3 style="margin-top:8px">Test (57 tareas, 1 repetición)</h3>
+  <div class="panel"><div class="leyenda" id="ley2"></div><div id="g-test"></div></div>
+  <h3 style="margin-top:28px">Dev (15 tareas × 3 repeticiones)</h3>
+  <div class="panel"><div id="g-dev"></div></div>
+</section>
+
+<section id="tareas">
+  <h2>Tarea por tarea (test)</h2>
+  <p class="sub">Cada tarea es una columna con un cuadro por modelo, en el mismo orden que la leyenda. Relleno = acierta, vacío = falla. Pasa el ratón para ver el nombre.</p>
+  <div class="panel"><div class="leyenda" id="ley3"></div><div class="tgrid" id="grid"></div><p class="pl-note" id="grid-resumen"></p></div>
+</section>
+
+<section id="consumo">
+  <h2>Consumo y costo</h2>
+  <p class="sub">Tokens, llamadas y tiempo sumando B, C, D dev y D test. Los modelos de nube no informan el tiempo de generación, así que el tiempo es el de reloj por tarea y no es comparable con el de una GPU concreta.</p>
+  <div class="tscroll"><table id="tabla-consumo"></table></div>
+  <p id="notas-costo" style="margin-top:14px"></p>
+</section>
+
+<section id="lectura">
+  <h2>Qué se lee de las dos primeras mediciones</h2>
+  <div class="finds">
+    <div class="find"><div class="row"><span class="tag hecho">Resultado</span></div><h4>Un empate en nota, una diferencia enorme en fiabilidad</h4>
+      <p>En el test los dos aciertan casi lo mismo (48 y 49 de 57), y con una repetición esa diferencia es ruido. Lo que sí separa a los modelos: el 9B local tuvo 8 fallos de protocolo y 8 corridas rescatadas en el test, DeepSeek ninguno, y DeepSeek termina el test en 23 minutos frente a 220.</p></div>
+    <div class="find"><div class="row"><span class="tag media">Matiz</span></div><h4>Más parámetros no ganan B</h4>
+      <p>En el nivel B (una sola acción) DeepSeek responde mejor, con el valor correcto en 99 de 99 tareas, pero llama <code>predecir_recursos</code> antes de la herramienta correcta, sobre todo antes de <code>estimar_baseline</code>. Con el criterio estricto del puntuador eso cuenta como fallo de selección (88,9 % frente a 97,0 % del 9B). No es un error de elegir mal; es una preparación de más. Además, el sistema se afinó durante días mirando los fallos del 9B.</p></div>
+    <div class="find"><div class="row"><span class="tag alta">Abierto</span></div><h4>T5 no se resuelve con más tamaño</h4>
+      <p>Las dos plantillas más difíciles de búsqueda son T5 (frente de Pareto) y las T8 que exigen cambiar dos o más perillas. Los dos modelos fallan las mismas tareas de T5: cambian una perilla cada vez, no las combinan, y entregan puntos que no están en el frente real. Un modelo de unos 763 mil millones de parámetros no lo arregla, así que el límite puede estar en cómo el sistema plantea la búsqueda y no solo en el modelo. Hipótesis a contrastar con tareas nuevas de dev, no con el test.</p></div>
+    <div class="find"><div class="row"><span class="tag baja">Salvedad</span></div><h4>Una repetición en el test</h4>
+      <p>El test se corrió una vez por modelo. Las diferencias de pocas tareas no se pueden atribuir al modelo. T1 y T9 no existen en dev, por eso el test y el dev no son comparables entre sí: la mezcla de plantillas es distinta. Nada del sistema se cambió mirando el test.</p></div>
+  </div>
+</section>
+
+<section id="agregar">
+  <h2>Añadir un modelo</h2>
+  <div class="panel">
+    <ol style="margin:0;padding-left:22px">
+      <li>Correr los cuatro niveles con el modelo (los comandos están en la bitácora del proyecto): <code>correr_base.py</code> para B y C, y <code>correr_modelos.py</code> con <code>--conjunto dev --reps 3</code> y <code>--conjunto test</code> para D. Mismas opciones que los demás: <code>--num-ctx 16384 --num-predict 2048 --razonamiento apagado --arquitectura-json</code>.</li>
+      <li>Añadir una entrada a <code>banco_dse/base/modelos_web.json</code> con los cuatro archivos de resultados, el color y, si hay, el costo real del panel del proveedor.</li>
+      <li>Correr <code>python -m banco_dse.base.exportar_web</code>, que escribe <code>banco_dse/resultados/web/modelos_dse.js</code>.</li>
+      <li>Copiar ese archivo a <code>data/modelos_dse.js</code> de este repositorio y publicar. La página lo lee entera: no hay que tocar el HTML.</li>
+    </ol>
+    <p class="pl-note">Regla de comparación: mismo sistema (misma huella), mismo banco, mismo contexto y razonamiento apagado. Si un modelo de nube no deja apagar el razonamiento o no informa los tokens, se anota como condición distinta y no se compara de forma directa.</p>
+  </div>
+</section>
+
+<footer>
+  <div>Banco DSE · comparación de modelos. Datos de <span>banco_dse/resultados/</span>, generados con <span>banco_dse/base/exportar_web.py</span>.</div>
+  <div>Detalle por corrida, trazas y huellas: <span>banco_dse/resultados/BITACORA.md</span></div>
+</footer>
+</div>
+
+<script src="../data/modelos_dse.js"></script>
+<script>
+(function(){
+  var D=window.MODELOS_DSE, M=D.modelos;
+  function f1(x){return (Math.round(x*10)/10).toString().replace('.',',');}
+  function pc(a,b){return b?Math.round(1000*a/b)/10:0;}
+  function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;}
+  function dot(m){return '<span class="dot" style="background:'+m.color+'"></span>';}
+  function mil(n){return Math.round(n).toLocaleString('es');}
+  function ley(id){var e=document.getElementById(id);e.innerHTML=M.map(function(m){return '<span>'+dot(m)+m.nombre+' <span style="opacity:.7">('+m.tipo+')</span></span>';}).join('');}
+  ['ley1','ley2','ley3'].forEach(ley);
+
+  var sello=document.getElementById('sello');
+  var huellas={};M.forEach(function(m){huellas[m.huella_sistema]=1;});
+  sello.innerHTML='<span>'+M.length+' modelos medidos</span><span>Sistema '+Object.keys(huellas).join(' · ')+'</span><span>Banco '+(M[0].huella_banco||'')+'</span><span>Generado '+D.generado+'</span>';
+
+  var mejor=M.slice().sort(function(a,b){return pc(b.niveles.Dtest.ok,b.niveles.Dtest.n)-pc(a.niveles.Dtest.ok,a.niveles.Dtest.n);})[0];
+  var rapido=M.slice().sort(function(a,b){return a.consumo.Dtest.minutos-b.consumo.Dtest.minutos;})[0];
+  var st=document.getElementById('stats');
+  [[M.length,'modelos medidos'],[f1(pc(mejor.niveles.Dtest.ok,mejor.niveles.Dtest.n))+' %','mejor test: '+mejor.nombre],[Math.round(rapido.consumo.Dtest.minutos)+' min','test más rápido: '+rapido.nombre],[mil(M.reduce(function(s,m){return s+m.consumo.total.llamadas;},0)),'llamadas al LLM registradas']].forEach(function(x){st.appendChild(el('div','stat','<b>'+x[0]+'</b><span>'+x[1]+'</span>'));});
+
+  function celda(n){return '<td class="num">'+n.ok+'/'+n.n+' · '+f1(pc(n.ok,n.n))+' %</td>';}
+  var th='<thead><tr><th>Modelo</th><th>B</th><th>C</th><th>D dev</th><th>D test</th><th>Test: tiempo</th><th>Test: fallos de protocolo</th><th>Costo</th></tr></thead>';
+  var tb='<tbody>'+M.map(function(m){
+    var B=m.niveles.B, okB=B.seleccion>=90&&B.argumentos>=90&&B.fidelidad>=90, okC=pc(m.niveles.C.ok,m.niveles.C.n)>=80;
+    var costo=(m.costo_usd===0?'local, 0':'≥ '+String(m.costo_usd).replace('.',',')+' USD');
+    return '<tr><td>'+dot(m)+'<b>'+m.nombre+'</b><br><span style="color:var(--muted);font-size:12.5px">'+m.donde+'</span></td>'
+     +'<td class="num">'+B.ok+'/'+B.n+' · '+f1(pc(B.ok,B.n))+' %<br><span class="tag '+(okB?'hecho':'alta')+'">'+(okB?'pasa':'no pasa')+'</span></td>'
+     +'<td class="num">'+m.niveles.C.ok+'/'+m.niveles.C.n+' · '+f1(pc(m.niveles.C.ok,m.niveles.C.n))+' %<br><span class="tag '+(okC?'hecho':'alta')+'">'+(okC?'pasa':'no pasa')+'</span></td>'
+     +celda(m.niveles.Ddev)+celda(m.niveles.Dtest)
+     +'<td class="num">'+f1(m.consumo.Dtest.minutos)+' min</td><td class="num">'+m.consumo.Dtest.fallos_protocolo+' (rescatadas '+m.consumo.Dtest.rescatadas+')</td><td class="num">'+costo+'</td></tr>';
+  }).join('')+'</tbody>';
+  document.getElementById('tabla-resumen').innerHTML=th+tb;
+
+  function barra(m,ok,n){var p=pc(ok,n);return '<div class="mb"><div class="track" title="'+m.nombre+'"><i style="width:'+p+'%;background:'+m.color+'"></i></div><div class="val">'+ok+'/'+n+' · '+f1(p)+' %</div></div>';}
+  var niv=[['B · una acción',function(m){return [m.niveles.B.ok,m.niveles.B.n];}],['C · dos herramientas',function(m){return [m.niveles.C.ok,m.niveles.C.n];}],['D dev · 3 reps',function(m){return [m.niveles.Ddev.ok,m.niveles.Ddev.n];}],['D test · 1 rep',function(m){return [m.niveles.Dtest.ok,m.niveles.Dtest.n];}]];
+  document.getElementById('g-niveles').innerHTML=niv.map(function(x){return '<div class="mrow"><div class="tl">'+x[0]+'</div><div class="mbars">'+M.map(function(m){var v=x[1](m);return barra(m,v[0],v[1]);}).join('')+'</div></div>';}).join('');
+
+  function porPlantilla(id,clave){
+    var set={};M.forEach(function(m){Object.keys(m[clave]).forEach(function(k){set[k]=1;});});
+    var ks=Object.keys(set).sort(function(a,b){return parseInt(a.slice(1))-parseInt(b.slice(1));});
+    document.getElementById(id).innerHTML=ks.map(function(k){return '<div class="mrow"><div class="tl">'+k+'</div><div class="mbars">'+M.map(function(m){var v=m[clave][k];return v?barra(m,v[0],v[1]):'<div class="mb"><div class="track"></div><div class="val">sin dato</div></div>';}).join('')+'</div></div>';}).join('');
+  }
+  porPlantilla('g-test','test_por_plantilla');porPlantilla('g-dev','dev_por_plantilla');
+
+  var tareas={},plan={};
+  M.forEach(function(m){Object.keys(m.test_tareas).forEach(function(t){tareas[t]=1;plan[t]=m.test_plantilla_de_tarea[t];});});
+  var ord=Object.keys(tareas).sort(function(a,b){var d=parseInt(plan[a].slice(1))-parseInt(plan[b].slice(1));return d||(a<b?-1:1);});
+  var grupos={};ord.forEach(function(t){(grupos[plan[t]]=grupos[plan[t]]||[]).push(t);});
+  var g=document.getElementById('grid'),todos=0,ninguno=0,mixto=0;
+  Object.keys(grupos).forEach(function(k){
+    var gp=el('div','gp'),fila=el('div','gf');gp.appendChild(el('div','gt',k));
+    grupos[k].forEach(function(t){
+      var col=el('div','tk'),aciertos=0,desc=[];
+      M.forEach(function(m){var v=m.test_tareas[t],ok=v&&v[0]===1;if(ok)aciertos++;desc.push(m.nombre+(ok?' acierta':' falla'));
+        var s=el('span','sq');s.style.borderColor=m.color;s.style.background=ok?m.color:'transparent';col.appendChild(s);});
+      col.title=t+' · '+desc.join(' · ');
+      if(aciertos===M.length)todos++;else if(aciertos===0)ninguno++;else mixto++;
+      fila.appendChild(col);
+    });
+    gp.appendChild(fila);g.appendChild(gp);
+  });
+  document.getElementById('grid-resumen').textContent='De '+ord.length+' tareas: las aciertan todos los modelos '+todos+', no las acierta ninguno '+ninguno+' y los modelos se reparten el resto ('+mixto+').';
+
+  var tc='<thead><tr><th>Modelo</th><th>Tokens de entrada</th><th>Tokens de salida</th><th>De entrada en caché</th><th>Llamadas</th><th>Tiempo total</th><th>Pasos por tarea (test)</th><th>Rescatadas (test)</th></tr></thead><tbody>'+M.map(function(m){var t=m.consumo.total;
+    return '<tr><td>'+dot(m)+'<b>'+m.nombre+'</b></td><td class="num">'+mil(t.tokens_entrada)+'</td><td class="num">'+mil(t.tokens_salida)+'</td><td class="num">'+f1(pc(t.tokens_cacheados,t.tokens_entrada))+' %</td><td class="num">'+mil(t.llamadas)+'</td><td class="num">'+f1(t.minutos/60)+' h</td><td class="num">'+f1(m.consumo.Dtest.pasos_medios)+'</td><td class="num">'+m.consumo.Dtest.rescatadas+'</td></tr>';}).join('')+'</tbody>';
+  document.getElementById('tabla-consumo').innerHTML=tc;
+  document.getElementById('notas-costo').innerHTML=M.map(function(m){return dot(m)+'<b>'+m.nombre+'.</b> '+(m.costo_nota||'')+(m.nota?' <span style="color:var(--muted)">'+m.nota+'</span>':'');}).join('<br>');
+})();
+</script>
+</body></html>
