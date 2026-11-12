@@ -1,6 +1,6 @@
 // Generado por banco_dse/base/exportar_web.py. No editar a mano: añade el modelo en modelos_web.json y vuelve a generarlo.
 window.MODELOS_DSE = {
- "generado": "2026-11-11 09:10",
+ "generado": "2026-11-11 21:39",
  "niveles": {
   "A": {
    "n": 1914,
@@ -1183,9 +1183,9 @@ window.MODELOS_DSE = {
    "donde": "Ollama Cloud (etiqueta :0813) · plan Pro",
    "color": "#6250d6",
    "nota": "Sistema dd9fe84426bd4db2 en todos los niveles. Razonamiento apagado con think=false. Caché de entrada: 64 % en B, 84 % en C y 90 % en D.",
-   "costo_usd": 1.4,
-   "costo_fuente": "estimado",
-   "costo_nota": "Estimado con los tokens de las 4 corridas y los precios de la ficha de Ollama en hora pico (1,32 de entrada, 0,044 de entrada en caché y 3,96 de salida por millón): B 0,44 + C 0,10 + D dev 0,35 + D test 0,52. A confirmar con el panel de Usage. 1,65 T de parámetros.",
+   "costo_usd": 1.41,
+   "costo_fuente": "panel",
+   "costo_nota": "Panel de Ollama (Usage), 11 nov: 1 101 peticiones, 4,5 M de entrada, 94,3 K de salida, 1,41 USD en total (la estimación previa era 1,40). Corrida en hora pico de DeepSeek. 1,65 T de parámetros.",
    "precios_lista_usd_por_millon": [
     1.32,
     3.96
@@ -1758,6 +1758,1176 @@ window.MODELOS_DSE = {
      "rescatadas": 0,
      "excepciones": 0,
      "fallos_protocolo": 3
+    }
+   }
+  },
+  {
+   "id": "kimi-k26",
+   "nombre": "kimi-k2.6",
+   "tipo": "nube",
+   "donde": "Ollama Cloud · plan Pro",
+   "color": "#0f9d8a",
+   "nota": "Sistema dd9fe84426bd4db2 en todos los niveles. Razonamiento apagado con think=false. En B se muestra solo la repetición 1 (99 corridas, comparable con los demás); las 3 repeticiones dieron 270/297 (91 %) de correctas.",
+   "costo_usd": 2.78,
+   "costo_fuente": "panel",
+   "costo_nota": "Panel de Ollama (Usage), 11 nov: 1 630 peticiones, 7,0 M de entrada, 296,7 K de salida, 2,78 USD en total; coincide con nuestro conteo (1 629 llamadas, 6 985 347 de entrada, 296 630 de salida). Ficha: 0,95 de entrada, 0,16 de entrada en caché y 4,00 de salida por millón; caché del 91 %. B se corrió con 3 repeticiones (297 corridas, 0,33 USD por cada una): con 1 repetición como los demás el costo equivalente sería de unos 2,13 USD. 1,04 T de parámetros, INT4.",
+   "precios_lista_usd_por_millon": [
+    0.95,
+    4.0
+   ],
+   "razonamiento": "apagado (think=false)",
+   "num_ctx": "16384",
+   "num_predict": "2048",
+   "huella_sistema": "dd9fe84426bd4db2",
+   "huella_ejecutor": "7d6027bc4c2de628",
+   "huella_banco": "a80b20d62efab9cd",
+   "fecha": "2026-11-11",
+   "huellas_sistema_por_nivel": {
+    "B": "dd9fe84426bd4db2",
+    "C": "dd9fe84426bd4db2",
+    "Ddev": "dd9fe84426bd4db2",
+    "Dtest": "dd9fe84426bd4db2"
+   },
+   "niveles": {
+    "B": {
+     "n": 99,
+     "ok": 90,
+     "seleccion": 90.9,
+     "argumentos": 100.0,
+     "fidelidad": 94.9,
+     "valor": 100.0
+    },
+    "C": {
+     "n": 27,
+     "ok": 26
+    },
+    "Ddev": {
+     "n": 45,
+     "ok": 39,
+     "ok_estricto": 39
+    },
+    "Dtest": {
+     "n": 57,
+     "ok": 53,
+     "ok_estricto": 53
+    }
+   },
+   "B_por_herramienta": {
+    "barrer": [
+     9,
+     9
+    ],
+    "variar": [
+     9,
+     9
+    ],
+    "frente_pareto": [
+     9,
+     9
+    ],
+    "consultar_estado": [
+     9,
+     9
+    ],
+    "estimar_baseline": [
+     0,
+     9
+    ],
+    "generar_candidato": [
+     9,
+     9
+    ],
+    "predecir_recursos": [
+     9,
+     9
+    ],
+    "seleccionar_mejor": [
+     9,
+     9
+    ],
+    "sugerir_ejemplo_real": [
+     9,
+     9
+    ],
+    "verificar_restricciones": [
+     9,
+     9
+    ],
+    "verificar_limites_operativos": [
+     9,
+     9
+    ]
+   },
+   "C_por_cadena": {
+    "variar>verificar": [
+     9,
+     9
+    ],
+    "barrer>seleccionar": [
+     8,
+     9
+    ],
+    "predecir>verificar": [
+     9,
+     9
+    ]
+   },
+   "dev_por_plantilla": {
+    "T2": [
+     12,
+     12
+    ],
+    "T3": [
+     2,
+     3
+    ],
+    "T4": [
+     12,
+     12
+    ],
+    "T5": [
+     7,
+     12
+    ],
+    "T8": [
+     3,
+     3
+    ],
+    "T10": [
+     3,
+     3
+    ]
+   },
+   "test_por_plantilla": {
+    "T1": [
+     9,
+     9
+    ],
+    "T2": [
+     5,
+     5
+    ],
+    "T3": [
+     8,
+     8
+    ],
+    "T4": [
+     5,
+     5
+    ],
+    "T5": [
+     2,
+     5
+    ],
+    "T8": [
+     8,
+     8
+    ],
+    "T9": [
+     9,
+     9
+    ],
+    "T10": [
+     7,
+     8
+    ]
+   },
+   "test_tareas": {
+    "Conv1D-conv1d-C-T1-D2": [
+     1,
+     2,
+     10
+    ],
+    "Conv1D-conv1d-C-T2-D1": [
+     1,
+     11,
+     42
+    ],
+    "Conv1D-conv1d-C-T5-D3": [
+     0,
+     5,
+     41
+    ],
+    "Conv1D-conv1d-PA-RA-T1-D1": [
+     1,
+     2,
+     10
+    ],
+    "Conv1D-conv1d-PA-RA-T10-D2": [
+     1,
+     6,
+     26
+    ],
+    "Conv1D-conv1d-PA-RA-T5-D2": [
+     0,
+     5,
+     43
+    ],
+    "Conv1D-conv1d-PA-RA-T9-D3": [
+     1,
+     9,
+     53
+    ],
+    "Conv1D-conv1d-PA-RB-T10-D1": [
+     1,
+     6,
+     34
+    ],
+    "Conv1D-conv1d-PA-RB-T3-D3": [
+     1,
+     8,
+     55
+    ],
+    "Conv1D-conv1d-PA-RB-T5-D1": [
+     1,
+     4,
+     34
+    ],
+    "Conv1D-conv1d-PA-RB-T8-D3": [
+     1,
+     6,
+     36
+    ],
+    "Conv1D-conv1d-PA-RB-T9-D2": [
+     1,
+     6,
+     40
+    ],
+    "Conv1D-conv1d-PB-RA-T2-D3": [
+     1,
+     14,
+     47
+    ],
+    "Conv1D-conv1d-PB-RA-T3-D2": [
+     1,
+     13,
+     59
+    ],
+    "Conv1D-conv1d-PB-RA-T8-D2": [
+     1,
+     5,
+     28
+    ],
+    "Conv1D-conv1d-PB-RA-T9-D1": [
+     1,
+     10,
+     49
+    ],
+    "Conv1D-conv1d-PB-RB-T1-D3": [
+     1,
+     2,
+     9
+    ],
+    "Conv1D-conv1d-PB-RB-T3-D1": [
+     1,
+     11,
+     49
+    ],
+    "Conv1D-conv1d-PB-RB-T8-D1": [
+     1,
+     7,
+     49
+    ],
+    "Conv2D-conv2d-C-T1-D1": [
+     1,
+     2,
+     11
+    ],
+    "Conv2D-conv2d-C-T10-D2": [
+     1,
+     6,
+     33
+    ],
+    "Conv2D-conv2d-C-T4-D3": [
+     1,
+     5,
+     22
+    ],
+    "Conv2D-conv2d-C-T9-D3": [
+     1,
+     9,
+     52
+    ],
+    "Conv2D-conv2d-PA-RA-T10-D1": [
+     1,
+     6,
+     42
+    ],
+    "Conv2D-conv2d-PA-RA-T3-D3": [
+     1,
+     6,
+     35
+    ],
+    "Conv2D-conv2d-PA-RA-T5-D1": [
+     1,
+     6,
+     31
+    ],
+    "Conv2D-conv2d-PA-RA-T8-D3": [
+     1,
+     5,
+     53
+    ],
+    "Conv2D-conv2d-PA-RA-T9-D2": [
+     1,
+     10,
+     54
+    ],
+    "Conv2D-conv2d-PA-RB-T3-D2": [
+     1,
+     8,
+     53
+    ],
+    "Conv2D-conv2d-PA-RB-T4-D1": [
+     1,
+     6,
+     25
+    ],
+    "Conv2D-conv2d-PA-RB-T8-D2": [
+     1,
+     4,
+     18
+    ],
+    "Conv2D-conv2d-PA-RB-T9-D1": [
+     1,
+     7,
+     36
+    ],
+    "Conv2D-conv2d-PB-RA-T1-D3": [
+     1,
+     2,
+     9
+    ],
+    "Conv2D-conv2d-PB-RA-T3-D1": [
+     1,
+     9,
+     50
+    ],
+    "Conv2D-conv2d-PB-RA-T8-D1": [
+     1,
+     7,
+     44
+    ],
+    "Conv2D-conv2d-PB-RB-T1-D2": [
+     1,
+     2,
+     11
+    ],
+    "Conv2D-conv2d-PB-RB-T10-D3": [
+     1,
+     6,
+     33
+    ],
+    "Conv2D-conv2d-PB-RB-T5-D3": [
+     0,
+     5,
+     30
+    ],
+    "Dense-2_20-T1-D1": [
+     1,
+     2,
+     10
+    ],
+    "Dense-2_20-T10-D2": [
+     1,
+     9,
+     43
+    ],
+    "Dense-2_20-T4-D3": [
+     1,
+     7,
+     29
+    ],
+    "Dense-2_20-T9-D3": [
+     1,
+     9,
+     72
+    ],
+    "Dense-2layer-T2-D3": [
+     1,
+     15,
+     51
+    ],
+    "Dense-2layer-T4-D1": [
+     1,
+     5,
+     32
+    ],
+    "Dense-2layer-T8-D2": [
+     1,
+     12,
+     54
+    ],
+    "Dense-2layer-T9-D1": [
+     1,
+     4,
+     22
+    ],
+    "Dense-3layer-T10-D1": [
+     0,
+     6,
+     28
+    ],
+    "Dense-3layer-T3-D3": [
+     1,
+     9,
+     47
+    ],
+    "Dense-3layer-T4-D2": [
+     1,
+     6,
+     23
+    ],
+    "Dense-3layer-T8-D3": [
+     1,
+     10,
+     34
+    ],
+    "Dense-3layer-T9-D2": [
+     1,
+     8,
+     62
+    ],
+    "Dense-latency-T1-D2": [
+     1,
+     2,
+     11
+    ],
+    "Dense-latency-T10-D3": [
+     1,
+     6,
+     29
+    ],
+    "Dense-latency-T2-D1": [
+     1,
+     11,
+     42
+    ],
+    "Dense-resource-T1-D3": [
+     1,
+     2,
+     9
+    ],
+    "Dense-resource-T2-D2": [
+     1,
+     13,
+     46
+    ],
+    "Dense-resource-T3-D1": [
+     1,
+     4,
+     22
+    ]
+   },
+   "test_plantilla_de_tarea": {
+    "Conv1D-conv1d-C-T1-D2": "T1",
+    "Conv1D-conv1d-C-T2-D1": "T2",
+    "Conv1D-conv1d-C-T5-D3": "T5",
+    "Conv1D-conv1d-PA-RA-T1-D1": "T1",
+    "Conv1D-conv1d-PA-RA-T10-D2": "T10",
+    "Conv1D-conv1d-PA-RA-T5-D2": "T5",
+    "Conv1D-conv1d-PA-RA-T9-D3": "T9",
+    "Conv1D-conv1d-PA-RB-T10-D1": "T10",
+    "Conv1D-conv1d-PA-RB-T3-D3": "T3",
+    "Conv1D-conv1d-PA-RB-T5-D1": "T5",
+    "Conv1D-conv1d-PA-RB-T8-D3": "T8",
+    "Conv1D-conv1d-PA-RB-T9-D2": "T9",
+    "Conv1D-conv1d-PB-RA-T2-D3": "T2",
+    "Conv1D-conv1d-PB-RA-T3-D2": "T3",
+    "Conv1D-conv1d-PB-RA-T8-D2": "T8",
+    "Conv1D-conv1d-PB-RA-T9-D1": "T9",
+    "Conv1D-conv1d-PB-RB-T1-D3": "T1",
+    "Conv1D-conv1d-PB-RB-T3-D1": "T3",
+    "Conv1D-conv1d-PB-RB-T8-D1": "T8",
+    "Conv2D-conv2d-C-T1-D1": "T1",
+    "Conv2D-conv2d-C-T10-D2": "T10",
+    "Conv2D-conv2d-C-T4-D3": "T4",
+    "Conv2D-conv2d-C-T9-D3": "T9",
+    "Conv2D-conv2d-PA-RA-T10-D1": "T10",
+    "Conv2D-conv2d-PA-RA-T3-D3": "T3",
+    "Conv2D-conv2d-PA-RA-T5-D1": "T5",
+    "Conv2D-conv2d-PA-RA-T8-D3": "T8",
+    "Conv2D-conv2d-PA-RA-T9-D2": "T9",
+    "Conv2D-conv2d-PA-RB-T3-D2": "T3",
+    "Conv2D-conv2d-PA-RB-T4-D1": "T4",
+    "Conv2D-conv2d-PA-RB-T8-D2": "T8",
+    "Conv2D-conv2d-PA-RB-T9-D1": "T9",
+    "Conv2D-conv2d-PB-RA-T1-D3": "T1",
+    "Conv2D-conv2d-PB-RA-T3-D1": "T3",
+    "Conv2D-conv2d-PB-RA-T8-D1": "T8",
+    "Conv2D-conv2d-PB-RB-T1-D2": "T1",
+    "Conv2D-conv2d-PB-RB-T10-D3": "T10",
+    "Conv2D-conv2d-PB-RB-T5-D3": "T5",
+    "Dense-2_20-T1-D1": "T1",
+    "Dense-2_20-T10-D2": "T10",
+    "Dense-2_20-T4-D3": "T4",
+    "Dense-2_20-T9-D3": "T9",
+    "Dense-2layer-T2-D3": "T2",
+    "Dense-2layer-T4-D1": "T4",
+    "Dense-2layer-T8-D2": "T8",
+    "Dense-2layer-T9-D1": "T9",
+    "Dense-3layer-T10-D1": "T10",
+    "Dense-3layer-T3-D3": "T3",
+    "Dense-3layer-T4-D2": "T4",
+    "Dense-3layer-T8-D3": "T8",
+    "Dense-3layer-T9-D2": "T9",
+    "Dense-latency-T1-D2": "T1",
+    "Dense-latency-T10-D3": "T10",
+    "Dense-latency-T2-D1": "T2",
+    "Dense-resource-T1-D3": "T1",
+    "Dense-resource-T2-D2": "T2",
+    "Dense-resource-T3-D1": "T3"
+   },
+   "consumo": {
+    "B": {
+     "corridas": 99,
+     "tokens_entrada": 821462,
+     "tokens_salida": 34183,
+     "tokens_cacheados": 738048,
+     "llamadas": 236,
+     "minutos": 15.3,
+     "segundos_medios": 9.3,
+     "pasos_medios": 1.3,
+     "rescatadas": 0,
+     "excepciones": 0,
+     "fallos_protocolo": 0
+    },
+    "C": {
+     "corridas": 27,
+     "tokens_entrada": 326976,
+     "tokens_salida": 10371,
+     "tokens_cacheados": 304608,
+     "llamadas": 90,
+     "minutos": 5.0,
+     "segundos_medios": 11.2,
+     "pasos_medios": 2.3,
+     "rescatadas": 0,
+     "excepciones": 0,
+     "fallos_protocolo": 0
+    },
+    "Ddev": {
+     "corridas": 45,
+     "tokens_entrada": 1931512,
+     "tokens_salida": 72680,
+     "tokens_cacheados": 1784096,
+     "llamadas": 387,
+     "minutos": 28.2,
+     "segundos_medios": 37.5,
+     "pasos_medios": 7.5,
+     "rescatadas": 1,
+     "excepciones": 1,
+     "fallos_protocolo": 2
+    },
+    "Dtest": {
+     "corridas": 57,
+     "tokens_entrada": 2279514,
+     "tokens_salida": 110419,
+     "tokens_cacheados": 2068448,
+     "llamadas": 448,
+     "minutos": 33.7,
+     "segundos_medios": 35.5,
+     "pasos_medios": 6.7,
+     "rescatadas": 0,
+     "excepciones": 0,
+     "fallos_protocolo": 0
+    },
+    "total": {
+     "corridas": 228,
+     "tokens_entrada": 5359464,
+     "tokens_salida": 227653,
+     "tokens_cacheados": 4895200,
+     "llamadas": 1161,
+     "minutos": 82.1,
+     "segundos_medios": 21.6,
+     "pasos_medios": 4.0,
+     "rescatadas": 1,
+     "excepciones": 1,
+     "fallos_protocolo": 2
+    }
+   }
+  },
+  {
+   "id": "glm-52",
+   "nombre": "glm-5.2",
+   "tipo": "nube",
+   "donde": "Ollama Cloud · plan Pro",
+   "color": "#7c5cff",
+   "nota": "Sistema dd9fe84426bd4db2 en todos los niveles. Razonamiento apagado con think=false. En B, 8 de las 17 corridas falladas son de generar_candidato: el modelo crea el candidato con los datos correctos (mismas capas, rf y bits que lo pedido) y entrega el id sin evaluarlo, que es lo que pide la tarea; el puntaje estricto compara los tamaños de capa, que solo se rellenan tras predecir_recursos, así que lo cuenta como fallo. Se deja el puntaje oficial (82/99) para no cambiar la regla a mitad del estudio; con un criterio de capas, rf y bits serían 90/99.",
+   "costo_usd": 1.84,
+   "costo_fuente": "panel",
+   "costo_nota": "Panel de Ollama (Usage), 11 nov: 972 peticiones, 3,8 M de entrada, 126,2 K de salida, 1,84 USD en total; coincide con nuestro conteo (971 llamadas más la prueba de humo, 3 823 482 de entrada, 126 132 de salida; caché del 93 %). La tarifa de lista de la API de Z.ai (1,40 de entrada, 0,26 en caché y 4,40 de salida por millón; la de Ollama no está publicada para este modelo) da 1,837 USD: coincide. B con 1 repetición (0,36 USD). 756 mil millones de parámetros.",
+   "precios_lista_usd_por_millon": [
+    1.4,
+    4.4
+   ],
+   "razonamiento": "apagado (think=false)",
+   "num_ctx": "16384",
+   "num_predict": "2048",
+   "huella_sistema": "dd9fe84426bd4db2",
+   "huella_ejecutor": "7d6027bc4c2de628",
+   "huella_banco": "a80b20d62efab9cd",
+   "fecha": "2026-11-12",
+   "huellas_sistema_por_nivel": {
+    "B": "dd9fe84426bd4db2",
+    "C": "dd9fe84426bd4db2",
+    "Ddev": "dd9fe84426bd4db2",
+    "Dtest": "dd9fe84426bd4db2"
+   },
+   "niveles": {
+    "B": {
+     "n": 99,
+     "ok": 82,
+     "seleccion": 90.9,
+     "argumentos": 100.0,
+     "fidelidad": 96.0,
+     "valor": 91.9
+    },
+    "C": {
+     "n": 27,
+     "ok": 26
+    },
+    "Ddev": {
+     "n": 45,
+     "ok": 38,
+     "ok_estricto": 38
+    },
+    "Dtest": {
+     "n": 57,
+     "ok": 52,
+     "ok_estricto": 52
+    }
+   },
+   "B_por_herramienta": {
+    "barrer": [
+     9,
+     9
+    ],
+    "variar": [
+     9,
+     9
+    ],
+    "frente_pareto": [
+     9,
+     9
+    ],
+    "consultar_estado": [
+     9,
+     9
+    ],
+    "estimar_baseline": [
+     0,
+     9
+    ],
+    "generar_candidato": [
+     1,
+     9
+    ],
+    "predecir_recursos": [
+     9,
+     9
+    ],
+    "seleccionar_mejor": [
+     9,
+     9
+    ],
+    "sugerir_ejemplo_real": [
+     9,
+     9
+    ],
+    "verificar_restricciones": [
+     9,
+     9
+    ],
+    "verificar_limites_operativos": [
+     9,
+     9
+    ]
+   },
+   "C_por_cadena": {
+    "variar>verificar": [
+     9,
+     9
+    ],
+    "barrer>seleccionar": [
+     8,
+     9
+    ],
+    "predecir>verificar": [
+     9,
+     9
+    ]
+   },
+   "dev_por_plantilla": {
+    "T2": [
+     12,
+     12
+    ],
+    "T3": [
+     3,
+     3
+    ],
+    "T4": [
+     12,
+     12
+    ],
+    "T5": [
+     5,
+     12
+    ],
+    "T8": [
+     3,
+     3
+    ],
+    "T10": [
+     3,
+     3
+    ]
+   },
+   "test_por_plantilla": {
+    "T1": [
+     9,
+     9
+    ],
+    "T2": [
+     5,
+     5
+    ],
+    "T3": [
+     8,
+     8
+    ],
+    "T4": [
+     5,
+     5
+    ],
+    "T5": [
+     2,
+     5
+    ],
+    "T8": [
+     8,
+     8
+    ],
+    "T9": [
+     9,
+     9
+    ],
+    "T10": [
+     6,
+     8
+    ]
+   },
+   "test_tareas": {
+    "Conv1D-conv1d-C-T1-D2": [
+     1,
+     2,
+     9
+    ],
+    "Conv1D-conv1d-C-T2-D1": [
+     1,
+     9,
+     32
+    ],
+    "Conv1D-conv1d-C-T5-D3": [
+     0,
+     4,
+     17
+    ],
+    "Conv1D-conv1d-PA-RA-T1-D1": [
+     1,
+     2,
+     9
+    ],
+    "Conv1D-conv1d-PA-RA-T10-D2": [
+     1,
+     6,
+     28
+    ],
+    "Conv1D-conv1d-PA-RA-T5-D2": [
+     0,
+     5,
+     21
+    ],
+    "Conv1D-conv1d-PA-RA-T9-D3": [
+     1,
+     7,
+     27
+    ],
+    "Conv1D-conv1d-PA-RB-T10-D1": [
+     1,
+     7,
+     31
+    ],
+    "Conv1D-conv1d-PA-RB-T3-D3": [
+     1,
+     7,
+     35
+    ],
+    "Conv1D-conv1d-PA-RB-T5-D1": [
+     1,
+     4,
+     17
+    ],
+    "Conv1D-conv1d-PA-RB-T8-D3": [
+     1,
+     3,
+     13
+    ],
+    "Conv1D-conv1d-PA-RB-T9-D2": [
+     1,
+     8,
+     35
+    ],
+    "Conv1D-conv1d-PB-RA-T2-D3": [
+     1,
+     9,
+     31
+    ],
+    "Conv1D-conv1d-PB-RA-T3-D2": [
+     1,
+     8,
+     32
+    ],
+    "Conv1D-conv1d-PB-RA-T8-D2": [
+     1,
+     5,
+     22
+    ],
+    "Conv1D-conv1d-PB-RA-T9-D1": [
+     1,
+     5,
+     23
+    ],
+    "Conv1D-conv1d-PB-RB-T1-D3": [
+     1,
+     2,
+     9
+    ],
+    "Conv1D-conv1d-PB-RB-T3-D1": [
+     1,
+     6,
+     24
+    ],
+    "Conv1D-conv1d-PB-RB-T8-D1": [
+     1,
+     5,
+     20
+    ],
+    "Conv2D-conv2d-C-T1-D1": [
+     1,
+     2,
+     11
+    ],
+    "Conv2D-conv2d-C-T10-D2": [
+     1,
+     6,
+     37
+    ],
+    "Conv2D-conv2d-C-T4-D3": [
+     1,
+     3,
+     51
+    ],
+    "Conv2D-conv2d-C-T9-D3": [
+     1,
+     7,
+     118
+    ],
+    "Conv2D-conv2d-PA-RA-T10-D1": [
+     1,
+     7,
+     30
+    ],
+    "Conv2D-conv2d-PA-RA-T3-D3": [
+     1,
+     6,
+     23
+    ],
+    "Conv2D-conv2d-PA-RA-T5-D1": [
+     1,
+     5,
+     20
+    ],
+    "Conv2D-conv2d-PA-RA-T8-D3": [
+     1,
+     7,
+     27
+    ],
+    "Conv2D-conv2d-PA-RA-T9-D2": [
+     1,
+     7,
+     28
+    ],
+    "Conv2D-conv2d-PA-RB-T3-D2": [
+     1,
+     8,
+     36
+    ],
+    "Conv2D-conv2d-PA-RB-T4-D1": [
+     1,
+     6,
+     24
+    ],
+    "Conv2D-conv2d-PA-RB-T8-D2": [
+     1,
+     7,
+     26
+    ],
+    "Conv2D-conv2d-PA-RB-T9-D1": [
+     1,
+     7,
+     26
+    ],
+    "Conv2D-conv2d-PB-RA-T1-D3": [
+     1,
+     2,
+     9
+    ],
+    "Conv2D-conv2d-PB-RA-T3-D1": [
+     1,
+     7,
+     26
+    ],
+    "Conv2D-conv2d-PB-RA-T8-D1": [
+     1,
+     3,
+     13
+    ],
+    "Conv2D-conv2d-PB-RB-T1-D2": [
+     1,
+     2,
+     9
+    ],
+    "Conv2D-conv2d-PB-RB-T10-D3": [
+     1,
+     6,
+     27
+    ],
+    "Conv2D-conv2d-PB-RB-T5-D3": [
+     0,
+     4,
+     17
+    ],
+    "Dense-2_20-T1-D1": [
+     1,
+     2,
+     9
+    ],
+    "Dense-2_20-T10-D2": [
+     0,
+     9,
+     39
+    ],
+    "Dense-2_20-T4-D3": [
+     1,
+     3,
+     13
+    ],
+    "Dense-2_20-T9-D3": [
+     1,
+     8,
+     36
+    ],
+    "Dense-2layer-T2-D3": [
+     1,
+     9,
+     30
+    ],
+    "Dense-2layer-T4-D1": [
+     1,
+     6,
+     24
+    ],
+    "Dense-2layer-T8-D2": [
+     1,
+     6,
+     22
+    ],
+    "Dense-2layer-T9-D1": [
+     1,
+     4,
+     19
+    ],
+    "Dense-3layer-T10-D1": [
+     0,
+     6,
+     26
+    ],
+    "Dense-3layer-T3-D3": [
+     1,
+     7,
+     28
+    ],
+    "Dense-3layer-T4-D2": [
+     1,
+     6,
+     22
+    ],
+    "Dense-3layer-T8-D3": [
+     1,
+     4,
+     16
+    ],
+    "Dense-3layer-T9-D2": [
+     1,
+     7,
+     30
+    ],
+    "Dense-latency-T1-D2": [
+     1,
+     2,
+     11
+    ],
+    "Dense-latency-T10-D3": [
+     1,
+     6,
+     28
+    ],
+    "Dense-latency-T2-D1": [
+     1,
+     7,
+     32
+    ],
+    "Dense-resource-T1-D3": [
+     1,
+     2,
+     12
+    ],
+    "Dense-resource-T2-D2": [
+     1,
+     12,
+     43
+    ],
+    "Dense-resource-T3-D1": [
+     1,
+     4,
+     16
+    ]
+   },
+   "test_plantilla_de_tarea": {
+    "Conv1D-conv1d-C-T1-D2": "T1",
+    "Conv1D-conv1d-C-T2-D1": "T2",
+    "Conv1D-conv1d-C-T5-D3": "T5",
+    "Conv1D-conv1d-PA-RA-T1-D1": "T1",
+    "Conv1D-conv1d-PA-RA-T10-D2": "T10",
+    "Conv1D-conv1d-PA-RA-T5-D2": "T5",
+    "Conv1D-conv1d-PA-RA-T9-D3": "T9",
+    "Conv1D-conv1d-PA-RB-T10-D1": "T10",
+    "Conv1D-conv1d-PA-RB-T3-D3": "T3",
+    "Conv1D-conv1d-PA-RB-T5-D1": "T5",
+    "Conv1D-conv1d-PA-RB-T8-D3": "T8",
+    "Conv1D-conv1d-PA-RB-T9-D2": "T9",
+    "Conv1D-conv1d-PB-RA-T2-D3": "T2",
+    "Conv1D-conv1d-PB-RA-T3-D2": "T3",
+    "Conv1D-conv1d-PB-RA-T8-D2": "T8",
+    "Conv1D-conv1d-PB-RA-T9-D1": "T9",
+    "Conv1D-conv1d-PB-RB-T1-D3": "T1",
+    "Conv1D-conv1d-PB-RB-T3-D1": "T3",
+    "Conv1D-conv1d-PB-RB-T8-D1": "T8",
+    "Conv2D-conv2d-C-T1-D1": "T1",
+    "Conv2D-conv2d-C-T10-D2": "T10",
+    "Conv2D-conv2d-C-T4-D3": "T4",
+    "Conv2D-conv2d-C-T9-D3": "T9",
+    "Conv2D-conv2d-PA-RA-T10-D1": "T10",
+    "Conv2D-conv2d-PA-RA-T3-D3": "T3",
+    "Conv2D-conv2d-PA-RA-T5-D1": "T5",
+    "Conv2D-conv2d-PA-RA-T8-D3": "T8",
+    "Conv2D-conv2d-PA-RA-T9-D2": "T9",
+    "Conv2D-conv2d-PA-RB-T3-D2": "T3",
+    "Conv2D-conv2d-PA-RB-T4-D1": "T4",
+    "Conv2D-conv2d-PA-RB-T8-D2": "T8",
+    "Conv2D-conv2d-PA-RB-T9-D1": "T9",
+    "Conv2D-conv2d-PB-RA-T1-D3": "T1",
+    "Conv2D-conv2d-PB-RA-T3-D1": "T3",
+    "Conv2D-conv2d-PB-RA-T8-D1": "T8",
+    "Conv2D-conv2d-PB-RB-T1-D2": "T1",
+    "Conv2D-conv2d-PB-RB-T10-D3": "T10",
+    "Conv2D-conv2d-PB-RB-T5-D3": "T5",
+    "Dense-2_20-T1-D1": "T1",
+    "Dense-2_20-T10-D2": "T10",
+    "Dense-2_20-T4-D3": "T4",
+    "Dense-2_20-T9-D3": "T9",
+    "Dense-2layer-T2-D3": "T2",
+    "Dense-2layer-T4-D1": "T4",
+    "Dense-2layer-T8-D2": "T8",
+    "Dense-2layer-T9-D1": "T9",
+    "Dense-3layer-T10-D1": "T10",
+    "Dense-3layer-T3-D3": "T3",
+    "Dense-3layer-T4-D2": "T4",
+    "Dense-3layer-T8-D3": "T8",
+    "Dense-3layer-T9-D2": "T9",
+    "Dense-latency-T1-D2": "T1",
+    "Dense-latency-T10-D3": "T10",
+    "Dense-latency-T2-D1": "T2",
+    "Dense-resource-T1-D3": "T1",
+    "Dense-resource-T2-D2": "T2",
+    "Dense-resource-T3-D1": "T3"
+   },
+   "consumo": {
+    "B": {
+     "corridas": 99,
+     "tokens_entrada": 698145,
+     "tokens_salida": 26143,
+     "tokens_cacheados": 645360,
+     "llamadas": 217,
+     "minutos": 12.6,
+     "segundos_medios": 7.6,
+     "pasos_medios": 1.1,
+     "rescatadas": 0,
+     "excepciones": 0,
+     "fallos_protocolo": 0
+    },
+    "C": {
+     "corridas": 27,
+     "tokens_entrada": 279052,
+     "tokens_salida": 8819,
+     "tokens_cacheados": 263772,
+     "llamadas": 83,
+     "minutos": 4.5,
+     "segundos_medios": 10.0,
+     "pasos_medios": 2.1,
+     "rescatadas": 0,
+     "excepciones": 0,
+     "fallos_protocolo": 0
+    },
+    "Ddev": {
+     "corridas": 45,
+     "tokens_entrada": 1210124,
+     "tokens_salida": 35383,
+     "tokens_cacheados": 1141580,
+     "llamadas": 290,
+     "minutos": 16.2,
+     "segundos_medios": 21.6,
+     "pasos_medios": 5.4,
+     "rescatadas": 0,
+     "excepciones": 0,
+     "fallos_protocolo": 0
+    },
+    "Dtest": {
+     "corridas": 57,
+     "tokens_entrada": 1636161,
+     "tokens_salida": 55787,
+     "tokens_cacheados": 1520204,
+     "llamadas": 381,
+     "minutos": 24.2,
+     "segundos_medios": 25.5,
+     "pasos_medios": 5.5,
+     "rescatadas": 0,
+     "excepciones": 0,
+     "fallos_protocolo": 0
+    },
+    "total": {
+     "corridas": 228,
+     "tokens_entrada": 3823482,
+     "tokens_salida": 126132,
+     "tokens_cacheados": 3570916,
+     "llamadas": 971,
+     "minutos": 57.5,
+     "segundos_medios": 15.1,
+     "pasos_medios": 3.2,
+     "rescatadas": 0,
+     "excepciones": 0,
+     "fallos_protocolo": 0
     }
    }
   }
